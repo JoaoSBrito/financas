@@ -105,7 +105,7 @@ export async function corrigirFatura(params: {
  * Mantém as faturas futuras de acordo com a regra do cartão:
  * cria as que faltam, atualiza as estimadas e realoca compras que mudaram de fatura.
  */
-export async function sincronizarFaturas(cartaoId: string): Promise<void> {
+export async function sincronizarFaturas(cartaoId: string, ateMes?: Mes): Promise<void> {
   const supabase = supabaseNavegador();
   const cartao = await obterCartao(cartaoId);
   if (!cartao) return;
@@ -134,6 +134,7 @@ export async function sincronizarFaturas(cartaoId: string): Promise<void> {
   }
 
   const mesesUsados = parcelas.map((p) => faturaPorId.get(p.fatura_id)?.mes).filter((m): m is Mes => Boolean(m));
+  if (ateMes) mesesUsados.push(ateMes);
   const ultimoMesUsado = mesesUsados.sort().at(-1);
 
   const plano = planejarSincronizacao({ cartao, existentes, hoje: hojeEmSaoPaulo(), ultimoMesUsado });

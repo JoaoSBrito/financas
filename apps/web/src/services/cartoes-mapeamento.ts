@@ -189,3 +189,29 @@ function mesesEntre(de: Mes, ate: Mes): number {
   const [a2, m2] = ate.split("-").map(Number);
   return (a2! - a1!) * 12 + (m2! - m1!);
 }
+
+// ───────────── Fatura com totais (view faturas_resumo) ─────────────
+
+export const faturaResumoLinhaSchema = faturaLinhaSchema.extend({
+  total: z.number().int(),
+  lancamentos: z.number().int(),
+  conferidos: z.number().int(),
+});
+
+export interface FaturaResumo extends Fatura {
+  total: number;
+  lancamentos: number;
+  conferidos: number;
+}
+
+export function linhaParaFaturaResumo(l: z.infer<typeof faturaResumoLinhaSchema>): FaturaResumo {
+  return { ...linhaParaFatura(l), total: l.total, lancamentos: l.lancamentos, conferidos: l.conferidos };
+}
+
+/** Totais por mês e quanto do limite está preso (faturas ainda não pagas). */
+export function resumirFaturas(faturas: FaturaResumo[]): { totaisPorMes: Map<Mes, number>; comprometido: number } {
+  return {
+    totaisPorMes: new Map(faturas.map((f) => [f.mes, f.total])),
+    comprometido: faturas.filter((f) => !f.pagaEm).reduce((s, f) => s + f.total, 0),
+  };
+}

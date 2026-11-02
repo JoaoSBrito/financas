@@ -34,8 +34,8 @@ pnpm dev          # http://localhost:3000
    (o app é de um usuário só) e crie seu usuário em **Authentication → Users**.
 3. Aplique as migrações:
    ```bash
-   supabase link --project-ref SEU-PROJETO
-   supabase db push
+   npx supabase link --project-ref SEU-PROJETO
+   npx supabase db push --remote
    ```
    Ao criar o usuário, um gatilho cadastra as categorias padrão.
 4. Copie `apps/web/.env.example` para `apps/web/.env.local` e preencha.
@@ -45,9 +45,13 @@ pnpm dev          # http://localhost:3000
 **Vercel:** importe o repositório, defina **Root Directory** como `apps/web` e
 cadastre `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
-**Migrações automáticas:** o workflow `migracoes.yml` roda `supabase db push` a
+**Aplicar entregas:** descompacte sempre pelo Terminal, dentro da pasta do projeto:
+`unzip -o ~/Downloads/ARQUIVO.zip -d .` (o Finder substitui pastas inteiras e apaga arquivos).
+
+**Migrações automáticas:** o workflow `migracoes.yml` roda `supabase db push --remote --yes` a
 cada push na `main` que altere `supabase/migrations`. Cadastre no GitHub os
 secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` e `SUPABASE_PROJECT_REF`.
+Também dá para rodar à mão pelo botão "Run workflow" na aba Actions.
 
 **iPhone:** abra o endereço no Safari → Compartilhar → "Adicionar à Tela de Início".
 O login por e-mail e senha funciona com o preenchimento automático do iCloud
@@ -59,6 +63,8 @@ O login por e-mail e senha funciona com o preenchimento automático do iCloud
 - A fatura é identificada pelo mês do vencimento e guarda fechamento, vencimento e
   status (`estimada` ou `confirmada`).
 - **A compra feita no dia do fechamento entra na fatura que fecha naquele dia.**
+- Compra e parcelas são gravadas juntas pela função `registrar_compra` (tudo ou nada).
+- "Melhor cartão para hoje" é o que dá mais prazo até o vencimento.
 - Fechamento por dias úteis considera feriados nacionais, Carnaval e Corpus Christi.
 - Corrigir a data de uma fatura move só as compras afetadas (`planejarRealocacao`).
 - Parcelas antigas ficam como histórico: fora de orçamento, limite e relatórios.

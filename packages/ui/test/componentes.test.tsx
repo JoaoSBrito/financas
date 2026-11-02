@@ -104,3 +104,42 @@ describe("ItemFaturaFutura", () => {
     expect(onCorrigir).toHaveBeenCalled();
   });
 });
+
+import { ChipsCategoria, SeletorCartao, SeletorParcelas } from "../src";
+
+describe("SeletorCartao", () => {
+  const opcoes = [
+    { id: "xp", nome: "XP", detalhe: "Paga em 10/12", recomendado: true },
+    { id: "viagens", nome: "Viagens", detalhe: "Paga em 30/11" },
+  ];
+
+  it("marca o recomendado e troca pelas setas", async () => {
+    const onChange = vi.fn();
+    render(<SeletorCartao opcoes={opcoes} valor="xp" onChange={onChange} rotulo="Cartão" />);
+    expect(screen.getByText("Melhor hoje · Paga em 10/12")).toBeInTheDocument();
+    const xp = screen.getByRole("radio", { name: /XP/ });
+    expect(xp).toHaveAttribute("aria-checked", "true");
+    xp.focus();
+    await userEvent.keyboard("{ArrowRight}");
+    expect(onChange).toHaveBeenCalledWith("viagens");
+  });
+});
+
+describe("ChipsCategoria", () => {
+  it("tocar de novo desmarca", async () => {
+    const onChange = vi.fn();
+    render(<ChipsCategoria opcoes={[{ id: "a", nome: "Lazer" }]} valor="a" onChange={onChange} rotulo="Categoria" />);
+    await userEvent.click(screen.getByRole("button", { name: "Lazer" }));
+    expect(onChange).toHaveBeenCalledWith(null);
+  });
+});
+
+describe("SeletorParcelas", () => {
+  it("'Outro' abre o contador começando em 2", async () => {
+    const onChange = vi.fn();
+    render(<SeletorParcelas valor={1} onChange={onChange} />);
+    await userEvent.click(screen.getByRole("button", { name: "Outro" }));
+    expect(onChange).toHaveBeenCalledWith(2);
+    expect(screen.getByRole("group", { name: "Número de parcelas" })).toBeInTheDocument();
+  });
+});

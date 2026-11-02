@@ -15,3 +15,6 @@ export * from "./componentes/ControleSegmentado";
 export * from "./componentes/ContadorNumerico";
 export * from "./componentes/CampoMoeda";
 export * from "./componentes/ItemFaturaFutura";
+export * from "./componentes/SeletorCartao";
+export * from "./componentes/ChipsCategoria";
+export * from "./componentes/SeletorParcelas";
