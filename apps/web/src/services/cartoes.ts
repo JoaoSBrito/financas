@@ -24,7 +24,7 @@ import {
 export class ErroDeDados extends Error {}
 
 const compraComDataSchema = z.object({ id: z.uuid(), data_compra: z.string() });
-const parcelaPosicaoSchema = z.object({ compra_id: z.uuid(), numero: z.number().int(), fatura_id: z.uuid() });
+const parcelaPosicaoSchema = z.object({ compra_id: z.uuid(), numero: z.number().int(), fatura_id: z.uuid().nullable() });
 
 function falhar(contexto: string, erro: { message: string } | null): never {
   throw new ErroDeDados(`${contexto}: ${erro?.message ?? "erro desconhecido"}`);
@@ -123,14 +123,17 @@ export async function sincronizarFaturas(cartaoId: string, ateMes?: Mes): Promis
   const compras = compraComDataSchema.array().parse(comprasBrutas ?? []);
 
   const idsCompras = compras.map((c) => c.id);
-  const parcelas: z.infer<typeof parcelaPosicaoSchema>[] = [];
+  const parcelas: { compra_id: string; numero: number; fatura_id: string }[] = [];
   if (idsCompras.length > 0) {
     const { data, error } = await supabase
       .from("parcelas")
       .select("compra_id, numero, fatura_id")
       .in("compra_id", idsCompras);
     if (error) falhar("Não foi possível carregar as parcelas", error);
-    parcelas.push(...parcelaPosicaoSchema.array().parse(data ?? []));
+    // Parcelas históricas (pagas antes do app) não têm fatura: ficam fora da sincronização.
+    for (const p of parcelaPosicaoSchema.array().parse(data ?? [])) {
+      if (p.fatura_id) parcelas.push({ ...p, fatura_id: p.fatura_id });
+    }
   }
 
   const mesesUsados = parcelas.map((p) => faturaPorId.get(p.fatura_id)?.mes).filter((m): m is Mes => Boolean(m));
