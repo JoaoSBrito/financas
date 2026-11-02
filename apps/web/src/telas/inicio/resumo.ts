@@ -102,3 +102,10 @@ export function resumirInicio(cartoes: CartaoCompleto[], faturas: FaturaResumo[]
 export function melhorDiaDeCompraGeral(r: ResumoInicio): Data | null {
   return r.proximoFechamento ? somarDias(r.proximoFechamento.data, 1) : null;
 }
+
+/** Mês de referência do orçamento: fatura aberta do primeiro cartão (ou o mês atual). */
+export function mesDeOrcamento(cartoes: CartaoCompleto[], faturas: FaturaResumo[], hoje: Data): Mes {
+  const primeiro = cartoes[0];
+  if (!primeiro) return mesDe(hoje);
+  return faturaDaCompra(primeiro, hoje, confirmadasDe(faturas.filter((f) => f.cartaoId === primeiro.id))).mes;
+}

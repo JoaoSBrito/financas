@@ -176,7 +176,10 @@ export function OrcamentoDoMes({
   const semOrcamento = [...gastos.entries()].filter(([id]) => !orcamentos.has(id)).sort((a, b) => b[1] - a[1]);
 
   return (
-    <SecaoCard titulo={`Orçamento · fatura de ${nomeDoMes(mes, false)}`}>
+    <SecaoCard
+      titulo={`Orçamento · fatura de ${nomeDoMes(mes, false)}`}
+      acao={<LinkSecao href="/ajustes/categorias">{orcamentos.size ? "Ajustar" : "Definir"}</LinkSecao>}
+    >
       {comOrcamento.length === 0 && semOrcamento.length === 0 && (
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           Nenhum gasto com categoria nas faturas de {nomeDoMes(mes, false)} ainda.

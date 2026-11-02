@@ -6,6 +6,8 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import AddRounded from "@mui/icons-material/AddRounded";
+import SettingsRounded from "@mui/icons-material/SettingsRounded";
+import IconButton from "@mui/material/IconButton";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -49,8 +51,11 @@ function Cabecalho() {
         </Typography>
         <Typography variant="h1">{mes.charAt(0).toUpperCase() + mes.slice(1)}</Typography>
       </Box>
-      <Box sx={{ display: { xs: "block", md: "none" } }}>
+      <Box sx={{ display: { xs: "flex", md: "none" }, gap: 2 }}>
         <BotaoOcultarValores />
+        <IconButton component={Link} href="/ajustes" aria-label="Ajustes" sx={{ bgcolor: "background.paper" }}>
+          <SettingsRounded />
+        </IconButton>
       </Box>
     </Box>
   );
