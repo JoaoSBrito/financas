@@ -17,7 +17,8 @@ export const tema = createTheme({
     text: { primary: cores.texto, secondary: cores.textoSuave },
     divider: cores.borda,
   },
-  shape: { borderRadius: raios.medio },
+  // Base 4 px, como o espaçamento: no sx, borderRadius: 5 vira 20 px (raios.card).
+  shape: { borderRadius: espacoBase },
   typography: {
     fontFamily: fonte.familia,
     h1: { fontSize: "1.75rem", fontWeight: fonte.pesos.extra, lineHeight: 1.2 },
@@ -51,7 +52,13 @@ export const tema = createTheme({
       defaultProps: { elevation: 0 },
       styleOverrides: { root: { borderRadius: raios.card } },
     },
-    MuiPaper: { defaultProps: { elevation: 0 } },
+    MuiPaper: {
+      defaultProps: { elevation: 0 },
+      styleOverrides: { rounded: { borderRadius: raios.medio } },
+    },
+    MuiSkeleton: {
+      styleOverrides: { rounded: { borderRadius: raios.medio } },
+    },
     MuiChip: {
       styleOverrides: { root: { fontWeight: fonte.pesos.negrito, borderRadius: raios.pilula } },
     },
