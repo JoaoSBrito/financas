@@ -71,9 +71,12 @@ vi.mock("@/hooks/useGastos", () => ({
 vi.mock("@/hooks/useFaturas", () => ({
   useLancamentos: () => ({ isPending: false, isError: false, data: lancamentos }),
   useMarcarConferida: () => ({ mutate: conferir }),
-  useMarcarFaturaPaga: () => ({ mutate: pagar, isPending: false }),
   useEditarCompra: () => ({ mutate: editar, isPending: false, error: null }),
   useExcluirCompra: () => ({ mutate: vi.fn(), isPending: false, error: null }),
+}));
+vi.mock("@/hooks/useContas", () => ({
+  usePagamentoFatura: () => ({ pagar: { mutate: pagar, isPending: false, error: null }, desfazer: { mutate: vi.fn(), isPending: false } }),
+  useContas: () => ({ isPending: false, data: [{ id: "8f7e6d5c-1111-4a2b-9c3d-0e1f2a3b4c5d", nome: "Conta XP", tipo: "corrente", conferidaEm: null, saldo: 315000 }] }),
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
@@ -128,11 +131,18 @@ describe("TelaFaturas", () => {
     expect(normalizar(parcelamentos.textContent)).toContain("6 de 10 · termina em dez/26 · faltam R$ 200,00");
   });
 
-  it("marca a fatura como paga com a data de hoje", async () => {
+  it("paga a fatura com a conta escolhida, como transferência", async () => {
     const user = userEvent.setup();
     render(<TelaFaturas />);
     await user.click(screen.getByRole("button", { name: "Marcar como paga" }));
-    expect(pagar).toHaveBeenCalledWith({ faturaId: "f-2026-11", pagaEm: "2026-11-01" });
+    const dialogo = screen.getByRole("dialog");
+    expect(normalizar(dialogo.textContent)).toContain("ValorR$ 286,40");
+    await user.click(within(dialogo).getByRole("button", { name: "Confirmar pagamento" }));
+    expect(pagar.mock.calls[0]![0]).toEqual({
+      faturaId: "f-2026-11",
+      contaId: "8f7e6d5c-1111-4a2b-9c3d-0e1f2a3b4c5d",
+      data: "2026-11-01",
+    });
   });
 
   it("edita descrição e categoria de um gasto", async () => {

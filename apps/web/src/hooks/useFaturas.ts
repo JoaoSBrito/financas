@@ -1,13 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Data, Mes } from "@financas/core";
+import type { Mes } from "@financas/core";
 import {
   editarCompra,
   excluirCompra,
   listarLancamentos,
   marcarConferida,
-  marcarFaturaPaga,
   type Lancamento,
 } from "@/services/faturas";
 import { chavesGastos } from "./useGastos";
@@ -47,14 +46,6 @@ export function useMarcarConferida() {
     },
     onError: (_e, _v, ctx) => ctx?.anteriores.forEach(([chave, dados]) => qc.setQueryData(chave, dados)),
     onSettled: () => void qc.invalidateQueries({ queryKey: chavesGastos.faturasResumo }),
-  });
-}
-
-export function useMarcarFaturaPaga() {
-  const invalidar = useInvalidarTudo();
-  return useMutation({
-    mutationFn: (p: { faturaId: string; pagaEm: Data | null }) => marcarFaturaPaga(p.faturaId, p.pagaEm),
-    onSuccess: invalidar,
   });
 }
 

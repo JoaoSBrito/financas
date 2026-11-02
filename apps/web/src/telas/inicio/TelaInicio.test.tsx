@@ -42,6 +42,13 @@ vi.mock("@/hooks/useInicio", () => ({
     data: [{ id: "a", descricao: "Fone de ouvido", dataCompra: "2026-10-31", valorTotal: 120000, totalParcelas: 6, cartaoId: "xp", categoriaId: null }],
   }),
 }));
+vi.mock("@/hooks/useContas", () => ({
+  useProjecao: () => ({
+    isPending: false,
+    isError: false,
+    data: { ate: "2026-11-30", saldoFinal: 386510, saldoHoje: 315000, entradasPrevistas: 520000, faturasAVencer: 238490, contasFixas: 210000, outros: 0, itens: [], menorSaldo: 0 },
+  }),
+}));
 vi.mock("next/dynamic", () => ({ default: () => () => <div data-testid="grafico" /> }));
 
 beforeAll(() => {
@@ -70,6 +77,13 @@ describe("TelaInicio", () => {
     expect(t).toContain("92% · R$ 368,00 de R$ 400,00");
     expect(t).toContain("Sem orçamento definido");
     expect(t).toContain("MercadoR$ 186,40");
+  });
+
+  it("mostra quanto sobra no fim do mês", () => {
+    render(<TelaInicio />);
+    const card = screen.getByRole("region", { name: "Sobra em 30/11" });
+    expect(normalizar(card.textContent)).toContain("R$ 3.865,10");
+    expect(screen.getByRole("link", { name: "Sobra em 30/11: ver contas" })).toHaveAttribute("href", "/contas");
   });
 
   it("lista os últimos gastos", () => {

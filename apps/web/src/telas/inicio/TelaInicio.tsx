@@ -12,10 +12,12 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo } from "react";
 import { formatarDiaMes, hojeEmSaoPaulo, mesDe, nomeDoMes } from "@financas/core";
-import { CardIndicador, CarregandoLista, EstadoErro, EstadoVazio, SecaoCard, Valor } from "@financas/ui";
+import { CardIndicador, CardSaldoProjetado, CarregandoLista, EstadoErro, EstadoVazio, SecaoCard, Valor } from "@financas/ui";
+import ChevronRightRounded from "@mui/icons-material/ChevronRightRounded";
 import { BotaoOcultarValores } from "@/componentes/navegacao/BotaoOcultarValores";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
+import { useProjecao } from "@/hooks/useContas";
 import { useComprasRecentes, useLancamentosDoMes, useOrcamentos } from "@/hooks/useInicio";
 import { melhorDiaDeCompraGeral, resumirInicio } from "./resumo";
 import {
@@ -67,6 +69,7 @@ export function TelaInicio() {
   const faturas = useFaturasResumo();
   const categorias = useCategorias();
   const recentes = useComprasRecentes();
+  const projecao = useProjecao();
 
   const r = useMemo(
     () => (cartoes.data && faturas.data ? resumirInicio(cartoes.data, faturas.data, hoje) : null),
@@ -120,13 +123,49 @@ export function TelaInicio() {
   }
 
   const melhorDia = melhorDiaDeCompraGeral(r);
-  const sobra = (
+  const p = projecao.data;
+  const semConta = (
     <CardEmBreve
       titulo="Quanto sobra no mês"
-      texto="Com suas contas cadastradas, este card mostra o saldo projetado até o fim do mês."
+      texto="Cadastre sua conta para ver o saldo projetado até o fim do mês, depois das faturas e contas fixas."
       href="/contas"
-      rotulo="Ir para Contas"
+      rotulo="Cadastrar conta"
     />
+  );
+  const sobraCelular = projecao.isPending ? (
+    <Skeleton variant="rounded" height={120} sx={{ borderRadius: 5 }} />
+  ) : p ? (
+    <Box component={Link} href="/contas" aria-label={`Sobra em ${formatarDiaMes(p.ate)}: ver contas`} sx={{ textDecoration: "none", color: "inherit" }}>
+      <CardSaldoProjetado
+        compacto
+        ate={p.ate}
+        saldoFinal={p.saldoFinal}
+        saldoHoje={p.saldoHoje}
+        entradas={p.entradasPrevistas}
+        faturas={p.faturasAVencer}
+        contasFixas={p.contasFixas}
+        acessorio={<ChevronRightRounded aria-hidden sx={{ color: "primary.main" }} />}
+      />
+    </Box>
+  ) : (
+    semConta
+  );
+  const sobraDesktop = p ? (
+    <CardIndicador
+      tom="contorno"
+      titulo={`Sobra em ${formatarDiaMes(p.ate)}`}
+      valor={p.saldoFinal}
+      corValor={p.saldoFinal < 0 ? "#B91C1C" : undefined}
+      detalhe={
+        <>
+          Saldo hoje <Valor valor={p.saldoHoje} sx={{ font: "inherit" }} />
+        </>
+      }
+    />
+  ) : projecao.isPending ? (
+    <Skeleton variant="rounded" height={130} sx={{ borderRadius: 5 }} />
+  ) : (
+    semConta
   );
 
   return (
@@ -136,13 +175,13 @@ export function TelaInicio() {
         {/* Celular e tablet */}
         <Stack spacing={4} sx={{ display: { xs: "flex", md: "none" } }}>
           <DestaqueFatura r={r} melhorDia={melhorDia} />
-          {sobra}
+          {sobraCelular}
           <Atalhos />
         </Stack>
 
         {/* Desktop: quatro indicadores */}
         <Box sx={{ display: { xs: "none", md: "grid" }, gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 4 }}>
-          {sobra}
+          {sobraDesktop}
           <CardIndicador
             tom="destaque"
             titulo="Fatura atual · todos"

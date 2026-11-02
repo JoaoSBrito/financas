@@ -80,12 +80,6 @@ export async function marcarConferida(parcelaId: string, conferida: boolean): Pr
   if (error) falhar("Não foi possível marcar o lançamento", error);
 }
 
-/** Por enquanto só registra a data; com a tela de Contas, o pagamento vira transferência. */
-export async function marcarFaturaPaga(faturaId: string, pagaEm: Data | null): Promise<void> {
-  const { error } = await supabaseNavegador().from("faturas").update({ paga_em: pagaEm }).eq("id", faturaId);
-  if (error) falhar("Não foi possível atualizar a fatura", error);
-}
-
 export async function editarCompra(compraId: string, dados: { descricao: string; categoriaId: string | null }) {
   const { error } = await supabaseNavegador()
     .from("compras")

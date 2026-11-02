@@ -191,3 +191,17 @@ describe("PassosOnboarding", () => {
     expect(screen.getByLabelText("2. Parcelamentos")).toHaveAttribute("aria-current", "step");
   });
 });
+
+import { CardSaldoProjetado } from "../src";
+
+describe("CardSaldoProjetado", () => {
+  it("mostra a conta do saldo projetado", () => {
+    render(<CardSaldoProjetado ate="2026-11-30" saldoFinal={386510} saldoHoje={315000} entradas={520000} faturas={238490} contasFixas={210000} />);
+    const card = screen.getByRole("region", { name: "Sobra em 30/11" });
+    const t = normalizar(card.textContent);
+    expect(t).toContain("R$ 3.865,10");
+    expect(t).toContain("Entradas previstas+ R$ 5.200,00");
+    expect(t).toContain("Faturas a pagar− R$ 2.384,90");
+    expect(t).toContain("Contas fixas− R$ 2.100,00");
+  });
+});

@@ -24,12 +24,14 @@ import {
 import { CarregandoLista, EstadoErro, EstadoVazio, PilulasSelecao, SecaoCard } from "@financas/ui";
 import { DialogoCorrigirData } from "@/componentes/DialogoCorrigirData";
 import { useCartoes, useCorrigirFatura } from "@/hooks/useCartoes";
-import { useMarcarFaturaPaga, useLancamentos } from "@/hooks/useFaturas";
+import { usePagamentoFatura } from "@/hooks/useContas";
+import { useLancamentos } from "@/hooks/useFaturas";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { confirmadasDe, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
 import type { Lancamento } from "@/services/faturas";
 import { ParcelamentosAtivos, ProximasFaturas } from "./ColunaLateral";
 import { DialogoEditarLancamento } from "./DialogoEditarLancamento";
+import { DialogoPagarFatura } from "./DialogoPagarFatura";
 import { ListaLancamentos } from "./ListaLancamentos";
 import { ResumoFatura } from "./ResumoFatura";
 import { mesCurto } from "./textos";
@@ -123,7 +125,8 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
   const desde = mes < mesAberto ? mes : mesAberto;
   const lancamentos = useLancamentos(cartao.id, desde);
   const categorias = useCategorias();
-  const pagar = useMarcarFaturaPaga();
+  const { desfazer } = usePagamentoFatura();
+  const [pagando, setPagando] = useState(false);
   const corrigir = useCorrigirFatura(cartao.id);
   const [corrigindo, setCorrigindo] = useState<FaturaResumo | null>(null);
   const [editando, setEditando] = useState<Lancamento | null>(null);
@@ -185,9 +188,9 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
             fatura={fatura}
             divisao={dividirFatura(daFatura)}
             situacao={situacaoDaFatura(fatura, hoje, mesAberto)}
-            carregandoPagamento={pagar.isPending}
+            carregandoPagamento={desfazer.isPending}
             onCorrigirDatas={() => setCorrigindo(fatura)}
-            onAlternarPagamento={() => pagar.mutate({ faturaId: fatura.id, pagaEm: fatura.pagaEm ? null : hoje })}
+            onAlternarPagamento={() => (fatura.pagaEm ? desfazer.mutate(fatura.id) : setPagando(true))}
           />
 
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "flex-start" }}>
@@ -232,6 +235,10 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
             corrigir.mutate({ mes: corrigindo.mes, ...datas }, { onSuccess: () => setCorrigindo(null) })
           }
         />
+      )}
+
+      {pagando && fatura && (
+        <DialogoPagarFatura fatura={fatura} total={dividirFatura(daFatura).total} onFechar={() => setPagando(false)} />
       )}
 
       {editando && (
