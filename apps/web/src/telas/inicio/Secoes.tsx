@@ -2,7 +2,6 @@
 
 import AddRounded from "@mui/icons-material/AddRounded";
 import CreditCardRounded from "@mui/icons-material/CreditCardRounded";
-import ReceiptLongRounded from "@mui/icons-material/ReceiptLongRounded";
 import SavingsRounded from "@mui/icons-material/SavingsRounded";
 import ShoppingBagRounded from "@mui/icons-material/ShoppingBagRounded";
 import Box from "@mui/material/Box";
@@ -102,12 +101,11 @@ const ATALHOS = [
   { href: "/gastos/novo", rotulo: "Novo gasto", icone: <AddRounded />, cor: cores.primaria },
   { href: "/cartoes", rotulo: "Faturas", icone: <CreditCardRounded />, cor: cores.primaria },
   { href: "/caixinhas", rotulo: "Guardar", icone: <SavingsRounded />, cor: cores.investimento },
-  { href: "/gastos/novo", rotulo: "Simular", icone: <ReceiptLongRounded />, cor: cores.primaria },
 ];
 
 export function Atalhos() {
   return (
-    <Box component="nav" aria-label="Atalhos" sx={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 2.5 }}>
+    <Box component="nav" aria-label="Atalhos" sx={{ display: "grid", gridTemplateColumns: `repeat(${ATALHOS.length}, minmax(0, 1fr))`, gap: 2.5 }}>
       {ATALHOS.map((a) => (
         <ButtonBase
           key={a.rotulo}
