@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import Link from "next/link";
 import { useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
@@ -215,6 +216,12 @@ export function FormularioGasto({ cartoes, categorias, faturas, hoje, onConcluir
       >
         {registrar.isPending ? "Salvando…" : "Salvar gasto"}
       </Button>
+      <Typography variant="body2" sx={{ textAlign: "center", color: "text.secondary" }}>
+        Já começou a pagar e sabe só a parcela atual?{" "}
+        <Link href="/parcelamentos/em-andamento" style={{ color: "inherit", fontWeight: 700 }}>
+          Lançar parcelamento em andamento
+        </Link>
+      </Typography>
     </Box>
   );
 }

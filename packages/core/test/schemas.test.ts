@@ -31,6 +31,7 @@ describe("schemas", () => {
       valorParcela: 10000,
       totalParcelas: 10,
       parcelaAtual: 11,
+      mesFatura: "2026-11",
     });
     expect(r.success).toBe(false);
     expect(r.error?.issues[0]?.path).toEqual(["parcelaAtual"]);

@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { hojeEmSaoPaulo, simularCompra, type NovoGasto } from "@financas/core";
+import {
+  hojeEmSaoPaulo,
+  parcelamentoEmAndamento,
+  simularCompra,
+  type NovoGasto,
+  type ParcelamentoEmAndamento,
+} from "@financas/core";
 import { supabaseNavegador } from "@/lib/supabase/client";
 import { ErroDeDados, obterCartao, sincronizarFaturas } from "./cartoes";
 import {
@@ -69,5 +75,31 @@ export async function registrarGasto(gasto: NovoGasto): Promise<string> {
         : `Não foi possível salvar o gasto: ${error.message}`,
     );
   }
+  return z.uuid().parse(data);
+}
+
+/**
+ * Parcelamento que já estava em andamento antes do app: lança a compra completa,
+ * cria só as parcelas restantes e guarda as anteriores como histórico.
+ */
+export async function registrarParcelamentoEmAndamento(p: ParcelamentoEmAndamento): Promise<string> {
+  const parcelas = parcelamentoEmAndamento({
+    valorParcela: p.valorParcela,
+    totalParcelas: p.totalParcelas,
+    parcelaAtual: p.parcelaAtual,
+    faturaAtual: p.mesFatura,
+  });
+  await sincronizarFaturas(p.cartaoId, parcelas.at(-1)!.mes);
+
+  const { data, error } = await supabaseNavegador().rpc("registrar_compra", {
+    p_cartao_id: p.cartaoId,
+    p_categoria_id: p.categoriaId,
+    p_descricao: p.descricao,
+    p_data_compra: null,
+    p_valor_total: p.valorParcela * p.totalParcelas,
+    p_origem: "anterior_ao_app",
+    p_parcelas: parcelas.map((x) => ({ numero: x.numero, mes: `${x.mes}-01`, valor: x.valor, historico: x.historico })),
+  });
+  if (error) throw new ErroDeDados(`Não foi possível salvar o parcelamento: ${error.message}`);
   return z.uuid().parse(data);
 }

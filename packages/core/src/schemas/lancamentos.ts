@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { centavosPositivoSchema, centavosSchema, dataSchema, idSchema, textoCurto } from "./comuns";
+import { centavosPositivoSchema, centavosSchema, dataSchema, idSchema, mesSchema, textoCurto } from "./comuns";
 
 export const novoGastoSchema = z.object({
   valor: centavosPositivoSchema,
@@ -17,8 +17,14 @@ export const parcelamentoEmAndamentoSchema = z
     cartaoId: idSchema,
     categoriaId: idSchema.nullable(),
     valorParcela: centavosPositivoSchema,
-    totalParcelas: z.number().int().min(2, "Mínimo de 2 parcelas").max(48, "Máximo de 48 parcelas"),
+    totalParcelas: z
+      .number({ error: "Informe o total de parcelas" })
+      .int()
+      .min(2, "Mínimo de 2 parcelas")
+      .max(48, "Máximo de 48 parcelas"),
     parcelaAtual: z.number().int().min(1),
+    /** Fatura (mês do vencimento) em que a parcela atual aparece. */
+    mesFatura: mesSchema,
   })
   .refine((v) => v.parcelaAtual <= v.totalParcelas, {
     path: ["parcelaAtual"],

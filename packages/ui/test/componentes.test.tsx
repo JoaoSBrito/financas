@@ -166,3 +166,17 @@ describe("PilulasSelecao", () => {
     expect(onChange).toHaveBeenCalledWith("pendentes");
   });
 });
+
+import { LinhaDoTempoParcelas } from "../src";
+
+describe("LinhaDoTempoParcelas", () => {
+  it("descreve cada parcela para leitores de tela", () => {
+    render(<LinhaDoTempoParcelas total={3} atual={2} meses={["out", "nov", "dez"]} mesesAcessiveis={["outubro", "novembro", "dezembro"]} />);
+    const itens = screen.getAllByRole("listitem");
+    expect(itens.map((i) => i.getAttribute("aria-label"))).toEqual([
+      "Parcela 1, outubro, já paga",
+      "Parcela 2, novembro, na fatura escolhida",
+      "Parcela 3, dezembro, futura",
+    ]);
+  });
+});

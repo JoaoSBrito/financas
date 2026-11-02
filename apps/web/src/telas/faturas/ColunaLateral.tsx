@@ -55,9 +55,21 @@ export function ProximasFaturas({
   );
 }
 
-export function ParcelamentosAtivos({ itens }: { itens: ParcelamentoAtivo[] }) {
+export function ParcelamentosAtivos({ itens, cartaoId }: { itens: ParcelamentoAtivo[]; cartaoId: string }) {
   return (
-    <SecaoCard titulo="Parcelamentos ativos">
+    <SecaoCard
+      titulo="Parcelamentos ativos"
+      acao={
+        <Typography
+          component={Link}
+          href={`/parcelamentos/em-andamento?cartao=${cartaoId}`}
+          variant="body2"
+          sx={{ fontWeight: 700, textDecoration: "none", color: "primary.main" }}
+        >
+          + Em andamento
+        </Typography>
+      }
+    >
       {itens.length === 0 ? (
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           Nenhuma compra parcelada em andamento.

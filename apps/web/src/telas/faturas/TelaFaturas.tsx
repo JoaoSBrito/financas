@@ -210,7 +210,7 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
                 faturas={doCartao.filter((f) => f.mes > mesAberto).slice(0, 3)}
                 onCorrigir={setCorrigindo}
               />
-              <ParcelamentosAtivos itens={parcelamentosAtivos(lancamentos.data ?? [], mesAberto)} />
+              <ParcelamentosAtivos cartaoId={cartao.id} itens={parcelamentosAtivos(lancamentos.data ?? [], mesAberto)} />
             </Stack>
           </Box>
         </Stack>
