@@ -117,3 +117,16 @@ describe("planejarRealocacao", () => {
     expect(planejarRealocacao(xp, [], compras)).toEqual([]);
   });
 });
+
+import { descreverRegra } from "../src";
+
+describe("descreverRegra", () => {
+  it("descreve a regra do XP", () => {
+    expect(descreverRegra(xp)).toBe("Vence dia 10 · fecha 5 dias úteis antes");
+  });
+  it("singular para 1 dia corrido", () => {
+    expect(descreverRegra({ diaVencimento: 5, fechamento: { tipo: "dias_antes", dias: 1, contagem: "corridos" } })).toBe(
+      "Vence dia 5 · fecha 1 dia corrido antes",
+    );
+  });
+});

@@ -3,7 +3,10 @@ import type { Cartao, RegraFechamento } from "../fatura";
 import { centavosPositivoSchema, textoCurto } from "./comuns";
 
 export const regraFechamentoSchema = z.discriminatedUnion("tipo", [
-  z.object({ tipo: z.literal("dia_fixo"), dia: z.number().int().min(1).max(31) }),
+  z.object({
+    tipo: z.literal("dia_fixo"),
+    dia: z.number({ error: "Informe o dia" }).int().min(1, "Dia entre 1 e 31").max(31, "Dia entre 1 e 31"),
+  }),
   z.object({
     tipo: z.literal("dias_antes"),
     dias: z.number().int().min(1, "Mínimo de 1 dia").max(20, "Máximo de 20 dias"),
@@ -20,7 +23,7 @@ export const cartaoFormSchema = z.object({
     .optional()
     .or(z.literal("").transform(() => undefined)),
   limite: centavosPositivoSchema,
-  diaVencimento: z.number().int().min(1, "Dia entre 1 e 31").max(31, "Dia entre 1 e 31"),
+  diaVencimento: z.number({ error: "Informe o dia" }).int().min(1, "Dia entre 1 e 31").max(31, "Dia entre 1 e 31"),
   vencimentoNaoUtil: z.enum(["proximo_dia_util", "mantem"]),
   fechamento: regraFechamentoSchema,
   avisarAntesDoFechamento: z.boolean(),

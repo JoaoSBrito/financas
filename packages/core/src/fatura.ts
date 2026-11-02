@@ -155,3 +155,15 @@ function diferencaEmMeses(de: Mes, para: Mes): number {
   const b = partesDoMes(para);
   return (b.ano - a.ano) * 12 + (b.mes - a.mes);
 }
+
+/** Texto curto da regra, ex.: "Vence dia 10 · fecha 5 dias úteis antes". */
+export function descreverRegra(cartao: Pick<Cartao, "diaVencimento" | "fechamento">): string {
+  const r = cartao.fechamento;
+  const fechamento =
+    r.tipo === "dia_fixo"
+      ? `fecha dia ${r.dia}`
+      : r.tipo === "dias_antes"
+        ? `fecha ${r.dias} ${r.dias === 1 ? "dia" : "dias"} ${r.contagem === "uteis" ? (r.dias === 1 ? "útil" : "úteis") : r.dias === 1 ? "corrido" : "corridos"} antes`
+        : "fechamento informado mês a mês";
+  return `Vence dia ${cartao.diaVencimento} · ${fechamento}`;
+}

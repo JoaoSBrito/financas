@@ -82,3 +82,25 @@ describe("CampoMoeda", () => {
     expect(aoMudar).toHaveBeenLastCalledWith(120050);
   });
 });
+
+import { ItemFaturaFutura } from "../src";
+
+describe("ItemFaturaFutura", () => {
+  it("mostra datas, selo e botão de correção acessível", async () => {
+    const onCorrigir = vi.fn();
+    render(
+      <ItemFaturaFutura
+        fechamento="2027-01-04"
+        vencimento="2027-01-11"
+        status="estimado"
+        observacao="dia 10 é domingo"
+        nomeMes="janeiro"
+        onCorrigir={onCorrigir}
+      />,
+    );
+    expect(screen.getByText("Fecha 04/01")).toBeInTheDocument();
+    expect(screen.getByText("Vence 11/01 · dia 10 é domingo")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Corrigir datas da fatura de janeiro" }));
+    expect(onCorrigir).toHaveBeenCalled();
+  });
+});

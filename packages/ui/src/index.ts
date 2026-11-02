@@ -14,3 +14,4 @@ export * from "./componentes/Estados";
 export * from "./componentes/ControleSegmentado";
 export * from "./componentes/ContadorNumerico";
 export * from "./componentes/CampoMoeda";
+export * from "./componentes/ItemFaturaFutura";
