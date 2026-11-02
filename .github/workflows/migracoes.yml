@@ -2,7 +2,10 @@ name: Migrações do banco
 on:
   push:
     branches: [main]
-    paths: ["supabase/migrations/**"]
+    paths:
+      - "supabase/migrations/**"
+      - ".github/workflows/migracoes.yml"
+  workflow_dispatch:
 jobs:
   aplicar:
     runs-on: ubuntu-latest
@@ -15,4 +18,4 @@ jobs:
         with:
           version: latest
       - run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
-      - run: supabase db push
+      - run: supabase db push --remote
