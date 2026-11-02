@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { TelaEmConstrucao } from "@/componentes/TelaEmConstrucao";
+import { TelaInicio } from "@/telas/inicio/TelaInicio";
 
 export const metadata: Metadata = { title: "Início" };
 
 export default function Pagina() {
-  return <TelaEmConstrucao titulo="Início" />;
+  return <TelaInicio />;
 }

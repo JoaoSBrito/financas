@@ -68,6 +68,13 @@ export async function listarLancamentos(cartaoId: string, aPartirDe: Mes): Promi
   return lancamentoLinhaSchema.array().parse(data).map(paraLancamento);
 }
 
+/** Lançamentos de todos os cartões nas faturas de um mês (orçamento por categoria). */
+export async function listarLancamentosDoMes(mes: Mes): Promise<Lancamento[]> {
+  const { data, error } = await supabaseNavegador().from("lancamentos").select(COLUNAS).eq("mes", `${mes}-01`);
+  if (error) falhar("Não foi possível carregar os lançamentos do mês", error);
+  return lancamentoLinhaSchema.array().parse(data).map(paraLancamento);
+}
+
 export async function marcarConferida(parcelaId: string, conferida: boolean): Promise<void> {
   const { error } = await supabaseNavegador().from("parcelas").update({ conferida }).eq("id", parcelaId);
   if (error) falhar("Não foi possível marcar o lançamento", error);
