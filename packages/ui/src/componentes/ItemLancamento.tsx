@@ -1,6 +1,7 @@
 "use client";
 
 import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import Checkbox from "@mui/material/Checkbox";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
@@ -20,6 +21,8 @@ export interface ItemLancamentoProps {
   corValor?: string;
   /** Texto à direita no lugar do valor principal (ex.: saldo após). */
   extra?: ReactNode;
+  /** Torna a linha tocável (ex.: abrir edição). A caixa de conferido continua separada. */
+  onAbrir?: () => void;
 }
 
 /** Linha de lista usada em gastos, lançamentos da fatura e movimentos da conta. */
@@ -33,7 +36,26 @@ export function ItemLancamento({
   sinal,
   corValor,
   extra,
+  onAbrir,
 }: ItemLancamentoProps) {
+  const conteudo = (
+    <>
+      <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", textAlign: "left" }}>
+        <Typography variant="subtitle1" noWrap>
+          {descricao}
+        </Typography>
+        {detalhe && (
+          <Typography variant="caption" component="div">
+            {detalhe}
+          </Typography>
+        )}
+      </Box>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+        <Valor valor={valor} sinal={sinal} sx={{ fontSize: 14, fontWeight: 700, color: corValor ?? "inherit" }} />
+        {extra}
+      </Box>
+    </>
+  );
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 52 }}>
       {conferido !== undefined && (
@@ -62,20 +84,16 @@ export function ItemLancamento({
           {icone}
         </Box>
       )}
-      <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-        <Typography variant="subtitle1" noWrap>
-          {descricao}
-        </Typography>
-        {detalhe && (
-          <Typography variant="caption" component="div">
-            {detalhe}
-          </Typography>
-        )}
-      </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-        <Valor valor={valor} sinal={sinal} sx={{ fontSize: 14, fontWeight: 700, color: corValor ?? "inherit" }} />
-        {extra}
-      </Box>
+      {onAbrir ? (
+        <ButtonBase
+          onClick={onAbrir}
+          sx={{ flex: 1, minWidth: 0, gap: 3, minHeight: 52, borderRadius: 2, justifyContent: "space-between" }}
+        >
+          {conteudo}
+        </ButtonBase>
+      ) : (
+        conteudo
+      )}
     </Box>
   );
 }

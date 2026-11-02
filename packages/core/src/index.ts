@@ -7,5 +7,6 @@ export * from "./limite";
 export * from "./orcamento";
 export * from "./saldo";
 export * from "./simulacao";
+export * from "./lancamentos";
 export * from "./caixinha";
 export * from "./schemas";

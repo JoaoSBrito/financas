@@ -18,3 +18,4 @@ export * from "./componentes/ItemFaturaFutura";
 export * from "./componentes/SeletorCartao";
 export * from "./componentes/ChipsCategoria";
 export * from "./componentes/SeletorParcelas";
+export * from "./componentes/PilulasSelecao";

@@ -143,3 +143,26 @@ describe("SeletorParcelas", () => {
     expect(screen.getByRole("group", { name: "Número de parcelas" })).toBeInTheDocument();
   });
 });
+
+import { PilulasSelecao } from "../src";
+
+describe("PilulasSelecao", () => {
+  it("seleciona uma opção e ignora clique na já selecionada", async () => {
+    const onChange = vi.fn();
+    render(
+      <PilulasSelecao
+        rotulo="Filtro"
+        valor="todos"
+        onChange={onChange}
+        opcoes={[
+          { valor: "todos", rotulo: "Todos" },
+          { valor: "pendentes", rotulo: "Não conferidos" },
+        ]}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+    expect(onChange).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Não conferidos" }));
+    expect(onChange).toHaveBeenCalledWith("pendentes");
+  });
+});

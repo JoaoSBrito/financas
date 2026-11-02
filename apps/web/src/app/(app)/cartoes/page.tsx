@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import { TelaCartoes } from "@/telas/cartoes/TelaCartoes";
+import { Suspense } from "react";
+import { TelaFaturas } from "@/telas/faturas/TelaFaturas";
 
-export const metadata: Metadata = { title: "Cartões" };
+export const metadata: Metadata = { title: "Cartões e faturas" };
 
 export default function Pagina() {
-  return <TelaCartoes />;
+  // useSearchParams (cartão e mês na URL) precisa de um limite de Suspense.
+  return (
+    <Suspense>
+      <TelaFaturas />
+    </Suspense>
+  );
 }

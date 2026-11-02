@@ -10,6 +10,7 @@ import {
   listarFaturas,
   obterCartao,
 } from "@/services/cartoes";
+import { chavesGastos } from "./useGastos";
 
 export const chaves = {
   cartoes: ["cartoes"] as const,
@@ -51,6 +52,8 @@ export function useSalvarCartao(id: string | undefined) {
     onSuccess: (cartaoId) => {
       void qc.invalidateQueries({ queryKey: chaves.cartoes });
       void qc.invalidateQueries({ queryKey: chaves.faturas(cartaoId) });
+      void qc.invalidateQueries({ queryKey: chavesGastos.faturasResumo });
+      void qc.invalidateQueries({ queryKey: ["lancamentos"] });
     },
   });
 }
@@ -60,7 +63,10 @@ export function useCorrigirFatura(cartaoId: string) {
   return useMutation({
     mutationFn: (p: { mes: Mes; fechamento: Data; vencimento: Data }) => corrigirFatura({ cartaoId, ...p }),
     onSuccess: () => {
+      // Corrigir uma data pode mover compras entre faturas.
       void qc.invalidateQueries({ queryKey: chaves.faturas(cartaoId) });
+      void qc.invalidateQueries({ queryKey: chavesGastos.faturasResumo });
+      void qc.invalidateQueries({ queryKey: ["lancamentos"] });
     },
   });
 }
