@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { simularCompra, type NovoGasto } from "@financas/core";
+import { hojeEmSaoPaulo, simularCompra, type NovoGasto } from "@financas/core";
 import { supabaseNavegador } from "@/lib/supabase/client";
 import { ErroDeDados, obterCartao, sincronizarFaturas } from "./cartoes";
 import {
@@ -40,9 +40,10 @@ export async function registrarGasto(gasto: NovoGasto): Promise<string> {
     totaisPorMes,
     limite: cartao.limite,
     comprometido,
+    hoje: hojeEmSaoPaulo(),
   });
 
-  // Garante que existem faturas até a última parcela.
+  // Garante que existem faturas até a última parcela (as históricas não precisam de fatura).
   await sincronizarFaturas(cartao.id, simulacao.ultimoMes);
 
   const { data, error } = await supabaseNavegador().rpc("registrar_compra", {
@@ -51,14 +52,22 @@ export async function registrarGasto(gasto: NovoGasto): Promise<string> {
     p_descricao: gasto.descricao,
     p_data_compra: gasto.dataCompra,
     p_valor_total: gasto.valor,
-    p_origem: "app",
+    // Compra antiga com parcelas já pagas = parcelamento em andamento.
+    p_origem: simulacao.historicas > 0 ? "anterior_ao_app" : "app",
     p_parcelas: simulacao.parcelas.map((p) => ({
       numero: p.numero,
       mes: `${p.mes}-01`,
       valor: p.valor,
-      historico: false,
+      historico: p.historico,
     })),
   });
-  if (error) throw new ErroDeDados(`Não foi possível salvar o gasto: ${error.message}`);
+  if (error) {
+    const faltaFatura = error.message.includes("Faltam faturas");
+    throw new ErroDeDados(
+      faltaFatura
+        ? "Algumas parcelas caem em faturas que ainda não foram geradas. Abra a configuração do cartão, salve de novo e tente outra vez."
+        : `Não foi possível salvar o gasto: ${error.message}`,
+    );
+  }
   return z.uuid().parse(data);
 }

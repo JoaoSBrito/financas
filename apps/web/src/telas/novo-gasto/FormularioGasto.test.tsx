@@ -107,3 +107,20 @@ describe("FormularioGasto", () => {
     expect(mutate).not.toHaveBeenCalled();
   });
 });
+
+describe("FormularioGasto com compra antiga", () => {
+  it("marca as parcelas de faturas vencidas como histórico", async () => {
+    const user = userEvent.setup();
+    renderizar();
+    await user.type(screen.getByLabelText("Valor total"), "1000");
+    await user.click(screen.getByRole("radio", { name: /XP/ }));
+    const data = screen.getByLabelText("Data da compra");
+    await user.clear(data);
+    await user.type(data, "2026-06-15");
+    await user.click(screen.getByRole("button", { name: "10x" }));
+    const impacto = screen.getByRole("region", { name: "Impacto nas faturas" });
+    expect(normalizar(impacto.textContent)).toContain("Já pagas (só histórico)4 de 10");
+    expect(normalizar(impacto.textContent)).toContain("Primeira no appparcela 5 em novembro");
+    expect(normalizar(impacto.textContent)).toContain("Fatura de novembro passa aR$ 1.942,50");
+  });
+});

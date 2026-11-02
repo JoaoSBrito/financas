@@ -25,12 +25,52 @@ describe("simularCompra", () => {
       totaisPorMes: new Map([["2026-12", 130000]]),
       limite: 800000,
       comprometido: 258000,
+      hoje: "2026-11-04",
     });
     expect(s.ciclo.mes).toBe("2026-12");
     expect(s.parcelas[0]!.valor).toBe(20000);
     expect(s.primeiraFaturaDepois).toBe(150000);
     expect(s.limiteDisponivelDepois).toBe(422000);
     expect(s.ultimoMes).toBe("2027-05");
+    expect(s.historicas).toBe(0);
+  });
+
+  it("compra antiga em 10x: parcelas de faturas vencidas viram histórico", () => {
+    // Compra em 15/06: entra na fatura de julho. Hoje é 01/11.
+    const s = simularCompra({
+      cartao: xp,
+      confirmadas: [],
+      dataCompra: "2026-06-15",
+      valor: 100000,
+      parcelas: 10,
+      totaisPorMes: new Map([["2026-11", 184250]]),
+      limite: 800000,
+      comprometido: 184250,
+      hoje: "2026-11-01",
+    });
+    expect(s.ciclo.mes).toBe("2026-07");
+    expect(s.historicas).toBe(4);
+    expect(s.primeiraAtiva).toMatchObject({ numero: 5, mes: "2026-11" });
+    expect(s.primeiraFaturaDepois).toBe(194250);
+    // Só as 6 parcelas restantes prendem o limite.
+    expect(s.limiteDisponivelDepois).toBe(800000 - 184250 - 60000);
+  });
+
+  it("compra à vista numa fatura já vencida fica só como histórico", () => {
+    const s = simularCompra({
+      cartao: xp,
+      confirmadas: [],
+      dataCompra: "2026-08-20",
+      valor: 5000,
+      parcelas: 1,
+      totaisPorMes: new Map(),
+      limite: 800000,
+      comprometido: 0,
+      hoje: "2026-11-01",
+    });
+    expect(s.primeiraAtiva).toBeNull();
+    expect(s.primeiraFaturaDepois).toBeNull();
+    expect(s.limiteDisponivelDepois).toBe(800000);
   });
 });
 

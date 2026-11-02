@@ -19,6 +19,7 @@ import {
   simularCompra,
   type Data,
   type NovoGasto,
+  type SimulacaoDeCompra,
 } from "@financas/core";
 import { CampoMoeda, ChipsCategoria, ResumoImpacto, SeletorCartao, SeletorParcelas, Valor } from "@financas/ui";
 import { useRegistrarGasto } from "@/hooks/useGastos";
@@ -111,14 +112,15 @@ export function FormularioGasto({ cartoes, categorias, faturas, hoje, onConcluir
       totaisPorMes,
       limite: cartao.limite,
       comprometido,
+      hoje,
     });
-  }, [cartao, valor, parcelas, dataCompra, faturasPorCartao]);
+  }, [cartao, valor, parcelas, dataCompra, faturasPorCartao, hoje]);
 
   function salvar(gasto: NovoGasto) {
     registrar.mutate(gasto, {
       onSuccess: () => {
-        const mes = simulacao ? nomeDoMes(simulacao.ciclo.mes, false) : null;
-        mostrarAviso(mes ? `Gasto salvo na fatura de ${mes}` : "Gasto salvo");
+        const mes = simulacao?.primeiraAtiva ? nomeDoMes(simulacao.primeiraAtiva.mes, false) : null;
+        mostrarAviso(mes ? `Gasto salvo na fatura de ${mes}` : "Gasto salvo no histórico");
         onConcluir();
       },
     });
@@ -197,35 +199,7 @@ export function FormularioGasto({ cartoes, categorias, faturas, hoje, onConcluir
         />
       </Stack>
 
-      {simulacao && (
-        <ResumoImpacto
-          titulo="Impacto nas faturas"
-          linhas={[
-            simulacao.parcelas.length > 1
-              ? {
-                  rotulo: `${simulacao.parcelas.length}x de`,
-                  valor: (
-                    <>
-                      <Valor valor={simulacao.parcelas.at(-1)!.valor} sx={{ font: "inherit" }} /> ·{" "}
-                      {abreviar(simulacao.ciclo.mes)} a {abreviar(simulacao.ultimoMes)}
-                    </>
-                  ),
-                }
-              : {
-                  rotulo: "Entra na fatura de",
-                  valor: `${nomeDoMes(simulacao.ciclo.mes, false)} · vence ${formatarDiaMes(simulacao.ciclo.vencimento)}`,
-                },
-            {
-              rotulo: `Fatura de ${nomeDoMes(simulacao.ciclo.mes, false)} passa a`,
-              valor: <Valor valor={simulacao.primeiraFaturaDepois} sx={{ font: "inherit" }} />,
-            },
-            {
-              rotulo: "Limite disponível depois",
-              valor: <Valor valor={simulacao.limiteDisponivelDepois} sx={{ font: "inherit" }} />,
-            },
-          ]}
-        />
-      )}
+      {simulacao && <Impacto simulacao={simulacao} />}
 
       {simulacao && simulacao.limiteDisponivelDepois < 0 && (
         <Alert severity="warning">Este gasto passa do limite disponível do cartão.</Alert>
@@ -243,4 +217,53 @@ export function FormularioGasto({ cartoes, categorias, faturas, hoje, onConcluir
       </Button>
     </Box>
   );
+}
+
+function Impacto({ simulacao }: { simulacao: SimulacaoDeCompra }) {
+  const { parcelas, primeiraAtiva, historicas } = simulacao;
+  const total = parcelas.length;
+
+  if (!primeiraAtiva) {
+    return (
+      <Alert severity="info">
+        Todas as parcelas são de faturas que já venceram. A compra fica só no histórico, sem afetar faturas,
+        orçamento ou limite.
+      </Alert>
+    );
+  }
+
+  const linhas = [];
+  if (total > 1) {
+    linhas.push({
+      rotulo: `${total}x de`,
+      valor: (
+        <>
+          <Valor valor={parcelas.at(-1)!.valor} sx={{ font: "inherit" }} /> · {abreviar(parcelas[0]!.mes)} a{" "}
+          {abreviar(simulacao.ultimoMes)}
+        </>
+      ),
+    });
+  } else {
+    linhas.push({
+      rotulo: "Entra na fatura de",
+      valor: `${nomeDoMes(simulacao.ciclo.mes, false)} · vence ${formatarDiaMes(simulacao.ciclo.vencimento)}`,
+    });
+  }
+  if (historicas > 0) {
+    linhas.push({ rotulo: "Já pagas (só histórico)", valor: `${historicas} de ${total}` });
+    linhas.push({
+      rotulo: "Primeira no app",
+      valor: `parcela ${primeiraAtiva.numero} em ${nomeDoMes(primeiraAtiva.mes, false)}`,
+    });
+  }
+  linhas.push({
+    rotulo: `Fatura de ${nomeDoMes(primeiraAtiva.mes, false)} passa a`,
+    valor: <Valor valor={simulacao.primeiraFaturaDepois ?? 0} sx={{ font: "inherit" }} />,
+  });
+  linhas.push({
+    rotulo: "Limite disponível depois",
+    valor: <Valor valor={simulacao.limiteDisponivelDepois} sx={{ font: "inherit" }} />,
+  });
+
+  return <ResumoImpacto titulo="Impacto nas faturas" linhas={linhas} />;
 }
