@@ -17,7 +17,9 @@ import ChevronRightRounded from "@mui/icons-material/ChevronRightRounded";
 import { BotaoOcultarValores } from "@/componentes/navegacao/BotaoOcultarValores";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
+import { useCaixinhas, useMovimentosCaixinhas } from "@/hooks/useCaixinhas";
 import { useProjecao } from "@/hooks/useContas";
+import { resumirPatrimonio } from "@/telas/caixinhas/resumo";
 import { useComprasRecentes, useLancamentosDoMes, useOrcamentos } from "@/hooks/useInicio";
 import { melhorDiaDeCompraGeral, resumirInicio } from "./resumo";
 import {
@@ -27,6 +29,7 @@ import {
   DestaqueFatura,
   LinkSecao,
   OrcamentoDoMes,
+  ResumoCaixinhas,
   UltimosGastos,
 } from "./Secoes";
 
@@ -70,6 +73,8 @@ export function TelaInicio() {
   const categorias = useCategorias();
   const recentes = useComprasRecentes();
   const projecao = useProjecao();
+  const caixinhas = useCaixinhas();
+  const movCaixinhas = useMovimentosCaixinhas();
 
   const r = useMemo(
     () => (cartoes.data && faturas.data ? resumirInicio(cartoes.data, faturas.data, hoje) : null),
@@ -225,12 +230,21 @@ export function TelaInicio() {
             )}
           </Box>
           <Box sx={{ flex: "1 1 380px", minWidth: 0 }}>
-            <CardEmBreve
-              titulo="Caixinhas"
-              texto="Suas caixinhas e metas aparecem aqui quando a tela de investimentos estiver pronta."
-              href="/caixinhas"
-              rotulo="Ir para Caixinhas"
-            />
+            {caixinhas.isPending || movCaixinhas.isPending ? (
+              <Skeleton variant="rounded" height={180} sx={{ borderRadius: 5 }} />
+            ) : caixinhas.data && caixinhas.data.length > 0 && movCaixinhas.data ? (
+              <ResumoCaixinhas
+                {...resumirPatrimonio(caixinhas.data, movCaixinhas.data, hoje)}
+                caixinhas={caixinhas.data}
+              />
+            ) : (
+              <CardEmBreve
+                titulo="Caixinhas"
+                texto="Separe dinheiro por objetivo, como a reserva de emergência ou a próxima fatura."
+                href="/caixinhas"
+                rotulo="Criar caixinha"
+              />
+            )}
           </Box>
         </Box>
 

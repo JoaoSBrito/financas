@@ -263,3 +263,41 @@ export function UltimosGastos({
 }
 
 export { LinkSecao };
+
+export function ResumoCaixinhas({
+  total,
+  rendeuNoMes,
+  caixinhas,
+}: {
+  total: number;
+  rendeuNoMes: number;
+  caixinhas: { id: string; nome: string; saldo: number; meta: number | null }[];
+}) {
+  const comMeta = caixinhas.filter((c) => c.meta).slice(0, 3);
+  return (
+    <SecaoCard titulo="Caixinhas" acao={<LinkSecao href="/caixinhas">Ver tudo</LinkSecao>}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 2 }}>
+        <Box>
+          <Typography variant="caption">Total guardado</Typography>
+          <Valor valor={total} component="div" sx={{ fontSize: 24, fontWeight: 800 }} />
+        </Box>
+        <Typography variant="body2" sx={{ color: cores.investimento, fontWeight: 700 }}>
+          <Valor valor={rendeuNoMes} sinal="sempre" sx={{ font: "inherit" }} /> no mês
+        </Typography>
+      </Box>
+      {comMeta.map((c) => (
+        <BarraProgresso
+          key={c.id}
+          tom="investimento"
+          rotulo={c.nome}
+          percentual={Math.floor((c.saldo / c.meta!) * 100)}
+          detalhe={
+            <>
+              <Valor valor={c.saldo} sx={{ font: "inherit" }} /> / <Valor valor={c.meta!} sx={{ font: "inherit" }} />
+            </>
+          }
+        />
+      ))}
+    </SecaoCard>
+  );
+}

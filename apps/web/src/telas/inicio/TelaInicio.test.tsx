@@ -49,6 +49,13 @@ vi.mock("@/hooks/useContas", () => ({
     data: { ate: "2026-11-30", saldoFinal: 386510, saldoHoje: 315000, entradasPrevistas: 520000, faturasAVencer: 238490, contasFixas: 210000, outros: 0, itens: [], menorSaldo: 0 },
   }),
 }));
+vi.mock("@/hooks/useCaixinhas", () => ({
+  useCaixinhas: () => ({
+    isPending: false,
+    data: [{ id: "c1", nome: "Reserva de emergência", saldo: 1200000, meta: 2000000, dataMeta: null, cartaoId: null, percentualCdi: 100 }],
+  }),
+  useMovimentosCaixinhas: () => ({ isPending: false, data: [{ caixinhaId: "c1", data: "2026-11-01", valor: 15230, tipo: "rendimento_estimado" }] }),
+}));
 vi.mock("next/dynamic", () => ({ default: () => () => <div data-testid="grafico" /> }));
 
 beforeAll(() => {
@@ -84,6 +91,14 @@ describe("TelaInicio", () => {
     const card = screen.getByRole("region", { name: "Sobra em 30/11" });
     expect(normalizar(card.textContent)).toContain("R$ 3.865,10");
     expect(screen.getByRole("link", { name: "Sobra em 30/11: ver contas" })).toHaveAttribute("href", "/contas");
+  });
+
+  it("resume as caixinhas", () => {
+    render(<TelaInicio />);
+    const t = normalizar(screen.getByRole("region", { name: "Caixinhas" }).textContent);
+    expect(t).toContain("Total guardadoR$ 12.000,00");
+    expect(t).toContain("+ R$ 152,30 no mês");
+    expect(t).toContain("Reserva de emergênciaR$ 12.000,00 / R$ 20.000,00");
   });
 
   it("lista os últimos gastos", () => {

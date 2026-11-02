@@ -205,3 +205,14 @@ describe("CardSaldoProjetado", () => {
     expect(t).toContain("Contas fixas− R$ 2.100,00");
   });
 });
+
+import { CardCaixinha } from "../src";
+
+describe("CardCaixinha", () => {
+  it("mostra saldo, meta, progresso e dica", () => {
+    render(<CardCaixinha nome="Pagar fatura de dezembro" saldo={98000} meta={130000} dataMeta="2026-12-10" dica="Guarde R$ 80,00 por semana" />);
+    const card = screen.getByRole("article", { name: "Pagar fatura de dezembro" });
+    expect(normalizar(card.textContent)).toContain("R$ 980,00meta R$ 1.300,00 · 10/12/2026");
+    expect(screen.getByRole("progressbar", { name: "Pagar fatura de dezembro: 75% da meta" })).toBeInTheDocument();
+  });
+});

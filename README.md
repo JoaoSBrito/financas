@@ -45,6 +45,11 @@ pnpm dev          # http://localhost:3000
 **Vercel:** importe o repositório, defina **Root Directory** como `apps/web` e
 cadastre `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
+**Tarefa diária (Vercel Cron):** o arquivo `apps/web/vercel.json` agenda `/api/cron/diario`
+todo dia às 7h (Brasília). Ela busca o CDI no Banco Central e lança o rendimento estimado
+das caixinhas com % do CDI. Cadastre na Vercel, **sem** o prefixo `NEXT_PUBLIC_`:
+`SUPABASE_SECRET_KEY` (chave secreta do Supabase) e `CRON_SECRET` (texto aleatório longo).
+
 **Aplicar entregas:** descompacte sempre pelo Terminal, dentro da pasta do projeto:
 `unzip -o ~/Downloads/ARQUIVO.zip -d .` (o Finder substitui pastas inteiras e apaga arquivos).
 
@@ -84,5 +89,5 @@ O login por e-mail e senha funciona com o preenchimento automático do iCloud
 8. Caixinhas e investimentos
 
 Pendências de infraestrutura: service worker com Serwist e notificações push
-(entram junto com os lembretes), tarefa diária na Vercel (CDI, faturas futuras,
-alertas) e gráficos com MUI X Charts (entram com a tela Início).
+(entram junto com os lembretes) e, na tarefa diária, a renovação das faturas
+futuras e os alertas de fechamento.

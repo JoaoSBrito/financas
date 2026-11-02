@@ -22,3 +22,4 @@ export * from "./componentes/PilulasSelecao";
 export * from "./componentes/LinhaDoTempoParcelas";
 export * from "./componentes/PassosOnboarding";
 export * from "./componentes/CardSaldoProjetado";
+export * from "./componentes/CardCaixinha";

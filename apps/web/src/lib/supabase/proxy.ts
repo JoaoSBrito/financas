@@ -2,7 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "./env";
 
-const ROTAS_PUBLICAS = ["/entrar", "/auth"];
+// /api/cron se protege com o CRON_SECRET, não com sessão.
+const ROTAS_PUBLICAS = ["/entrar", "/auth", "/api/cron"];
 
 /** Renova a sessão a cada requisição e manda para /entrar quem não está logado. */
 export async function atualizarSessao(request: NextRequest) {
