@@ -36,6 +36,8 @@ export type ParcelamentoEmAndamento = z.infer<typeof parcelamentoEmAndamentoSche
 export const saldoInicialFaturaSchema = z.object({
   cartaoId: idSchema,
   valor: centavosPositivoSchema,
+  /** Fatura (mês do vencimento) que recebe o saldo. */
+  mesFatura: mesSchema,
 });
 export type SaldoInicialFatura = z.infer<typeof saldoInicialFaturaSchema>;
 

@@ -4,11 +4,13 @@
  */
 import { z } from "zod";
 import {
+  faturaDaCompra,
   gerarCiclos,
   mesDe,
   somarMeses,
   type Cartao,
   type CartaoForm,
+  type Data,
   type Ciclo,
   type FaturaConfirmada,
   type Mes,
@@ -214,4 +216,15 @@ export function resumirFaturas(faturas: FaturaResumo[]): { totaisPorMes: Map<Mes
     totaisPorMes: new Map(faturas.map((f) => [f.mes, f.total])),
     comprometido: faturas.filter((f) => !f.pagaEm).reduce((s, f) => s + f.total, 0),
   };
+}
+
+/**
+ * Faturas em que algo "de agora" pode estar: a que vence neste mês (fechada, ainda não paga)
+ * e a aberta. Usado no parcelamento em andamento e no saldo inicial.
+ */
+export function faturasDeReferencia(cartao: Cartao, faturas: Fatura[], hoje: Data): { aberta: Mes; meses: Mes[] } {
+  const doCartao = faturas.filter((f) => f.cartaoId === cartao.id);
+  const aberta = faturaDaCompra(cartao, hoje, confirmadasDe(doCartao)).mes;
+  const meses = new Set([mesDe(hoje), aberta]);
+  return { aberta, meses: [...meses].filter((m) => m <= aberta).sort() };
 }

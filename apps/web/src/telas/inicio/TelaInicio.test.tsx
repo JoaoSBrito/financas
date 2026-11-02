@@ -81,7 +81,7 @@ describe("TelaInicio", () => {
   it("sem cartões, convida a cadastrar", () => {
     cartoes = [];
     render(<TelaInicio />);
-    expect(screen.getByText("Vamos começar pelo seu cartão")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Começar" })).toHaveAttribute("href", "/primeiros-passos/cartao");
     cartoes = [xp];
   });
 });

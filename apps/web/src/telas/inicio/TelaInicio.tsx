@@ -106,11 +106,11 @@ export function TelaInicio() {
         <Cabecalho />
         <SecaoCard>
           <EstadoVazio
-            titulo="Vamos começar pelo seu cartão"
-            descricao="Cadastre o cartão com a regra de fechamento. Depois, é só lançar os gastos."
+            titulo="Vamos começar"
+            descricao="Em 4 passos: cartão com a regra de fechamento, parcelamentos em andamento e o que já está na fatura."
             acao={
-              <Button component={Link} href="/cartoes/novo" variant="contained" startIcon={<AddRounded />}>
-                Cadastrar cartão
+              <Button component={Link} href="/primeiros-passos/cartao" variant="contained" startIcon={<AddRounded />}>
+                Começar
               </Button>
             }
           />

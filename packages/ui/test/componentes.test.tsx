@@ -180,3 +180,14 @@ describe("LinhaDoTempoParcelas", () => {
     ]);
   });
 });
+
+import { PassosOnboarding } from "../src";
+
+describe("PassosOnboarding", () => {
+  it("marca o passo atual e os concluídos", () => {
+    render(<PassosOnboarding atual={2} passos={["Cartão", "Parcelamentos", "Fatura", "Pronto"]} />);
+    expect(screen.getByText("Passo 2 de 4")).toBeInTheDocument();
+    expect(screen.getByLabelText("1. Cartão, concluído")).toBeInTheDocument();
+    expect(screen.getByLabelText("2. Parcelamentos")).toHaveAttribute("aria-current", "step");
+  });
+});

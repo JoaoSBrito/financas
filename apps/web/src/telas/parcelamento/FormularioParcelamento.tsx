@@ -12,8 +12,6 @@ import { useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import {
-  faturaDaCompra,
-  mesDe,
   nomeDoMes,
   parcelamentoEmAndamento,
   parcelamentoEmAndamentoSchema,
@@ -32,7 +30,7 @@ import {
 } from "@financas/ui";
 import { useRegistrarParcelamento } from "@/hooks/useGastos";
 import type { Categoria } from "@/services/categorias";
-import { confirmadasDe, resumirFaturas, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
+import { faturasDeReferencia, resumirFaturas, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
 import { useAvisos } from "@/stores/avisos";
 
 type Entrada = z.input<typeof parcelamentoEmAndamentoSchema>;
@@ -45,17 +43,11 @@ export interface FormularioParcelamentoProps {
   faturas: FaturaResumo[];
   hoje: Data;
   cartaoInicial?: string;
+  /** Sem callback, vai para a fatura do cartão depois de salvar. */
+  onSalvo?: (cartaoId: string) => void;
 }
 
-/** Faturas em que a parcela atual pode estar: a que vence neste mês (se ainda existir) até a aberta. */
-function faturasDeReferencia(cartao: CartaoCompleto, faturas: FaturaResumo[], hoje: Data) {
-  const doCartao = faturas.filter((f) => f.cartaoId === cartao.id);
-  const aberta = faturaDaCompra(cartao, hoje, confirmadasDe(doCartao)).mes;
-  const meses = new Set([mesDe(hoje), aberta]);
-  return { aberta, meses: [...meses].filter((m) => m <= aberta).sort() };
-}
-
-export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, cartaoInicial }: FormularioParcelamentoProps) {
+export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, cartaoInicial, onSalvo }: FormularioParcelamentoProps) {
   const router = useRouter();
   const registrar = useRegistrarParcelamento();
   const mostrarAviso = useAvisos((s) => s.mostrar);
@@ -104,7 +96,8 @@ export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, car
     registrar.mutate(dados, {
       onSuccess: () => {
         mostrarAviso(`Parcelamento lançado: ${dados.totalParcelas - dados.parcelaAtual + 1} parcelas a partir de ${nomeDoMes(dados.mesFatura, false)}`);
-        router.push(`/cartoes?cartao=${dados.cartaoId}`);
+        if (onSalvo) onSalvo(dados.cartaoId);
+        else router.push(`/cartoes?cartao=${dados.cartaoId}`);
       },
     });
   }

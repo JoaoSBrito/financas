@@ -3,6 +3,7 @@
 import ChevronRightRounded from "@mui/icons-material/ChevronRightRounded";
 import CreditCardRounded from "@mui/icons-material/CreditCardRounded";
 import LogoutRounded from "@mui/icons-material/LogoutRounded";
+import PlaylistAddCheckRounded from "@mui/icons-material/PlaylistAddCheckRounded";
 import SellRounded from "@mui/icons-material/SellRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -51,6 +52,13 @@ export function TelaAjustes() {
         <ItemMenu href="/ajustes/categorias" icone={<SellRounded />} titulo="Categorias e orçamento" descricao="Nomes das categorias e quanto gastar em cada uma" />
         <Divider />
         <ItemMenu href="/cartoes" icone={<CreditCardRounded />} titulo="Cartões" descricao="Limites, vencimentos e regras de fechamento" />
+        <Divider />
+        <ItemMenu
+          href="/primeiros-passos/parcelamentos"
+          icone={<PlaylistAddCheckRounded />}
+          titulo="Primeiros passos"
+          descricao="Parcelamentos em andamento e saldo inicial das faturas"
+        />
       </SecaoCard>
       <Button
         onClick={sair}

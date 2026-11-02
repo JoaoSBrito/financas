@@ -27,9 +27,11 @@ export interface FormularioCartaoProps {
   cartaoId?: string;
   inicial: CartaoForm;
   faturas: Fatura[];
+  /** Sem callback, um cartão novo leva à lista de cartões depois de salvo. */
+  onSalvo?: (cartaoId: string) => void;
 }
 
-export function FormularioCartao({ cartaoId, inicial, faturas }: FormularioCartaoProps) {
+export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo }: FormularioCartaoProps) {
   const router = useRouter();
   const salvar = useSalvarCartao(cartaoId);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -49,8 +51,9 @@ export function FormularioCartao({ cartaoId, inicial, faturas }: FormularioCarta
 
   function enviar(dados: CartaoForm) {
     salvar.mutate(dados, {
-      onSuccess: () => {
-        if (cartaoId) {
+      onSuccess: (id) => {
+        if (onSalvo) onSalvo(id);
+        else if (cartaoId) {
           reset(dados);
           setAviso("Cartão salvo. As faturas futuras foram atualizadas.");
         } else {

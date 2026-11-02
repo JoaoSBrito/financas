@@ -5,6 +5,7 @@ import {
   simularCompra,
   type NovoGasto,
   type ParcelamentoEmAndamento,
+  type SaldoInicialFatura,
 } from "@financas/core";
 import { supabaseNavegador } from "@/lib/supabase/client";
 import { ErroDeDados, obterCartao, sincronizarFaturas } from "./cartoes";
@@ -102,4 +103,82 @@ export async function registrarParcelamentoEmAndamento(p: ParcelamentoEmAndament
   });
   if (error) throw new ErroDeDados(`Não foi possível salvar o parcelamento: ${error.message}`);
   return z.uuid().parse(data);
+}
+
+/** Fatura aberta informada como um valor único, sem categoria (fora do orçamento). */
+export async function registrarSaldoInicial(p: SaldoInicialFatura): Promise<string> {
+  await sincronizarFaturas(p.cartaoId, p.mesFatura);
+  const { data, error } = await supabaseNavegador().rpc("registrar_compra", {
+    p_cartao_id: p.cartaoId,
+    p_categoria_id: null,
+    p_descricao: "Saldo inicial da fatura",
+    p_data_compra: null,
+    p_valor_total: p.valor,
+    p_origem: "saldo_inicial",
+    p_parcelas: [{ numero: 1, mes: `${p.mesFatura}-01`, valor: p.valor, historico: false }],
+  });
+  if (error) throw new ErroDeDados(`Não foi possível salvar o saldo inicial: ${error.message}`);
+  return z.uuid().parse(data);
+}
+
+const compraComParcelasSchema = z.object({
+  id: z.uuid(),
+  descricao: z.string(),
+  cartao_id: z.uuid(),
+  valor_total: z.number().int(),
+  total_parcelas: z.number().int(),
+});
+const parcelaResumoSchema = z.object({
+  compra_id: z.uuid(),
+  numero: z.number().int(),
+  valor: z.number().int(),
+  historico: z.boolean(),
+  fatura_id: z.uuid().nullable(),
+});
+
+export interface CompraDoInicio {
+  id: string;
+  descricao: string;
+  cartaoId: string;
+  valorTotal: number;
+  totalParcelas: number;
+  /** Primeira parcela que entrou numa fatura (null se todas são histórico). */
+  parcelaAtual: number | null;
+  /** Soma das parcelas que ainda estão em faturas. */
+  restante: number;
+  faturaIds: string[];
+}
+
+/** Compras lançadas no começo do uso: parcelamentos em andamento e saldos iniciais. */
+export async function listarComprasDoInicio(origem: "anterior_ao_app" | "saldo_inicial"): Promise<CompraDoInicio[]> {
+  const supabase = supabaseNavegador();
+  const { data, error } = await supabase
+    .from("compras")
+    .select("id, descricao, cartao_id, valor_total, total_parcelas")
+    .eq("origem", origem)
+    .order("criado_em");
+  if (error) throw new ErroDeDados(`Não foi possível carregar os lançamentos: ${error.message}`);
+  const compras = compraComParcelasSchema.array().parse(data);
+  if (compras.length === 0) return [];
+
+  const { data: brutas, error: e2 } = await supabase
+    .from("parcelas")
+    .select("compra_id, numero, valor, historico, fatura_id")
+    .in("compra_id", compras.map((c) => c.id));
+  if (e2) throw new ErroDeDados(`Não foi possível carregar as parcelas: ${e2.message}`);
+  const parcelas = parcelaResumoSchema.array().parse(brutas);
+
+  return compras.map((c) => {
+    const ativas = parcelas.filter((p) => p.compra_id === c.id && !p.historico).sort((a, b) => a.numero - b.numero);
+    return {
+      id: c.id,
+      descricao: c.descricao,
+      cartaoId: c.cartao_id,
+      valorTotal: c.valor_total,
+      totalParcelas: c.total_parcelas,
+      parcelaAtual: ativas[0]?.numero ?? null,
+      restante: ativas.reduce((s, p) => s + p.valor, 0),
+      faturaIds: ativas.map((p) => p.fatura_id).filter((id): id is string => Boolean(id)),
+    };
+  });
 }
