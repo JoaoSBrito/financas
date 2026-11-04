@@ -2,6 +2,7 @@
 
 import AddRounded from "@mui/icons-material/AddRounded";
 import CreditCardRounded from "@mui/icons-material/CreditCardRounded";
+import ReceiptLongRounded from "@mui/icons-material/ReceiptLongRounded";
 import SavingsRounded from "@mui/icons-material/SavingsRounded";
 import ShoppingBagRounded from "@mui/icons-material/ShoppingBagRounded";
 import Box from "@mui/material/Box";
@@ -101,11 +102,12 @@ const ATALHOS = [
   { href: "/gastos/novo", rotulo: "Novo gasto", icone: <AddRounded />, cor: cores.primaria },
   { href: "/cartoes", rotulo: "Faturas", icone: <CreditCardRounded />, cor: cores.primaria },
   { href: "/caixinhas", rotulo: "Guardar", icone: <SavingsRounded />, cor: cores.investimento },
+  { href: "/gastos/novo", rotulo: "Simular", icone: <ReceiptLongRounded />, cor: cores.primaria },
 ];
 
 export function Atalhos() {
   return (
-    <Box component="nav" aria-label="Atalhos" sx={{ display: "grid", gridTemplateColumns: `repeat(${ATALHOS.length}, minmax(0, 1fr))`, gap: 2.5 }}>
+    <Box component="nav" aria-label="Atalhos" sx={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 2.5 }}>
       {ATALHOS.map((a) => (
         <ButtonBase
           key={a.rotulo}
@@ -266,12 +268,15 @@ export function ResumoCaixinhas({
   total,
   rendeuNoMes,
   caixinhas,
+  reserva,
 }: {
   total: number;
   rendeuNoMes: number;
   caixinhas: { id: string; nome: string; saldo: number; meta: number | null }[];
+  /** Reserva de emergência em destaque, quando existe. */
+  reserva?: { nome: string; saldo: number; sugerida: number | null; texto: string };
 }) {
-  const comMeta = caixinhas.filter((c) => c.meta).slice(0, 3);
+  const comMeta = caixinhas.filter((c) => c.meta).slice(0, reserva ? 2 : 3);
   return (
     <SecaoCard titulo="Caixinhas" acao={<LinkSecao href="/caixinhas">Ver tudo</LinkSecao>}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 2 }}>
@@ -283,6 +288,19 @@ export function ResumoCaixinhas({
           <Valor valor={rendeuNoMes} sinal="sempre" sx={{ font: "inherit" }} /> no mês
         </Typography>
       </Box>
+      {reserva && (
+        <Box sx={{ bgcolor: cores.investimentoClaro, borderRadius: 3, p: 3, display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Typography variant="caption" sx={{ color: cores.investimentoEscuro, fontWeight: 700 }}>
+            Reserva de emergência · {reserva.nome}
+          </Typography>
+          {reserva.sugerida ? (
+            <BarraProgresso compacta tom="investimento" percentual={Math.floor((reserva.saldo / reserva.sugerida) * 100)} rotulo={reserva.texto} />
+          ) : null}
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            {reserva.texto}
+          </Typography>
+        </Box>
+      )}
       {comMeta.map((c) => (
         <BarraProgresso
           key={c.id}

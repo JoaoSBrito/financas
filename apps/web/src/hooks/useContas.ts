@@ -11,10 +11,13 @@ import {
   type MovimentoForm,
   type ProjecaoDoMes,
   type RecorrenteForm,
+  type TransferenciaEntreContas,
 } from "@financas/core";
 import {
   ajustarSaldo,
   criarConta,
+  desfazerTransferencia,
+  transferirEntreContas,
   desativarRecorrente,
   desfazerPagamento,
   excluirMovimento,
@@ -89,6 +92,16 @@ export function useSalvarRecorrente() {
 export function useDesativarRecorrente() {
   const invalidar = useInvalidarContas();
   return useMutation({ mutationFn: desativarRecorrente, onSuccess: invalidar });
+}
+
+export function useTransferirEntreContas() {
+  const invalidar = useInvalidarContas();
+  return useMutation({ mutationFn: (t: TransferenciaEntreContas) => transferirEntreContas(t), onSuccess: invalidar });
+}
+
+export function useDesfazerTransferencia() {
+  const invalidar = useInvalidarContas();
+  return useMutation({ mutationFn: desfazerTransferencia, onSuccess: invalidar });
 }
 
 /** Pagar fatura mexe no saldo da conta e na fatura ao mesmo tempo. */

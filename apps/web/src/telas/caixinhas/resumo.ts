@@ -5,8 +5,11 @@ import {
   guardadoNoPeriodo,
   mesDe,
   partesDoMes,
+  nomeDoMes,
   rendimentoNoPeriodo,
+  situacaoDaReserva,
   sugestaoSemanal,
+  type CustoDeVida,
   ultimoDiaDoMes,
   type Data,
   type MovimentoCaixinha,
@@ -54,4 +57,49 @@ export function detalheDaCaixinha(c: Caixinha, cartoes: CartaoCompleto[]): strin
   if (cartao) partes.push(`Vinculada ao cartão ${cartao.nome}`);
   partes.push(c.percentualCdi ? `${c.percentualCdi.toLocaleString("pt-BR")}% do CDI` : "Atualização manual");
   return partes.join(" · ");
+}
+
+export const SELO_RESERVA = "Reserva de emergência";
+
+/** "Cobre 3,1 de 6 meses de custo de vida" */
+export function textoCobertura(cobertura: number, meses: number): string {
+  return `Cobre ${cobertura.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} de ${meses} ${meses === 1 ? "mês" : "meses"} de custo de vida`;
+}
+
+/** "R$ 4.100,00/mês · média de ago a out" */
+export function textoCustoDeVida(custo: CustoDeVida): string {
+  if (custo.fonte === "sem_dados") return "Ainda sem gastos para calcular o custo de vida";
+  const base = `${formatar(custo.valor)}/mês`;
+  if (custo.fonte === "contas_fixas") return `${base} · estimativa pelas contas fixas`;
+  const curto = (m: string) => nomeDoMes(m, false).slice(0, 3);
+  const [primeiro] = custo.mesesUsados;
+  const ultimo = custo.mesesUsados.at(-1)!;
+  const n = custo.mesesUsados.length;
+  return n === 1 ? `${base} · estimativa com base em ${nomeDoMes(primeiro!, false)}` : `${base} · média de ${curto(primeiro!)} a ${curto(ultimo)}`;
+}
+
+/** Como cada caixinha aparece no card: a reserva usa meses × custo de vida no lugar da meta. */
+export function apresentarCaixinha(
+  c: Caixinha,
+  custo: CustoDeVida | null,
+  cartoes: CartaoCompleto[],
+  faturas: FaturaResumo[],
+  hoje: Data,
+): { meta: number | null; dataMeta: Data | null; dica?: string; detalhe: string; selo?: string } {
+  if (c.reservaMeses) {
+    const s = custo ? situacaoDaReserva(c.saldo, c.reservaMeses, custo.valor) : { sugerida: null, cobertura: null };
+    return {
+      meta: s.sugerida,
+      dataMeta: null,
+      detalhe: c.percentualCdi ? `${c.percentualCdi.toLocaleString("pt-BR")}% do CDI` : "Atualização manual",
+      selo: SELO_RESERVA,
+      dica: s.cobertura !== null ? textoCobertura(s.cobertura, c.reservaMeses) : "Lance seus gastos para calcular o custo de vida",
+    };
+  }
+  return {
+    meta: c.meta,
+    dataMeta: c.dataMeta,
+    detalhe: detalheDaCaixinha(c, cartoes),
+    dica: dicaDaCaixinha(c, cartoes, faturas, hoje),
+  };
 }

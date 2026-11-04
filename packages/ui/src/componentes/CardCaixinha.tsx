@@ -3,6 +3,7 @@
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Card from "@mui/material/Card";
+import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import { formatarData, type Centavos, type Data } from "@financas/core";
 import { cores } from "../tokens";
@@ -18,15 +19,24 @@ export interface CardCaixinhaProps {
   dataMeta?: Data | null;
   /** Ex.: "Guarde R$ 80,00 por semana para cobrir a fatura". */
   dica?: string;
+  /** Destaque curto acima do nome (ex.: "Reserva de emergência"). */
+  selo?: string;
   onAbrir?: () => void;
 }
 
 /** Caixinha com saldo, meta e progresso. */
-export function CardCaixinha({ nome, detalhe, saldo, meta, dataMeta, dica, onAbrir }: CardCaixinhaProps) {
+export function CardCaixinha({ nome, detalhe, saldo, meta, dataMeta, dica, selo, onAbrir }: CardCaixinhaProps) {
   const pct = meta ? Math.floor((saldo / meta) * 100) : null;
   const conteudo = (
     <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 2.5, textAlign: "left" }}>
       <Box>
+        {selo && (
+          <Chip
+            size="small"
+            label={selo}
+            sx={{ height: 22, fontSize: 11, mb: 1.5, color: cores.investimentoEscuro, bgcolor: cores.investimentoClaro }}
+          />
+        )}
         <Typography variant="subtitle1" sx={{ fontSize: 15, fontWeight: 800 }}>
           {nome}
         </Typography>

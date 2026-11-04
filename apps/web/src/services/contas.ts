@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ContaForm, Data, Mes, MovimentoForm, RecorrenteForm } from "@financas/core";
+import type { ContaForm, Data, Mes, MovimentoForm, RecorrenteForm, TransferenciaEntreContas } from "@financas/core";
 import { dataNoMes, partesDoMes, ultimoDiaDoMes } from "@financas/core";
 import { supabaseNavegador } from "@/lib/supabase/client";
 import { ErroDeDados } from "./cartoes";
@@ -63,6 +63,7 @@ const movimentoSchema = z.object({
   valor: z.number().int(),
   tipo: z.enum(["saldo_inicial", "entrada", "saida", "transferencia", "ajuste"]),
   recorrente_id: z.uuid().nullable(),
+  transferencia_id: z.uuid().nullable(),
 });
 
 export interface MovimentoConta {
@@ -73,19 +74,34 @@ export interface MovimentoConta {
   valor: number;
   tipo: "saldo_inicial" | "entrada" | "saida" | "transferencia" | "ajuste";
   recorrenteId: string | null;
+  transferenciaId: string | null;
+  /** Transferência entre contas suas (pode ser desfeita). */
+  entreContas: boolean;
 }
 
 /** Movimentos do mês inteiro (inclui os agendados para depois de hoje). */
 export async function listarMovimentosDoMes(mes: Mes): Promise<MovimentoConta[]> {
   const { ano, mes: m } = partesDoMes(mes);
-  const { data, error } = await supabaseNavegador()
+  const fim = dataNoMes(ano, m, ultimoDiaDoMes(ano, m));
+  const supabase = supabaseNavegador();
+  const { data, error } = await supabase
     .from("movimentos")
-    .select("id, conta_id, data, descricao, valor, tipo, recorrente_id")
+    .select("id, conta_id, data, descricao, valor, tipo, recorrente_id, transferencia_id")
     .gte("data", `${mes}-01`)
-    .lte("data", dataNoMes(ano, m, ultimoDiaDoMes(ano, m)))
+    .lte("data", fim)
     .order("data", { ascending: false })
     .order("criado_em", { ascending: false });
   if (error) falhar("Não foi possível carregar os movimentos", error);
+
+  const { data: entre, error: e2 } = await supabase
+    .from("transferencias")
+    .select("id")
+    .eq("tipo", "entre_contas")
+    .gte("data", `${mes}-01`)
+    .lte("data", fim);
+  if (e2) falhar("Não foi possível carregar as transferências", e2);
+  const idsEntreContas = new Set(z.object({ id: z.uuid() }).array().parse(entre).map((t) => t.id));
+
   return movimentoSchema.array().parse(data).map((x) => ({
     id: x.id,
     contaId: x.conta_id,
@@ -94,7 +110,45 @@ export async function listarMovimentosDoMes(mes: Mes): Promise<MovimentoConta[]>
     valor: x.valor,
     tipo: x.tipo,
     recorrenteId: x.recorrente_id,
+    transferenciaId: x.transferencia_id,
+    entreContas: x.transferencia_id !== null && idsEntreContas.has(x.transferencia_id),
   }));
+}
+
+/** Saídas reais da conta (sem transferências e ajustes) somadas por mês, para o custo de vida. */
+export async function listarSaidasPorMes(de: Mes, ate: Mes): Promise<Map<Mes, number>> {
+  const { ano, mes: m } = partesDoMes(ate);
+  const { data, error } = await supabaseNavegador()
+    .from("movimentos")
+    .select("data, valor")
+    .eq("tipo", "saida")
+    .gte("data", `${de}-01`)
+    .lte("data", dataNoMes(ano, m, ultimoDiaDoMes(ano, m)));
+  if (error) falhar("Não foi possível carregar as saídas", error);
+  const mapa = new Map<Mes, number>();
+  for (const x of z.object({ data: z.string(), valor: z.number().int() }).array().parse(data)) {
+    const chave = x.data.slice(0, 7);
+    mapa.set(chave, (mapa.get(chave) ?? 0) - x.valor);
+  }
+  return mapa;
+}
+
+// ───────────── Transferência entre contas ─────────────
+
+export async function transferirEntreContas(t: TransferenciaEntreContas): Promise<void> {
+  const { error } = await supabaseNavegador().rpc("transferir_entre_contas", {
+    p_origem: t.origemId,
+    p_destino: t.destinoId,
+    p_valor: t.valor,
+    p_data: t.data,
+    p_descricao: t.descricao || null,
+  });
+  if (error) falhar("Não foi possível transferir", error);
+}
+
+export async function desfazerTransferencia(transferenciaId: string): Promise<void> {
+  const { error } = await supabaseNavegador().rpc("desfazer_transferencia", { p_transferencia_id: transferenciaId });
+  if (error) falhar("Não foi possível desfazer a transferência", error);
 }
 
 export async function registrarMovimento(form: MovimentoForm, recorrenteId?: string): Promise<void> {

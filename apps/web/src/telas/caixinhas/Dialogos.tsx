@@ -14,8 +14,15 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
-import { caixinhaFormSchema, dataSchema, hojeEmSaoPaulo, type CaixinhaForm } from "@financas/core";
-import { CampoMoeda, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
+import Box from "@mui/material/Box";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+import { useWatch } from "react-hook-form";
+import { caixinhaFormSchema, dataSchema, hojeEmSaoPaulo, situacaoDaReserva, type CaixinhaForm } from "@financas/core";
+import { CampoMoeda, ContadorNumerico, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
+import { cores } from "@financas/ui/tokens";
+import { useCustoDeVida } from "@/hooks/useReserva";
+import { textoCustoDeVida } from "./resumo";
 import { useArquivarCaixinha, useAtualizarSaldoCaixinha, useMovimentarCaixinha, useSalvarCaixinha } from "@/hooks/useCaixinhas";
 import type { CartaoCompleto } from "@/services/cartoes-mapeamento";
 import type { Caixinha } from "@/services/caixinhas";
@@ -61,7 +68,18 @@ const Rotulo = ({ children }: { children: string }) => (
 
 type Entrada = z.input<typeof caixinhaFormSchema>;
 
-export function DialogoCaixinha({ caixinha, cartoes, onFechar }: { caixinha?: Caixinha; cartoes: CartaoCompleto[]; onFechar: () => void }) {
+export function DialogoCaixinha({
+  caixinha,
+  cartoes,
+  reservaAtual,
+  onFechar,
+}: {
+  caixinha?: Caixinha;
+  cartoes: CartaoCompleto[];
+  /** Caixinha que hoje é a reserva (para avisar que ela deixará de ser). */
+  reservaAtual?: Caixinha;
+  onFechar: () => void;
+}) {
   const salvar = useSalvarCaixinha();
   const arquivar = useArquivarCaixinha();
   const aviso = useAvisos((s) => s.mostrar);
@@ -72,6 +90,7 @@ export function DialogoCaixinha({ caixinha, cartoes, onFechar }: { caixinha?: Ca
     control,
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<Entrada, unknown, CaixinhaForm>({
     resolver: zodResolver(caixinhaFormSchema),
@@ -81,8 +100,11 @@ export function DialogoCaixinha({ caixinha, cartoes, onFechar }: { caixinha?: Ca
       dataMeta: caixinha?.dataMeta ?? null,
       cartaoId: caixinha?.cartaoId ?? null,
       percentualCdi: caixinha?.percentualCdi ?? null,
+      reservaMeses: caixinha?.reservaMeses ?? null,
     },
   });
+  const reservaMeses = useWatch({ control, name: "reservaMeses" });
+  const ehReserva = reservaMeses !== null && reservaMeses !== undefined;
 
   const enviar = handleSubmit((form) =>
     salvar.mutate(
@@ -145,6 +167,49 @@ export function DialogoCaixinha({ caixinha, cartoes, onFechar }: { caixinha?: Ca
       )}
       <Controller
         control={control}
+        name="reservaMeses"
+        render={({ field }) => (
+          <FormControlLabel
+            labelPlacement="start"
+            label="Reserva de emergência"
+            control={
+              <Switch
+                checked={field.value !== null && field.value !== undefined}
+                onChange={(e) => {
+                  // Reserva não tem meta manual, data nem cartão: ao ligar, esses campos ficam vazios.
+                  if (e.target.checked) {
+                    setValue("meta", null);
+                    setValue("dataMeta", null);
+                    setValue("cartaoId", null);
+                  }
+                  field.onChange(e.target.checked ? 6 : null);
+                }}
+              />
+            }
+            sx={{ m: 0, minHeight: 48, justifyContent: "space-between" }}
+          />
+        )}
+      />
+      {ehReserva && (
+        <PainelReserva
+          meses={reservaMeses!}
+          saldo={caixinha?.saldo ?? saldoAtual ?? 0}
+          outra={reservaAtual && reservaAtual.id !== caixinha?.id ? reservaAtual.nome : undefined}
+          contador={
+            <Controller
+              control={control}
+              name="reservaMeses"
+              render={({ field }) => (
+                <ContadorNumerico rotulo="Meses de cobertura" valor={field.value ?? 6} min={1} max={36} onChange={field.onChange} sufixo="meses" />
+              )}
+            />
+          }
+        />
+      )}
+      {!ehReserva && (
+        <>
+      <Controller
+        control={control}
         name="meta"
         render={({ field, fieldState }) => (
           <CampoMoeda label="Meta (opcional)" valor={field.value ?? null} onChange={(v) => field.onChange(v || null)} error={Boolean(fieldState.error)} helperText={fieldState.error?.message} />
@@ -165,7 +230,9 @@ export function DialogoCaixinha({ caixinha, cartoes, onFechar }: { caixinha?: Ca
           />
         )}
       />
-      {cartoes.length > 0 && (
+        </>
+      )}
+      {!ehReserva && cartoes.length > 0 && (
         <Stack spacing={2}>
           <Rotulo>Vincular a um cartão</Rotulo>
           <Controller
@@ -390,5 +457,44 @@ function CampoPercentual({ valor, onChange, erro }: { valor: number | null; onCh
       error={Boolean(erro)}
       helperText={erro ?? "Com o valor, o rendimento é estimado todo dia. Sem ele, só muda quando você atualiza o saldo."}
     />
+  );
+}
+
+/** Custo de vida, reserva sugerida e cobertura, ao vivo enquanto ajusta os meses. */
+function PainelReserva({ meses, saldo, outra, contador }: { meses: number; saldo: number; outra?: string; contador: ReactNode }) {
+  const custo = useCustoDeVida();
+  const s = custo.data ? situacaoDaReserva(saldo, meses, custo.data.valor) : null;
+  return (
+    <Stack spacing={3} sx={{ bgcolor: cores.investimentoClaro, borderRadius: 4, p: 4 }}>
+      {contador}
+      {custo.isPending ? (
+        <Typography variant="caption">Calculando o custo de vida…</Typography>
+      ) : custo.data ? (
+        <Box component="dl" sx={{ m: 0, display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Typography component="dt" variant="caption">
+            Custo de vida
+          </Typography>
+          <Typography component="dd" variant="body2" sx={{ m: 0, fontWeight: 700 }}>
+            {textoCustoDeVida(custo.data)}
+          </Typography>
+          {s?.sugerida != null && (
+            <>
+              <Typography component="dt" variant="caption">
+                Reserva sugerida
+              </Typography>
+              <Typography component="dd" variant="body2" sx={{ m: 0, fontWeight: 700 }}>
+                {meses} × custo de vida = <Valor valor={s.sugerida} sx={{ font: "inherit" }} />
+              </Typography>
+            </>
+          )}
+        </Box>
+      ) : (
+        <Typography variant="caption">Não foi possível calcular o custo de vida agora.</Typography>
+      )}
+      <Typography variant="caption">
+        Só informativo: a barra de progresso usa a reserva sugerida, que se atualiza quando seus gastos mudam.
+      </Typography>
+      {outra && <Alert severity="info">&quot;{outra}&quot; deixa de ser a reserva e volta a ser uma caixinha comum.</Alert>}
+    </Stack>
   );
 }

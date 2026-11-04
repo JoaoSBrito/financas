@@ -19,7 +19,8 @@ import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { useCaixinhas, useMovimentosCaixinhas } from "@/hooks/useCaixinhas";
 import { useProjecao } from "@/hooks/useContas";
-import { resumirPatrimonio } from "@/telas/caixinhas/resumo";
+import { useCustoDeVida } from "@/hooks/useReserva";
+import { apresentarCaixinha, resumirPatrimonio } from "@/telas/caixinhas/resumo";
 import { useComprasRecentes, useLancamentosDoMes, useOrcamentos } from "@/hooks/useInicio";
 import { melhorDiaDeCompraGeral, resumirInicio } from "./resumo";
 import {
@@ -75,6 +76,7 @@ export function TelaInicio() {
   const projecao = useProjecao();
   const caixinhas = useCaixinhas();
   const movCaixinhas = useMovimentosCaixinhas();
+  const custo = useCustoDeVida();
 
   const r = useMemo(
     () => (cartoes.data && faturas.data ? resumirInicio(cartoes.data, faturas.data, hoje) : null),
@@ -235,7 +237,13 @@ export function TelaInicio() {
             ) : caixinhas.data && caixinhas.data.length > 0 && movCaixinhas.data ? (
               <ResumoCaixinhas
                 {...resumirPatrimonio(caixinhas.data, movCaixinhas.data, hoje)}
-                caixinhas={caixinhas.data}
+                caixinhas={caixinhas.data.filter((c) => !c.reservaMeses)}
+                reserva={(() => {
+                  const c = caixinhas.data.find((x) => x.reservaMeses);
+                  if (!c) return undefined;
+                  const a = apresentarCaixinha(c, custo.data, cartoes.data, faturas.data, hoje);
+                  return { nome: c.nome, saldo: c.saldo, sugerida: a.meta, texto: a.dica ?? "" };
+                })()}
               />
             ) : (
               <CardEmBreve

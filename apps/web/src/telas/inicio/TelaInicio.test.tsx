@@ -52,9 +52,12 @@ vi.mock("@/hooks/useContas", () => ({
 vi.mock("@/hooks/useCaixinhas", () => ({
   useCaixinhas: () => ({
     isPending: false,
-    data: [{ id: "c1", nome: "Reserva de emergência", saldo: 1200000, meta: 2000000, dataMeta: null, cartaoId: null, percentualCdi: 100 }],
+    data: [{ id: "c1", nome: "Reserva de emergência", saldo: 1200000, meta: 2000000, dataMeta: null, cartaoId: null, percentualCdi: 100, reservaMeses: null }],
   }),
   useMovimentosCaixinhas: () => ({ isPending: false, data: [{ caixinhaId: "c1", data: "2026-11-01", valor: 15230, tipo: "rendimento_estimado" }] }),
+}));
+vi.mock("@/hooks/useReserva", () => ({
+  useCustoDeVida: () => ({ isPending: false, isError: false, data: { valor: 0, mesesUsados: [], fonte: "sem_dados" } }),
 }));
 vi.mock("next/dynamic", () => ({ default: () => () => <div data-testid="grafico" /> }));
 

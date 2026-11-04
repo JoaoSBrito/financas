@@ -3,6 +3,7 @@
 import AccountBalanceRounded from "@mui/icons-material/AccountBalanceRounded";
 import AddRounded from "@mui/icons-material/AddRounded";
 import RemoveRounded from "@mui/icons-material/RemoveRounded";
+import SwapHorizRounded from "@mui/icons-material/SwapHorizRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
@@ -18,10 +19,12 @@ import { useContas, useMovimentosDoMes, useProjecao, useRecorrentes } from "@/ho
 import type { Conta, MovimentoConta, Recorrente } from "@/services/contas";
 import {
   DialogoAjustarSaldo,
+  DialogoDesfazerTransferencia,
   DialogoExcluirMovimento,
   DialogoMovimento,
   DialogoNovaConta,
   DialogoRecorrente,
+  DialogoTransferir,
 } from "./Dialogos";
 
 type Dialogo =
@@ -31,6 +34,8 @@ type Dialogo =
   | { tipo: "lancar"; recorrente: Recorrente; data: string }
   | { tipo: "recorrente"; recorrente?: Recorrente }
   | { tipo: "excluir"; movimento: MovimentoConta }
+  | { tipo: "transferir" }
+  | { tipo: "desfazer"; movimento: MovimentoConta }
   | null;
 
 function diasDesde(data: string | null, hoje: string): string {
@@ -109,13 +114,18 @@ export function TelaContas() {
           contasFixas={p.contasFixas}
           outros={p.outros}
         />
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: `repeat(${listaContas.length > 1 ? 3 : 2}, minmax(0, 1fr))`, gap: 3 }}>
           <Button variant="outlined" startIcon={<AddRounded />} onClick={() => setDialogo({ tipo: "movimento", mov: "entrada" })} sx={{ minHeight: 50, color: cores.investimento, borderColor: cores.bordaForte, bgcolor: "background.paper" }}>
             Entrada
           </Button>
           <Button variant="outlined" startIcon={<RemoveRounded />} onClick={() => setDialogo({ tipo: "movimento", mov: "saida" })} sx={{ minHeight: 50, color: "text.primary", borderColor: cores.bordaForte, bgcolor: "background.paper" }}>
             Saída / Pix
           </Button>
+          {listaContas.length > 1 && (
+            <Button variant="outlined" startIcon={<SwapHorizRounded />} onClick={() => setDialogo({ tipo: "transferir" })} sx={{ minHeight: 50, color: "text.primary", borderColor: cores.bordaForte, bgcolor: "background.paper" }}>
+              Transferir
+            </Button>
+          )}
         </Box>
 
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "flex-start" }}>
@@ -166,11 +176,17 @@ export function TelaContas() {
                     {n > 0 && <Divider />}
                     <ItemLancamento
                       descricao={m.descricao}
-                      detalhe={`${formatarDiaMes(m.data)} · ${ROTULO_TIPO[m.tipo]} · ${listaContas.find((c) => c.id === m.contaId)?.nome ?? ""}`}
+                      detalhe={`${formatarDiaMes(m.data)} · ${m.entreContas ? "entre contas" : ROTULO_TIPO[m.tipo]} · ${listaContas.find((c) => c.id === m.contaId)?.nome ?? ""}`}
                       valor={m.valor}
                       sinal="sempre"
                       corValor={m.valor > 0 ? cores.investimento : undefined}
-                      onAbrir={m.tipo === "transferencia" ? undefined : () => setDialogo({ tipo: "excluir", movimento: m })}
+                      onAbrir={
+                        m.entreContas
+                          ? () => setDialogo({ tipo: "desfazer", movimento: m })
+                          : m.tipo === "transferencia"
+                            ? undefined
+                            : () => setDialogo({ tipo: "excluir", movimento: m })
+                      }
                     />
                   </Box>
                 ))
@@ -266,6 +282,8 @@ export function TelaContas() {
       )}
       {dialogo?.tipo === "recorrente" && <DialogoRecorrente contas={contas.data ?? []} recorrente={dialogo.recorrente} onFechar={fechar} />}
       {dialogo?.tipo === "excluir" && <DialogoExcluirMovimento movimento={dialogo.movimento} onFechar={fechar} />}
+      {dialogo?.tipo === "transferir" && <DialogoTransferir contas={contas.data ?? []} onFechar={fechar} />}
+      {dialogo?.tipo === "desfazer" && <DialogoDesfazerTransferencia movimento={dialogo.movimento} onFechar={fechar} />}
     </>
   );
 }

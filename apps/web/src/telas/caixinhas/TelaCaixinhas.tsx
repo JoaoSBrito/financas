@@ -16,9 +16,10 @@ import { useCaixinhas, useMovimentosCaixinhas } from "@/hooks/useCaixinhas";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useContas } from "@/hooks/useContas";
 import { useFaturasResumo } from "@/hooks/useGastos";
+import { useCustoDeVida } from "@/hooks/useReserva";
 import type { Caixinha } from "@/services/caixinhas";
 import { DialogoAcoes, DialogoAtualizarSaldo, DialogoCaixinha, DialogoMovimentar } from "./Dialogos";
-import { detalheDaCaixinha, dicaDaCaixinha, resumirPatrimonio } from "./resumo";
+import { apresentarCaixinha, resumirPatrimonio } from "./resumo";
 
 const GraficoEvolucao = dynamic(() => import("@/componentes/graficos/GraficoEvolucao"), {
   ssr: false,
@@ -42,9 +43,11 @@ export function TelaCaixinhas() {
   const cartoes = useCartoes();
   const faturas = useFaturasResumo();
   const contas = useContas();
+  const custo = useCustoDeVida();
   const [dialogo, setDialogo] = useState<Dialogo>(null);
   const fechar = () => setDialogo(null);
 
+  const reservaAtual = caixinhas.data?.find((c) => c.reservaMeses);
   const carregando = caixinhas.isPending || movimentos.isPending || cartoes.isPending || faturas.isPending;
   const erro = caixinhas.isError || movimentos.isError || cartoes.isError || faturas.isError;
 
@@ -81,7 +84,8 @@ export function TelaCaixinhas() {
       </SecaoCard>
     );
   } else {
-    const lista = caixinhas.data;
+    // A reserva de emergência aparece primeiro.
+    const lista = [...caixinhas.data].sort((a, b) => Number(Boolean(b.reservaMeses)) - Number(Boolean(a.reservaMeses)));
     const r = resumirPatrimonio(lista, movimentos.data, hoje);
     const evolucao = evolucaoMensal(movimentos.data, hoje, 6);
     const comSaldo = lista.filter((c) => c.saldo > 0).sort((a, b) => b.saldo - a.saldo);
@@ -166,18 +170,22 @@ export function TelaCaixinhas() {
             Minhas caixinhas
           </Typography>
           <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 4 }}>
-            {lista.map((c) => (
-              <CardCaixinha
-                key={c.id}
-                nome={c.nome}
-                detalhe={detalheDaCaixinha(c, cartoes.data)}
-                saldo={c.saldo}
-                meta={c.meta}
-                dataMeta={c.dataMeta}
-                dica={dicaDaCaixinha(c, cartoes.data, faturas.data, hoje)}
-                onAbrir={() => setDialogo({ tipo: "acoes", caixinha: c })}
-              />
-            ))}
+            {lista.map((c) => {
+              const a = apresentarCaixinha(c, custo.data, cartoes.data, faturas.data, hoje);
+              return (
+                <CardCaixinha
+                  key={c.id}
+                  nome={c.nome}
+                  selo={a.selo}
+                  detalhe={a.detalhe}
+                  saldo={c.saldo}
+                  meta={a.meta}
+                  dataMeta={a.dataMeta}
+                  dica={a.dica}
+                  onAbrir={() => setDialogo({ tipo: "acoes", caixinha: c })}
+                />
+              );
+            })}
           </Box>
         </Box>
 
@@ -197,8 +205,10 @@ export function TelaCaixinhas() {
       </Box>
       {corpo}
 
-      {dialogo?.tipo === "nova" && <DialogoCaixinha cartoes={cartoes.data ?? []} onFechar={fechar} />}
-      {dialogo?.tipo === "editar" && <DialogoCaixinha caixinha={dialogo.caixinha} cartoes={cartoes.data ?? []} onFechar={fechar} />}
+      {dialogo?.tipo === "nova" && <DialogoCaixinha cartoes={cartoes.data ?? []} reservaAtual={reservaAtual} onFechar={fechar} />}
+      {dialogo?.tipo === "editar" && (
+        <DialogoCaixinha caixinha={dialogo.caixinha} cartoes={cartoes.data ?? []} reservaAtual={reservaAtual} onFechar={fechar} />
+      )}
       {dialogo?.tipo === "atualizar" && <DialogoAtualizarSaldo caixinha={dialogo.caixinha} onFechar={fechar} />}
       {dialogo?.tipo === "movimentar" && (
         <DialogoMovimentar

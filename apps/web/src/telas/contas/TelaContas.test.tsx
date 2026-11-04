@@ -7,6 +7,8 @@ import { TelaContas } from "./TelaContas";
 
 const CONTA = "8f7e6d5c-1111-4a2b-9c3d-0e1f2a3b4c5d";
 const registrar = vi.fn();
+const transferir = vi.fn();
+const BB = "9a8b7c6d-2222-4a2b-9c3d-0e1f2a3b4c5d";
 const ajustar = vi.fn();
 
 let contas: Conta[] = [{ id: CONTA, nome: "Conta XP", tipo: "corrente", conferidaEm: "2026-11-01", saldo: 315000 }];
@@ -35,6 +37,8 @@ vi.mock("@/hooks/useContas", () => ({
   useSalvarRecorrente: () => ({ mutate: vi.fn(), isPending: false, error: null }),
   useDesativarRecorrente: () => ({ mutate: vi.fn(), isPending: false, error: null }),
   useExcluirMovimento: () => ({ mutate: vi.fn(), isPending: false, error: null }),
+  useTransferirEntreContas: () => ({ mutate: transferir, isPending: false, error: null }),
+  useDesfazerTransferencia: () => ({ mutate: vi.fn(), isPending: false, error: null }),
 }));
 
 beforeAll(() => {
@@ -45,6 +49,7 @@ afterAll(() => vi.useRealTimers());
 beforeEach(() => {
   registrar.mockReset();
   ajustar.mockReset();
+  transferir.mockReset();
   contas = [{ id: CONTA, nome: "Conta XP", tipo: "corrente", conferidaEm: "2026-11-01", saldo: 315000 }];
 });
 
@@ -103,5 +108,22 @@ describe("TelaContas", () => {
       form: { contaId: CONTA, tipo: "saida", valor: 12000, descricao: "Pix para Ana", data: "2026-11-01", categoriaId: null },
       recorrenteId: undefined,
     });
+  });
+
+  it("só mostra Transferir com duas contas e registra como transferência", async () => {
+    const { unmount } = render(<TelaContas />);
+    expect(screen.queryByRole("button", { name: "Transferir" })).not.toBeInTheDocument();
+    unmount();
+    contas = [
+      { id: CONTA, nome: "Conta XP", tipo: "corrente", conferidaEm: "2026-11-01", saldo: 315000 },
+      { id: BB, nome: "BB", tipo: "corrente", conferidaEm: "2026-11-01", saldo: 10000 },
+    ];
+    const user = userEvent.setup();
+    render(<TelaContas />);
+    await user.click(screen.getByRole("button", { name: "Transferir" }));
+    const dialogo = screen.getByRole("dialog");
+    await user.type(within(dialogo).getByLabelText("Valor"), "500");
+    await user.click(within(dialogo).getByRole("button", { name: "Transferir" }));
+    expect(transferir.mock.calls[0]![0]).toEqual({ origemId: CONTA, destinoId: BB, valor: 50000, data: "2026-11-01", descricao: "" });
   });
 });

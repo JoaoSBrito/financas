@@ -29,6 +29,9 @@ vi.mock("@/hooks/useGastos", () => ({ useFaturasResumo: () => ({ isPending: fals
 vi.mock("@/hooks/useContas", () => ({
   useContas: () => ({ data: [{ id: CONTA, nome: "Conta XP", tipo: "corrente", conferidaEm: null, saldo: 315000 }] }),
 }));
+vi.mock("@/hooks/useReserva", () => ({
+  useCustoDeVida: () => ({ isPending: false, isError: false, data: { valor: 410000, mesesUsados: ["2026-08", "2026-09", "2026-10"], fonte: "media" } }),
+}));
 vi.mock("next/dynamic", () => ({ default: () => () => <div data-testid="grafico" /> }));
 
 beforeAll(() => {
@@ -40,7 +43,7 @@ beforeEach(() => {
   movimentar.mockReset();
   salvar.mockReset();
   caixinhas = [
-    { id: "r", nome: "Reserva", meta: 2000000, dataMeta: null, cartaoId: null, percentualCdi: 102, saldo: 1215230 },
+    { id: "r", nome: "Reserva", meta: 2000000, dataMeta: null, cartaoId: null, percentualCdi: 102, saldo: 1215230, reservaMeses: null },
   ];
 });
 
@@ -93,8 +96,42 @@ describe("TelaCaixinhas", () => {
     await user.click(within(dialogo).getByRole("button", { name: "Salvar" }));
     expect(salvar.mock.calls[0]![0]).toEqual({
       id: undefined,
-      form: { nome: "Viagem", meta: null, dataMeta: null, cartaoId: null, percentualCdi: 100.5 },
+      form: { nome: "Viagem", meta: null, dataMeta: null, cartaoId: null, percentualCdi: 100.5, reservaMeses: null },
       saldoAtual: 100000,
+    });
+  });
+
+  it("caixinha marcada como reserva mostra selo e cobertura pelo custo de vida", () => {
+    caixinhas = [{ ...caixinhas[0]!, reservaMeses: 6, meta: null }];
+    render(<TelaCaixinhas />);
+    const card = normalizar(screen.getByRole("article", { name: "Reserva" }).textContent);
+    expect(card).toContain("Reserva de emergência");
+    expect(card).toContain("meta R$ 24.600,00");
+    expect(card).toContain("Cobre 2,9 de 6 meses de custo de vida");
+  });
+
+  it("ligar a reserva troca meta, data e cartão pelo contador de meses", async () => {
+    const user = userEvent.setup();
+    render(<TelaCaixinhas />);
+    await user.click(screen.getByRole("button", { name: "Caixinha" }));
+    const dialogo = screen.getByRole("dialog");
+    await user.type(within(dialogo).getByLabelText("Nome"), "Reserva nova");
+    await user.type(within(dialogo).getByLabelText("Meta (opcional)"), "500");
+    await user.click(within(dialogo).getByRole("switch", { name: "Reserva de emergência" }));
+    expect(within(dialogo).queryByLabelText("Meta (opcional)")).not.toBeInTheDocument();
+    expect(within(dialogo).queryByLabelText("Data da meta (opcional)")).not.toBeInTheDocument();
+    expect(normalizar(dialogo.textContent)).toContain("R$ 4.100,00/mês · média de ago a out");
+    expect(normalizar(dialogo.textContent)).toContain("6 × custo de vida = R$ 24.600,00");
+    await user.click(within(dialogo).getByRole("button", { name: "Aumentar meses de cobertura" }));
+    expect(normalizar(dialogo.textContent)).toContain("7 × custo de vida = R$ 28.700,00");
+    await user.click(within(dialogo).getByRole("button", { name: "Salvar" }));
+    expect(salvar.mock.calls[0]![0].form).toEqual({
+      nome: "Reserva nova",
+      meta: null,
+      dataMeta: null,
+      cartaoId: null,
+      percentualCdi: null,
+      reservaMeses: 7,
     });
   });
 });

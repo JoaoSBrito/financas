@@ -18,16 +18,20 @@ import {
   hojeEmSaoPaulo,
   movimentoFormSchema,
   recorrenteFormSchema,
+  transferenciaEntreContasSchema,
   type ContaForm,
   type MovimentoForm,
   type RecorrenteForm,
+  type TransferenciaEntreContas,
 } from "@financas/core";
 import { CampoMoeda, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
 import {
   useAjustarSaldo,
   useCriarConta,
   useDesativarRecorrente,
+  useDesfazerTransferencia,
   useExcluirMovimento,
+  useTransferirEntreContas,
   useRegistrarMovimento,
   useSalvarRecorrente,
 } from "@/hooks/useContas";
@@ -445,6 +449,150 @@ export function DialogoExcluirMovimento({ movimento, onFechar }: { movimento: Mo
         &quot;{movimento.descricao}&quot; (<Valor valor={movimento.valor} sinal="sempre" sx={{ font: "inherit" }} />) sai do saldo da conta.
       </Typography>
       {excluir.error && <Alert severity="error">{excluir.error.message}</Alert>}
+    </Janela>
+  );
+}
+
+// ───────────── Transferência entre contas ─────────────
+
+type EntradaTransf = z.input<typeof transferenciaEntreContasSchema>;
+
+export function DialogoTransferir({ contas, onFechar }: { contas: Conta[]; onFechar: () => void }) {
+  const transferir = useTransferirEntreContas();
+  const aviso = useAvisos((s) => s.mostrar);
+  const {
+    control,
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<EntradaTransf, unknown, TransferenciaEntreContas>({
+    resolver: zodResolver(transferenciaEntreContasSchema),
+    defaultValues: {
+      origemId: contas[0]?.id ?? "",
+      destinoId: contas[1]?.id ?? "",
+      valor: 0,
+      data: hojeEmSaoPaulo(),
+      descricao: "",
+    },
+  });
+
+  const enviar = handleSubmit((t) =>
+    transferir.mutate(t, {
+      onSuccess: () => {
+        aviso("Transferência registrada");
+        onFechar();
+      },
+    }),
+  );
+
+  const opcoes = contas.map((c) => ({ valor: c.id, rotulo: c.nome }));
+
+  return (
+    <Janela
+      titulo="Transferir entre contas"
+      ocupado={transferir.isPending}
+      onFechar={onFechar}
+      onEnviar={enviar}
+      acoes={
+        <>
+          <Button onClick={onFechar}>Cancelar</Button>
+          <Button type="submit" variant="contained" disabled={transferir.isPending}>
+            {transferir.isPending ? "Salvando…" : "Transferir"}
+          </Button>
+        </>
+      }
+    >
+      <Controller
+        control={control}
+        name="origemId"
+        render={({ field }) => (
+          <Stack spacing={2}>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              De
+            </Typography>
+            <PilulasSelecao
+              rotulo="Conta de origem"
+              tamanho="pequeno"
+              valor={field.value}
+              onChange={(id) => {
+                field.onChange(id);
+                // Mantém origem e destino diferentes.
+                const outra = contas.find((c) => c.id !== id);
+                setValue("destinoId", outra?.id ?? "");
+              }}
+              opcoes={opcoes}
+            />
+          </Stack>
+        )}
+      />
+      <Controller
+        control={control}
+        name="destinoId"
+        render={({ field, fieldState }) => (
+          <Stack spacing={2}>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              Para
+            </Typography>
+            <PilulasSelecao rotulo="Conta de destino" tamanho="pequeno" valor={field.value} onChange={field.onChange} opcoes={opcoes} />
+            {fieldState.error && (
+              <Typography variant="caption" sx={{ color: "error.main" }}>
+                {fieldState.error.message}
+              </Typography>
+            )}
+          </Stack>
+        )}
+      />
+      <Controller
+        control={control}
+        name="valor"
+        render={({ field, fieldState }) => (
+          <CampoMoeda label="Valor" valor={field.value || null} onChange={(v) => field.onChange(v ?? 0)} error={Boolean(fieldState.error)} helperText={fieldState.error?.message} />
+        )}
+      />
+      <TextField label="Data" type="date" slotProps={{ inputLabel: { shrink: true } }} error={Boolean(errors.data)} helperText={errors.data?.message} {...register("data")} />
+      <TextField
+        label="Descrição (opcional)"
+        placeholder="Ex.: Para pagar a conta de luz"
+        error={Boolean(errors.descricao)}
+        helperText={errors.descricao?.message}
+        {...register("descricao")}
+      />
+      <Typography variant="caption">É uma transferência: não conta como gasto nem como receita.</Typography>
+      {transferir.error && <Alert severity="error">{transferir.error.message}</Alert>}
+    </Janela>
+  );
+}
+
+export function DialogoDesfazerTransferencia({ movimento, onFechar }: { movimento: MovimentoConta; onFechar: () => void }) {
+  const desfazer = useDesfazerTransferencia();
+  const aviso = useAvisos((s) => s.mostrar);
+  return (
+    <Janela
+      titulo="Desfazer transferência?"
+      ocupado={desfazer.isPending}
+      onFechar={onFechar}
+      onEnviar={() =>
+        desfazer.mutate(movimento.transferenciaId!, {
+          onSuccess: () => {
+            aviso("Transferência desfeita");
+            onFechar();
+          },
+        })
+      }
+      acoes={
+        <>
+          <Button onClick={onFechar}>Cancelar</Button>
+          <Button type="submit" variant="contained" color="error" disabled={desfazer.isPending}>
+            Desfazer
+          </Button>
+        </>
+      }
+    >
+      <Typography variant="body2">
+        &quot;{movimento.descricao}&quot; sai das duas contas, e os saldos voltam ao que eram antes.
+      </Typography>
+      {desfazer.error && <Alert severity="error">{desfazer.error.message}</Alert>}
     </Janela>
   );
 }

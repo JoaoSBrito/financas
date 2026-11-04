@@ -7,7 +7,7 @@ const xp: CartaoCompleto = {
   id: "xp", nome: "XP", final: null, limite: 800000, diaVencimento: 10, vencimentoNaoUtil: "proximo_dia_util",
   fechamento: { tipo: "dias_antes", dias: 5, contagem: "uteis" }, avisarAntesDoFechamento: true, pedirConfirmacaoMensal: true,
 };
-const fatura: Caixinha = { id: "f", nome: "Pagar fatura", meta: 130000, dataMeta: null, cartaoId: "xp", percentualCdi: 100, saldo: 98000 };
+const fatura: Caixinha = { id: "f", nome: "Pagar fatura", meta: 130000, dataMeta: null, cartaoId: "xp", percentualCdi: 100, saldo: 98000, reservaMeses: null };
 
 describe("caixinhas", () => {
   it("vinculada ao cartão mira o vencimento da fatura aberta", () => {
