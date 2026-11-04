@@ -27,6 +27,7 @@ import {
 import { CampoMoeda, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
 import {
   useAjustarSaldo,
+  useAtualizarMovimento,
   useCriarConta,
   useDesativarRecorrente,
   useDesfazerTransferencia,
@@ -214,16 +215,24 @@ export function DialogoMovimento({
   contas,
   inicial,
   recorrenteId,
+  movimento,
   onFechar,
 }: {
   tipo: "entrada" | "saida";
   contas: Conta[];
   inicial?: Partial<MovimentoForm>;
   recorrenteId?: string;
+  /** Com movimento, o diálogo edita (e permite excluir) em vez de lançar. */
+  movimento?: MovimentoConta;
   onFechar: () => void;
 }) {
   const registrar = useRegistrarMovimento();
+  const atualizar = useAtualizarMovimento();
+  const excluir = useExcluirMovimento();
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
   const aviso = useAvisos((s) => s.mostrar);
+  const hoje = hojeEmSaoPaulo();
+  const ocupado = registrar.isPending || atualizar.isPending || excluir.isPending;
   const {
     control,
     register,
@@ -231,18 +240,39 @@ export function DialogoMovimento({
     formState: { errors },
   } = useForm<EntradaMov, unknown, MovimentoForm>({
     resolver: zodResolver(movimentoFormSchema),
-    defaultValues: {
-      contaId: contas[0]?.id ?? "",
-      tipo,
-      valor: 0,
-      descricao: "",
-      data: hojeEmSaoPaulo(),
-      categoriaId: null,
-      ...inicial,
-    },
+    defaultValues: movimento
+      ? {
+          contaId: movimento.contaId,
+          tipo,
+          valor: Math.abs(movimento.valor),
+          descricao: movimento.descricao,
+          data: movimento.data,
+          categoriaId: null,
+        }
+      : {
+          contaId: contas[0]?.id ?? "",
+          tipo,
+          valor: 0,
+          descricao: "",
+          data: hoje,
+          categoriaId: null,
+          ...inicial,
+        },
   });
 
-  const enviar = handleSubmit((form) =>
+  const enviar = handleSubmit((form) => {
+    if (movimento) {
+      atualizar.mutate(
+        { id: movimento.id, form },
+        {
+          onSuccess: () => {
+            aviso("Movimento atualizado");
+            onFechar();
+          },
+        },
+      );
+      return;
+    }
     registrar.mutate(
       { form, recorrenteId },
       {
@@ -251,20 +281,65 @@ export function DialogoMovimento({
           onFechar();
         },
       },
-    ),
-  );
+    );
+  });
+
+  if (movimento && confirmandoExclusao) {
+    return (
+      <Janela
+        titulo="Excluir movimento?"
+        ocupado={ocupado}
+        onFechar={onFechar}
+        onEnviar={() =>
+          excluir.mutate(movimento.id, {
+            onSuccess: () => {
+              aviso("Movimento excluído");
+              onFechar();
+            },
+          })
+        }
+        acoes={
+          <>
+            <Button onClick={() => setConfirmandoExclusao(false)}>Voltar</Button>
+            <Button type="submit" variant="contained" color="error" disabled={ocupado}>
+              Excluir
+            </Button>
+          </>
+        }
+      >
+        <Typography variant="body2">
+          &quot;{movimento.descricao}&quot; (<Valor valor={movimento.valor} sinal="sempre" sx={{ font: "inherit" }} />){" "}
+          {movimento.data > hoje ? "deixa de estar agendado." : "sai do saldo da conta."}
+        </Typography>
+        {excluir.error && <Alert severity="error">{excluir.error.message}</Alert>}
+      </Janela>
+    );
+  }
+
+  const titulo = movimento
+    ? `Editar ${tipo === "entrada" ? "entrada" : "saída"}${movimento.data > hoje ? " agendada" : ""}`
+    : recorrenteId
+      ? "Lançar recorrente"
+      : tipo === "entrada"
+        ? "Nova entrada"
+        : "Nova saída / Pix";
 
   return (
     <Janela
-      titulo={recorrenteId ? "Lançar recorrente" : tipo === "entrada" ? "Nova entrada" : "Nova saída / Pix"}
-      ocupado={registrar.isPending}
+      titulo={titulo}
+      ocupado={ocupado}
       onFechar={onFechar}
       onEnviar={enviar}
       acoes={
         <>
+          {movimento && (
+            <Button color="error" sx={{ mr: "auto" }} onClick={() => setConfirmandoExclusao(true)} disabled={ocupado}>
+              Excluir
+            </Button>
+          )}
           <Button onClick={onFechar}>Cancelar</Button>
-          <Button type="submit" variant="contained" disabled={registrar.isPending}>
-            {registrar.isPending ? "Salvando…" : "Lançar"}
+          <Button type="submit" variant="contained" disabled={ocupado}>
+            {ocupado ? "Salvando…" : movimento ? "Salvar" : "Lançar"}
           </Button>
         </>
       }
@@ -298,7 +373,7 @@ export function DialogoMovimento({
         {...register("data")}
       />
       <Controller control={control} name="contaId" render={({ field }) => <SeletorConta contas={contas} valor={field.value} onChange={field.onChange} />} />
-      {registrar.error && <Alert severity="error">{registrar.error.message}</Alert>}
+      {(registrar.error ?? atualizar.error) && <Alert severity="error">{(registrar.error ?? atualizar.error)!.message}</Alert>}
     </Janela>
   );
 }

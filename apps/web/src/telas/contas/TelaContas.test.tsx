@@ -8,6 +8,19 @@ import { TelaContas } from "./TelaContas";
 const CONTA = "8f7e6d5c-1111-4a2b-9c3d-0e1f2a3b4c5d";
 const registrar = vi.fn();
 const transferir = vi.fn();
+const atualizar = vi.fn();
+const excluir = vi.fn();
+const agendado = {
+  id: "6b5a4c3d-3333-4a2b-9c3d-0e1f2a3b4c5d",
+  contaId: "8f7e6d5c-1111-4a2b-9c3d-0e1f2a3b4c5d",
+  data: "2026-11-20",
+  descricao: "Pix agendado",
+  valor: -30000,
+  tipo: "saida" as const,
+  recorrenteId: null,
+  transferenciaId: null,
+  entreContas: false,
+};
 const BB = "9a8b7c6d-2222-4a2b-9c3d-0e1f2a3b4c5d";
 const ajustar = vi.fn();
 
@@ -23,20 +36,21 @@ const projecao = () =>
     recorrentes,
     lancadasNoMes: new Set(),
     faturas: [{ id: "f", descricao: "Fatura XP", vencimento: "2026-11-10", total: 184250 }],
-    agendados: [],
+    agendados: [{ id: agendado.id, data: agendado.data, descricao: agendado.descricao, valor: agendado.valor }],
   });
 
 vi.mock("@/hooks/useContas", () => ({
   useContas: () => ({ isPending: false, isError: false, data: contas }),
   useRecorrentes: () => ({ isPending: false, isError: false, data: recorrentes }),
-  useMovimentosDoMes: () => ({ isPending: false, isError: false, data: [] }),
+  useMovimentosDoMes: () => ({ isPending: false, isError: false, data: [agendado] }),
   useProjecao: () => ({ isPending: false, isError: false, data: contas.length ? projecao() : null, refetch: vi.fn() }),
   useRegistrarMovimento: () => ({ mutate: registrar, isPending: false, error: null }),
   useAjustarSaldo: () => ({ mutate: ajustar, isPending: false, error: null }),
   useCriarConta: () => ({ mutate: vi.fn(), isPending: false, error: null }),
   useSalvarRecorrente: () => ({ mutate: vi.fn(), isPending: false, error: null }),
   useDesativarRecorrente: () => ({ mutate: vi.fn(), isPending: false, error: null }),
-  useExcluirMovimento: () => ({ mutate: vi.fn(), isPending: false, error: null }),
+  useExcluirMovimento: () => ({ mutate: excluir, isPending: false, error: null }),
+  useAtualizarMovimento: () => ({ mutate: atualizar, isPending: false, error: null }),
   useTransferirEntreContas: () => ({ mutate: transferir, isPending: false, error: null }),
   useDesfazerTransferencia: () => ({ mutate: vi.fn(), isPending: false, error: null }),
 }));
@@ -50,6 +64,8 @@ beforeEach(() => {
   registrar.mockReset();
   ajustar.mockReset();
   transferir.mockReset();
+  atualizar.mockReset();
+  excluir.mockReset();
   contas = [{ id: CONTA, nome: "Conta XP", tipo: "corrente", conferidaEm: "2026-11-01", saldo: 315000 }];
 });
 
@@ -64,7 +80,7 @@ describe("TelaContas", () => {
 
   it("mostra a sobra e os próximos movimentos com saldo acumulado", () => {
     render(<TelaContas />);
-    expect(normalizar(screen.getByRole("region", { name: "Sobra em 30/11" }).textContent)).toContain("R$ 4.707,50");
+    expect(normalizar(screen.getByRole("region", { name: "Sobra em 30/11" }).textContent)).toContain("R$ 4.407,50");
     const proximos = normalizar(screen.getByRole("region", { name: "Próximos movimentos" }).textContent);
     expect(proximos).toContain("Salário05/11 · recorrente · tocar para lançar+ R$ 5.200,00R$ 8.350,00");
     expect(proximos).toContain("Fatura XP10/11 · fatura do cartão− R$ 1.842,50R$ 4.707,50");
@@ -125,5 +141,33 @@ describe("TelaContas", () => {
     await user.type(within(dialogo).getByLabelText("Valor"), "500");
     await user.click(within(dialogo).getByRole("button", { name: "Transferir" }));
     expect(transferir.mock.calls[0]![0]).toEqual({ origemId: CONTA, destinoId: BB, valor: 50000, data: "2026-11-01", descricao: "" });
+  });
+
+  it("edita uma saída agendada pelos próximos movimentos", async () => {
+    const user = userEvent.setup();
+    render(<TelaContas />);
+    const proximos = screen.getByRole("region", { name: "Próximos movimentos" });
+    await user.click(within(proximos).getByRole("button", { name: /^Pix agendado/ }));
+    const dialogo = screen.getByRole("dialog", { name: "Editar saída agendada" });
+    const valor = within(dialogo).getByLabelText("Valor");
+    await user.clear(valor);
+    await user.type(valor, "350");
+    await user.click(within(dialogo).getByRole("button", { name: "Salvar" }));
+    expect(atualizar.mock.calls[0]![0]).toEqual({
+      id: agendado.id,
+      form: { contaId: CONTA, tipo: "saida", valor: 35000, descricao: "Pix agendado", data: "2026-11-20", categoriaId: null },
+    });
+  });
+
+  it("exclui uma saída agendada com confirmação", async () => {
+    const user = userEvent.setup();
+    render(<TelaContas />);
+    const proximos = screen.getByRole("region", { name: "Próximos movimentos" });
+    await user.click(within(proximos).getByRole("button", { name: /^Pix agendado/ }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Excluir" }));
+    const confirmacao = screen.getByRole("dialog", { name: "Excluir movimento?" });
+    expect(normalizar(confirmacao.textContent)).toContain("deixa de estar agendado");
+    await user.click(within(confirmacao).getByRole("button", { name: "Excluir" }));
+    expect(excluir).toHaveBeenCalledWith(agendado.id, expect.anything());
   });
 });

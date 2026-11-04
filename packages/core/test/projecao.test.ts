@@ -66,9 +66,10 @@ describe("projetarFimDoMes", () => {
       recorrentes: [],
       lancadasNoMes: new Set(),
       faturas: [],
-      agendados: [{ data: "2026-11-08", descricao: "Pix agendado", valor: -500 }],
+      agendados: [{ id: "m1", data: "2026-11-08", descricao: "Pix agendado", valor: -500 }],
     });
     expect(r.saldoFinal).toBe(500);
+    expect(r.itens[0]).toMatchObject({ origem: "agendado", referencia: "m1" });
     expect(r.menorSaldo).toBe(500);
   });
 });

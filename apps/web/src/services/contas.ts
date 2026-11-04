@@ -164,6 +164,23 @@ export async function registrarMovimento(form: MovimentoForm, recorrenteId?: str
   if (error) falhar("Não foi possível salvar o movimento", error);
 }
 
+/** Edita uma entrada ou saída (inclusive agendada). Transferências e ajustes não se editam. */
+export async function atualizarMovimento(id: string, form: MovimentoForm): Promise<void> {
+  const { error } = await supabaseNavegador()
+    .from("movimentos")
+    .update({
+      conta_id: form.contaId,
+      data: form.data,
+      descricao: form.descricao,
+      valor: form.tipo === "entrada" ? form.valor : -form.valor,
+      tipo: form.tipo,
+      categoria_id: form.categoriaId,
+    })
+    .eq("id", id)
+    .in("tipo", ["entrada", "saida"]);
+  if (error) falhar("Não foi possível salvar o movimento", error);
+}
+
 /** Só entradas, saídas e ajustes; transferências se desfazem pela origem (fatura, caixinha). */
 export async function excluirMovimento(id: string): Promise<void> {
   const { error } = await supabaseNavegador().from("movimentos").delete().eq("id", id).neq("tipo", "transferencia");

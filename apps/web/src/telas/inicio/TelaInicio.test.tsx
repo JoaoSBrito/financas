@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { CartaoCompleto, FaturaResumo } from "@/services/cartoes-mapeamento";
 import type { Lancamento } from "@/services/faturas";
@@ -78,6 +78,13 @@ describe("TelaInicio", () => {
     expect(t).toContain("XP fecha em 2 dias");
     expect(t).toContain("Melhor dia de compra: 04/11");
     expect(t).toContain("Disponível R$ 4.315,10");
+  });
+
+  it("atalhos não têm mais o Simular", () => {
+    render(<TelaInicio />);
+    const atalhos = screen.getByRole("navigation", { name: "Atalhos" });
+    expect(within(atalhos).queryByText("Simular")).not.toBeInTheDocument();
+    expect(within(atalhos).getAllByRole("link")).toHaveLength(3);
   });
 
   it("alerta a categoria acima de 80% e lista as sem orçamento", () => {

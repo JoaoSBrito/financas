@@ -15,6 +15,7 @@ import {
 } from "@financas/core";
 import {
   ajustarSaldo,
+  atualizarMovimento,
   criarConta,
   desfazerTransferencia,
   transferirEntreContas,
@@ -77,6 +78,11 @@ export function useRegistrarMovimento() {
     mutationFn: (p: { form: MovimentoForm; recorrenteId?: string }) => registrarMovimento(p.form, p.recorrenteId),
     onSuccess: invalidar,
   });
+}
+
+export function useAtualizarMovimento() {
+  const invalidar = useInvalidarContas();
+  return useMutation({ mutationFn: (p: { id: string; form: MovimentoForm }) => atualizarMovimento(p.id, p.form), onSuccess: invalidar });
 }
 
 export function useExcluirMovimento() {
@@ -148,7 +154,7 @@ export function useProjecao(): {
       faturas: faturas.data
         .filter((f) => !f.pagaEm)
         .map((f) => ({ id: f.id, descricao: `Fatura ${nome.get(f.cartaoId) ?? ""}`.trim(), vencimento: f.vencimento, total: f.total })),
-      agendados: movimentos.data.filter((m) => m.data > hoje).map((m) => ({ data: m.data, descricao: m.descricao, valor: m.valor })),
+      agendados: movimentos.data.filter((m) => m.data > hoje).map((m) => ({ id: m.id, data: m.data, descricao: m.descricao, valor: m.valor })),
     });
   }, [contas.data, recorrentes.data, movimentos.data, faturas.data, cartoes.data, hoje]);
 

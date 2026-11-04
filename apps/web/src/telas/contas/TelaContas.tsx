@@ -35,6 +35,7 @@ type Dialogo =
   | { tipo: "recorrente"; recorrente?: Recorrente }
   | { tipo: "excluir"; movimento: MovimentoConta }
   | { tipo: "transferir" }
+  | { tipo: "editar-mov"; movimento: MovimentoConta }
   | { tipo: "desfazer"; movimento: MovimentoConta }
   | null;
 
@@ -52,6 +53,14 @@ const ROTULO_TIPO: Record<MovimentoConta["tipo"], string> = {
   transferencia: "transferência",
   ajuste: "ajuste",
 };
+
+/** O que acontece ao tocar num movimento já lançado (realizado ou agendado). */
+function acaoDoMovimento(m: MovimentoConta): Dialogo {
+  if (m.entreContas) return { tipo: "desfazer", movimento: m };
+  if (m.tipo === "entrada" || m.tipo === "saida") return { tipo: "editar-mov", movimento: m };
+  if (m.tipo === "transferencia") return null; // fatura e caixinha se desfazem pela origem
+  return { tipo: "excluir", movimento: m };
+}
 
 export function TelaContas() {
   const hoje = hojeEmSaoPaulo();
@@ -138,12 +147,18 @@ export function TelaContas() {
               ) : (
                 p.itens.map((i, n) => {
                   const recorrente = i.origem === "recorrente" ? daConta.find((r) => r.id === i.referencia) : undefined;
+                  const agendado = i.origem === "agendado" ? (movimentos.data ?? []).find((m) => m.id === i.referencia) : undefined;
+                  const abrir = recorrente
+                    ? () => setDialogo({ tipo: "lancar", recorrente, data: i.data })
+                    : agendado && acaoDoMovimento(agendado)
+                      ? () => setDialogo(acaoDoMovimento(agendado))
+                      : undefined;
                   return (
                     <Box key={`${i.data}-${i.descricao}-${n}`}>
                       {n > 0 && <Divider />}
                       <ItemLancamento
                         descricao={i.descricao}
-                        detalhe={`${formatarDiaMes(i.data)} · ${ROTULO_ORIGEM[i.origem]}${recorrente ? " · tocar para lançar" : ""}`}
+                        detalhe={`${formatarDiaMes(i.data)} · ${ROTULO_ORIGEM[i.origem]}${recorrente ? " · tocar para lançar" : agendado ? " · tocar para editar" : ""}`}
                         valor={i.valor}
                         sinal="sempre"
                         corValor={i.valor > 0 ? cores.investimento : undefined}
@@ -152,7 +167,7 @@ export function TelaContas() {
                             <Valor valor={i.saldoApos} sx={{ font: "inherit" }} />
                           </Typography>
                         }
-                        onAbrir={recorrente ? () => setDialogo({ tipo: "lancar", recorrente, data: i.data }) : undefined}
+                        onAbrir={abrir}
                       />
                     </Box>
                   );
@@ -180,13 +195,7 @@ export function TelaContas() {
                       valor={m.valor}
                       sinal="sempre"
                       corValor={m.valor > 0 ? cores.investimento : undefined}
-                      onAbrir={
-                        m.entreContas
-                          ? () => setDialogo({ tipo: "desfazer", movimento: m })
-                          : m.tipo === "transferencia"
-                            ? undefined
-                            : () => setDialogo({ tipo: "excluir", movimento: m })
-                      }
+                      onAbrir={acaoDoMovimento(m) ? () => setDialogo(acaoDoMovimento(m)) : undefined}
                     />
                   </Box>
                 ))
@@ -282,6 +291,14 @@ export function TelaContas() {
       )}
       {dialogo?.tipo === "recorrente" && <DialogoRecorrente contas={contas.data ?? []} recorrente={dialogo.recorrente} onFechar={fechar} />}
       {dialogo?.tipo === "excluir" && <DialogoExcluirMovimento movimento={dialogo.movimento} onFechar={fechar} />}
+      {dialogo?.tipo === "editar-mov" && (
+        <DialogoMovimento
+          tipo={dialogo.movimento.tipo === "entrada" ? "entrada" : "saida"}
+          contas={contas.data ?? []}
+          movimento={dialogo.movimento}
+          onFechar={fechar}
+        />
+      )}
       {dialogo?.tipo === "transferir" && <DialogoTransferir contas={contas.data ?? []} onFechar={fechar} />}
       {dialogo?.tipo === "desfazer" && <DialogoDesfazerTransferencia movimento={dialogo.movimento} onFechar={fechar} />}
     </>

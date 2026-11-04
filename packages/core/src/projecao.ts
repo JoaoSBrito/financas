@@ -18,6 +18,8 @@ export interface FaturaAPagar {
 }
 
 export interface MovimentoAgendado {
+  /** Id do movimento já lançado (para abrir e editar). */
+  id?: string;
   data: Data;
   descricao: string;
   /** Positivo entra, negativo sai. */
@@ -31,7 +33,7 @@ export interface ItemProjetado {
   descricao: string;
   valor: Centavos;
   origem: OrigemPrevisao;
-  /** Id da recorrência ou da fatura que originou a previsão. */
+  /** Id da recorrência, da fatura ou do movimento agendado que originou a previsão. */
   referencia?: string;
   saldoApos: Centavos;
 }
@@ -90,7 +92,14 @@ export function projetarFimDoMes(p: {
   for (const a of p.agendados) {
     if (a.data <= p.hoje || a.data > ate) continue;
     outros += a.valor;
-    previstos.push({ data: a.data, descricao: a.descricao, valor: a.valor, tipo: a.valor > 0 ? "entrada" : "saida", origem: "agendado" });
+    previstos.push({
+      data: a.data,
+      descricao: a.descricao,
+      valor: a.valor,
+      tipo: a.valor > 0 ? "entrada" : "saida",
+      origem: "agendado",
+      referencia: a.id,
+    });
   }
 
   // No mesmo dia, entradas primeiro (o salário costuma cair antes das contas).
