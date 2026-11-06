@@ -11,13 +11,13 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import { useState } from "react";
-import { gastoPorCategoria, hojeEmSaoPaulo, nomeDoMes, situacaoDoOrcamento } from "@financas/core";
+import { hojeEmSaoPaulo, nomeDoMes, situacaoDoOrcamento } from "@financas/core";
 import { BarraProgresso, CardIndicador, CarregandoLista, EstadoErro, EstadoVazio, SecaoCard, Valor } from "@financas/ui";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
-import { useLancamentosDoMes, useOrcamentos } from "@/hooks/useInicio";
+import { useLancamentosDoMes, useOrcamentos, useSaidasDoMes } from "@/hooks/useInicio";
 import type { Categoria } from "@/services/categorias";
-import { mesDeOrcamento } from "@/telas/inicio/resumo";
+import { gastoDoOrcamento, mesDeOrcamento } from "@/telas/inicio/resumo";
 import { DialogoCategoria } from "./DialogoCategoria";
 
 type Editando = { categoria?: Categoria & { orcamento: number | null } } | null;
@@ -30,6 +30,7 @@ export function TelaCategorias() {
   const mes = cartoes.data && faturas.data ? mesDeOrcamento(cartoes.data, faturas.data, hoje) : undefined;
   const orcamentos = useOrcamentos(mes);
   const doMes = useLancamentosDoMes(mes);
+  const saidas = useSaidasDoMes(mes);
   const [editando, setEditando] = useState<Editando>(null);
 
   const carregando = cartoes.isPending || faturas.isPending || categorias.isPending || orcamentos.isPending || doMes.isPending;
@@ -45,7 +46,8 @@ export function TelaCategorias() {
       </Box>
       {mes && (
         <Typography variant="body2" sx={{ color: "text.secondary", mb: 5 }}>
-          Gastos da fatura de {nomeDoMes(mes, false)}. Mudanças no orçamento valem a partir deste mês.
+          Gastos do cartão na fatura de {nomeDoMes(mes, false)} e saídas da conta em {nomeDoMes(mes, false)}. Mudanças no
+          orçamento valem a partir deste mês.
         </Typography>
       )}
 
@@ -66,10 +68,7 @@ export function TelaCategorias() {
         <Conteudo
           categorias={categorias.data}
           orcamentos={orcamentos.data}
-          gastos={gastoPorCategoria(
-            doMes.data.map((l) => ({ mes: l.mes, valor: l.valor, categoriaId: l.categoriaId, historico: false })),
-            mes,
-          )}
+          gastos={gastoDoOrcamento(mes, doMes.data, saidas.data ?? [])}
           onEditar={setEditando}
         />
       )}

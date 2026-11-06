@@ -285,6 +285,7 @@ export function TelaContas() {
             descricao: dialogo.recorrente.descricao,
             data: dialogo.data < hoje ? dialogo.data : hoje,
             contaId: dialogo.recorrente.contaId ?? undefined,
+            categoriaId: dialogo.recorrente.categoriaId,
           }}
           onFechar={fechar}
         />

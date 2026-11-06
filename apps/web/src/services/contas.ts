@@ -64,6 +64,7 @@ const movimentoSchema = z.object({
   tipo: z.enum(["saldo_inicial", "entrada", "saida", "transferencia", "ajuste"]),
   recorrente_id: z.uuid().nullable(),
   transferencia_id: z.uuid().nullable(),
+  categoria_id: z.uuid().nullable(),
 });
 
 export interface MovimentoConta {
@@ -75,6 +76,7 @@ export interface MovimentoConta {
   tipo: "saldo_inicial" | "entrada" | "saida" | "transferencia" | "ajuste";
   recorrenteId: string | null;
   transferenciaId: string | null;
+  categoriaId: string | null;
   /** Transferência entre contas suas (pode ser desfeita). */
   entreContas: boolean;
 }
@@ -86,7 +88,7 @@ export async function listarMovimentosDoMes(mes: Mes): Promise<MovimentoConta[]>
   const supabase = supabaseNavegador();
   const { data, error } = await supabase
     .from("movimentos")
-    .select("id, conta_id, data, descricao, valor, tipo, recorrente_id, transferencia_id")
+    .select("id, conta_id, data, descricao, valor, tipo, recorrente_id, transferencia_id, categoria_id")
     .gte("data", `${mes}-01`)
     .lte("data", fim)
     .order("data", { ascending: false })
@@ -111,7 +113,33 @@ export async function listarMovimentosDoMes(mes: Mes): Promise<MovimentoConta[]>
     tipo: x.tipo,
     recorrenteId: x.recorrente_id,
     transferenciaId: x.transferencia_id,
+    categoriaId: x.categoria_id,
     entreContas: x.transferencia_id !== null && idsEntreContas.has(x.transferencia_id),
+  }));
+}
+
+/** Saídas reais da conta (sem transferências e ajustes) entre dois meses, com categoria. */
+export async function listarSaidasEntre(de: Mes, ate: Mes): Promise<MovimentoConta[]> {
+  const { ano, mes: m } = partesDoMes(ate);
+  const { data, error } = await supabaseNavegador()
+    .from("movimentos")
+    .select("id, conta_id, data, descricao, valor, tipo, recorrente_id, transferencia_id, categoria_id")
+    .eq("tipo", "saida")
+    .gte("data", `${de}-01`)
+    .lte("data", dataNoMes(ano, m, ultimoDiaDoMes(ano, m)))
+    .order("data", { ascending: false });
+  if (error) falhar("Não foi possível carregar as saídas", error);
+  return movimentoSchema.array().parse(data).map((x) => ({
+    id: x.id,
+    contaId: x.conta_id,
+    data: x.data,
+    descricao: x.descricao,
+    valor: x.valor,
+    tipo: x.tipo,
+    recorrenteId: x.recorrente_id,
+    transferenciaId: x.transferencia_id,
+    categoriaId: x.categoria_id,
+    entreContas: false,
   }));
 }
 
@@ -152,13 +180,15 @@ export async function desfazerTransferencia(transferenciaId: string): Promise<vo
 }
 
 export async function registrarMovimento(form: MovimentoForm, recorrenteId?: string): Promise<void> {
+  // Entradas não têm categoria (a análise de gastos olha só saídas).
+  const categoria = form.tipo === "saida" ? form.categoriaId : null;
   const { error } = await supabaseNavegador().from("movimentos").insert({
     conta_id: form.contaId,
     data: form.data,
     descricao: form.descricao,
     valor: form.tipo === "entrada" ? form.valor : -form.valor,
     tipo: form.tipo,
-    categoria_id: form.categoriaId,
+    categoria_id: categoria,
     recorrente_id: recorrenteId ?? null,
   });
   if (error) falhar("Não foi possível salvar o movimento", error);
@@ -174,7 +204,7 @@ export async function atualizarMovimento(id: string, form: MovimentoForm): Promi
       descricao: form.descricao,
       valor: form.tipo === "entrada" ? form.valor : -form.valor,
       tipo: form.tipo,
-      categoria_id: form.categoriaId,
+      categoria_id: form.tipo === "saida" ? form.categoriaId : null,
     })
     .eq("id", id)
     .in("tipo", ["entrada", "saida"]);
@@ -238,7 +268,7 @@ export async function salvarRecorrente(id: string | undefined, form: RecorrenteF
     dia: form.dia,
     conta_id: form.contaId,
     cartao_id: form.cartaoId,
-    categoria_id: form.categoriaId,
+    categoria_id: form.tipo === "saida" ? form.categoriaId : null,
   };
   const consulta = id
     ? supabaseNavegador().from("recorrentes").update(linha).eq("id", id)

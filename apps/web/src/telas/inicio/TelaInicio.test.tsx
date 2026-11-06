@@ -33,7 +33,21 @@ vi.mock("@/hooks/useGastos", () => ({
   useFaturasResumo: () => ({ isPending: false, isError: false, data: faturas }),
   useCategorias: () => ({ isPending: false, isError: false, data: [{ id: LAZER, nome: "Lazer" }, { id: MERCADO, nome: "Mercado" }] }),
 }));
+vi.mock("@/hooks/useGastosDoMes", () => ({
+  useGastosDoMes: () => ({
+    resumo: {
+      total: 100000,
+      totalAnterior: 0,
+      linhas: [
+        { categoriaId: MERCADO, total: 62000, participacao: 0.62, anterior: 0, variacao: null },
+        { categoriaId: LAZER, total: 30000, participacao: 0.3, anterior: 0, variacao: null },
+        { categoriaId: null, total: 8000, participacao: 0.08, anterior: 0, variacao: null },
+      ],
+    },
+  }),
+}));
 vi.mock("@/hooks/useInicio", () => ({
+  useSaidasDoMes: () => ({ data: [{ data: "2026-11-05", valor: -3000, categoriaId: MERCADO }] }),
   useLancamentosDoMes: () => ({ isPending: false, isError: false, data: [lanc(LAZER, 36800), lanc(MERCADO, 18640)] }),
   useOrcamentos: () => ({ isPending: false, isError: false, data: new Map([[LAZER, 40000]]) }),
   useComprasRecentes: () => ({
@@ -93,7 +107,7 @@ describe("TelaInicio", () => {
     const t = normalizar(orcamento.textContent);
     expect(t).toContain("92% · R$ 368,00 de R$ 400,00");
     expect(t).toContain("Sem orçamento definido");
-    expect(t).toContain("MercadoR$ 186,40");
+    expect(t).toContain("MercadoR$ 216,40");
   });
 
   it("mostra quanto sobra no fim do mês", () => {
@@ -109,6 +123,15 @@ describe("TelaInicio", () => {
     expect(t).toContain("Total guardadoR$ 12.000,00");
     expect(t).toContain("+ R$ 152,30 no mês");
     expect(t).toContain("Reserva de emergênciaR$ 12.000,00 / R$ 20.000,00");
+  });
+
+  it("mostra para onde foi o dinheiro sem a linha 'Sem categoria'", () => {
+    render(<TelaInicio />);
+    const card = screen.getByRole("region", { name: "Para onde foi o dinheiro" });
+    const t = normalizar(card.textContent);
+    expect(t).toContain("Novembro: R$ 1.000,00");
+    expect(t).toContain("MercadoR$ 620,0062%");
+    expect(t).not.toContain("Sem categoria");
   });
 
   it("lista os últimos gastos", () => {

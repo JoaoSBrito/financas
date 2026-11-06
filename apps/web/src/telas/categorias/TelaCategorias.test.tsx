@@ -21,6 +21,7 @@ vi.mock("@/hooks/useGastos", () => ({
 }));
 vi.mock("@/hooks/useInicio", () => ({
   useOrcamentos: () => ({ isPending: false, isError: false, data: new Map([[LAZER, 40000]]) }),
+  useSaidasDoMes: () => ({ data: [{ data: "2026-11-05", valor: -3000, categoriaId: MERCADO }] }),
   useLancamentosDoMes: () => ({
     isPending: false,
     isError: false,
@@ -50,7 +51,7 @@ describe("TelaCategorias", () => {
     const lista = screen.getByRole("region", { name: "Categorias" });
     const t = normalizar(lista.textContent);
     expect(t).toContain("92% · R$ 368,00 de R$ 400,00");
-    expect(t).toContain("MercadoSem orçamentoGasto: R$ 186,40");
+    expect(t).toContain("MercadoSem orçamentoGasto: R$ 216,40");
   });
 
   it("define um orçamento para uma categoria", async () => {

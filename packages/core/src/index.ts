@@ -11,5 +11,6 @@ export * from "./lancamentos";
 export * from "./projecao";
 export * from "./patrimonio";
 export * from "./reserva";
+export * from "./gastos";
 export * from "./caixinha";
 export * from "./schemas";

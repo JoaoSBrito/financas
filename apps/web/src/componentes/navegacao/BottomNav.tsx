@@ -57,7 +57,7 @@ export function BottomNav() {
     >
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", alignItems: "center" }}>
         {esquerda.map((i) => (
-          <ItemBarra key={i.href} item={i} ativo={estaAtivo(pathname, i.href)} />
+          <ItemBarra key={i.href} item={i} ativo={estaAtivo(pathname, i.href, i.exato)} />
         ))}
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <Fab component={Link} href="/gastos/novo" color="primary" aria-label="Novo gasto" sx={{ mt: -6, boxShadow: 3 }}>
@@ -65,7 +65,7 @@ export function BottomNav() {
           </Fab>
         </Box>
         {direita.map((i) => (
-          <ItemBarra key={i.href} item={i} ativo={estaAtivo(pathname, i.href)} />
+          <ItemBarra key={i.href} item={i} ativo={estaAtivo(pathname, i.href, i.exato)} />
         ))}
       </Box>
     </Paper>

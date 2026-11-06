@@ -20,8 +20,10 @@ import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { useCaixinhas, useMovimentosCaixinhas } from "@/hooks/useCaixinhas";
 import { useProjecao } from "@/hooks/useContas";
 import { useCustoDeVida } from "@/hooks/useReserva";
+import { useGastosDoMes } from "@/hooks/useGastosDoMes";
+import { usePreferencias } from "@/stores/preferencias";
 import { apresentarCaixinha, resumirPatrimonio } from "@/telas/caixinhas/resumo";
-import { useComprasRecentes, useLancamentosDoMes, useOrcamentos } from "@/hooks/useInicio";
+import { useComprasRecentes, useLancamentosDoMes, useOrcamentos, useSaidasDoMes } from "@/hooks/useInicio";
 import { melhorDiaDeCompraGeral, resumirInicio } from "./resumo";
 import {
   AgendaCartoes,
@@ -30,6 +32,7 @@ import {
   DestaqueFatura,
   LinkSecao,
   OrcamentoDoMes,
+  ParaOndeFoi,
   ResumoCaixinhas,
   UltimosGastos,
 } from "./Secoes";
@@ -77,6 +80,8 @@ export function TelaInicio() {
   const caixinhas = useCaixinhas();
   const movCaixinhas = useMovimentosCaixinhas();
   const custo = useCustoDeVida();
+  const baseGastos = usePreferencias((s) => s.baseGastos);
+  const gastosMes = useGastosDoMes(mesDe(hoje), baseGastos);
 
   const r = useMemo(
     () => (cartoes.data && faturas.data ? resumirInicio(cartoes.data, faturas.data, hoje) : null),
@@ -84,6 +89,7 @@ export function TelaInicio() {
   );
   const doMes = useLancamentosDoMes(r?.mesOrcamento);
   const orcamentos = useOrcamentos(r?.mesOrcamento);
+  const saidasDoMes = useSaidasDoMes(r?.mesOrcamento);
 
   if (cartoes.isPending || faturas.isPending) {
     return (
@@ -228,7 +234,13 @@ export function TelaInicio() {
                 <EstadoErro mensagem="Não foi possível carregar o orçamento." onTentarNovamente={() => void doMes.refetch()} />
               </SecaoCard>
             ) : (
-              <OrcamentoDoMes mes={r.mesOrcamento} lancamentos={doMes.data} orcamentos={orcamentos.data} categorias={categorias.data} />
+              <OrcamentoDoMes
+                mes={r.mesOrcamento}
+                lancamentos={doMes.data}
+                saidas={saidasDoMes.data ?? []}
+                orcamentos={orcamentos.data}
+                categorias={categorias.data}
+              />
             )}
           </Box>
           <Box sx={{ flex: "1 1 380px", minWidth: 0 }}>
@@ -255,6 +267,15 @@ export function TelaInicio() {
             )}
           </Box>
         </Box>
+
+        {gastosMes.resumo && gastosMes.resumo.total > 0 && (
+          <ParaOndeFoi
+            mes={mesDe(hoje)}
+            total={gastosMes.resumo.total}
+            linhas={gastosMes.resumo.linhas}
+            nomes={new Map((categorias.data ?? []).map((c) => [c.id, c.nome]))}
+          />
+        )}
 
         {recentes.isPending ? (
           <SecaoCard titulo="Últimos gastos">

@@ -45,7 +45,7 @@ export function MenuPrincipal() {
         </Box>
       </Box>
       {ITENS_NAVEGACAO.map((item) => {
-        const ativo = estaAtivo(pathname, item.href);
+        const ativo = estaAtivo(pathname, item.href, item.exato);
         return (
           <ButtonBase
             key={item.href}

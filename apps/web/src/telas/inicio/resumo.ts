@@ -3,6 +3,7 @@
  */
 import {
   faturaDaCompra,
+  gastoPorCategoria,
   mesDe,
   somarDias,
   somarMeses,
@@ -108,4 +109,21 @@ export function mesDeOrcamento(cartoes: CartaoCompleto[], faturas: FaturaResumo[
   const primeiro = cartoes[0];
   if (!primeiro) return mesDe(hoje);
   return faturaDaCompra(primeiro, hoje, confirmadasDe(faturas.filter((f) => f.cartaoId === primeiro.id))).mes;
+}
+
+/** Gasto por categoria no orçamento: parcelas pelo mês da fatura + saídas da conta pelo mês da data. */
+export function gastoDoOrcamento(
+  mes: Mes,
+  lancamentos: { mes: Mes; valor: number; categoriaId: string | null }[],
+  saidas: { data: Data; valor: number; categoriaId: string | null }[],
+): Map<string, number> {
+  const mapa = gastoPorCategoria(
+    lancamentos.map((l) => ({ mes: l.mes, valor: l.valor, categoriaId: l.categoriaId, historico: false })),
+    mes,
+  );
+  for (const s of saidas) {
+    if (!s.categoriaId || mesDe(s.data) !== mes) continue;
+    mapa.set(s.categoriaId, (mapa.get(s.categoriaId) ?? 0) - s.valor);
+  }
+  return mapa;
 }

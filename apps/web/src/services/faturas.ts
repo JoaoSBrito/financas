@@ -68,6 +68,17 @@ export async function listarLancamentos(cartaoId: string, aPartirDe: Mes): Promi
   return lancamentoLinhaSchema.array().parse(data).map(paraLancamento);
 }
 
+/** Lançamentos de todos os cartões em faturas entre dois meses (tela de Gastos). */
+export async function listarLancamentosEntre(de: Mes, ate: Mes): Promise<Lancamento[]> {
+  const { data, error } = await supabaseNavegador()
+    .from("lancamentos")
+    .select(COLUNAS)
+    .gte("mes", `${de}-01`)
+    .lte("mes", `${ate}-01`);
+  if (error) falhar("Não foi possível carregar os lançamentos", error);
+  return lancamentoLinhaSchema.array().parse(data).map(paraLancamento);
+}
+
 /** Lançamentos de todos os cartões nas faturas de um mês (orçamento por categoria). */
 export async function listarLancamentosDoMes(mes: Mes): Promise<Lancamento[]> {
   const { data, error } = await supabaseNavegador().from("lancamentos").select(COLUNAS).eq("mes", `${mes}-01`);

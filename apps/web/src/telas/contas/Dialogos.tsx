@@ -11,7 +11,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState, type ReactNode } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import {
   contaFormSchema,
@@ -24,7 +24,8 @@ import {
   type RecorrenteForm,
   type TransferenciaEntreContas,
 } from "@financas/core";
-import { CampoMoeda, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
+import { CampoMoeda, ChipsCategoria, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
+import { useCategorias } from "@/hooks/useGastos";
 import {
   useAjustarSaldo,
   useAtualizarMovimento,
@@ -85,6 +86,20 @@ function SeletorConta({ contas, valor, onChange }: { contas: Conta[]; valor: str
         Conta
       </Typography>
       <PilulasSelecao rotulo="Conta" tamanho="pequeno" valor={valor} onChange={onChange} opcoes={contas.map((c) => ({ valor: c.id, rotulo: c.nome }))} />
+    </Stack>
+  );
+}
+
+/** Categoria opcional das saídas (alimenta a tela de Gastos e o orçamento). */
+function CampoCategoria({ valor, onChange }: { valor: string | null; onChange: (id: string | null) => void }) {
+  const categorias = useCategorias();
+  if (!categorias.data || categorias.data.length === 0) return null;
+  return (
+    <Stack spacing={2}>
+      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+        Categoria
+      </Typography>
+      <ChipsCategoria rotulo="Categoria" opcoes={categorias.data} valor={valor} onChange={onChange} />
     </Stack>
   );
 }
@@ -247,7 +262,7 @@ export function DialogoMovimento({
           valor: Math.abs(movimento.valor),
           descricao: movimento.descricao,
           data: movimento.data,
-          categoriaId: null,
+          categoriaId: movimento.categoriaId ?? null,
         }
       : {
           contaId: contas[0]?.id ?? "",
@@ -372,6 +387,9 @@ export function DialogoMovimento({
         helperText={errors.data?.message ?? "Data futura fica como agendada."}
         {...register("data")}
       />
+      {tipo === "saida" && (
+        <Controller control={control} name="categoriaId" render={({ field }) => <CampoCategoria valor={field.value ?? null} onChange={field.onChange} />} />
+      )}
       <Controller control={control} name="contaId" render={({ field }) => <SeletorConta contas={contas} valor={field.value} onChange={field.onChange} />} />
       {(registrar.error ?? atualizar.error) && <Alert severity="error">{(registrar.error ?? atualizar.error)!.message}</Alert>}
     </Janela>
@@ -401,9 +419,10 @@ export function DialogoRecorrente({ contas, recorrente, onFechar }: { contas: Co
       dia: recorrente?.dia ?? 5,
       contaId: recorrente?.contaId ?? contas[0]?.id ?? null,
       cartaoId: null,
-      categoriaId: null,
+      categoriaId: recorrente?.categoriaId ?? null,
     },
   });
+  const tipoRecorrente = useWatch({ control, name: "tipo" });
 
   const enviar = handleSubmit((form) =>
     salvar.mutate(
@@ -487,6 +506,9 @@ export function DialogoRecorrente({ contas, recorrente, onFechar }: { contas: Co
           />
         )}
       />
+      {tipoRecorrente === "saida" && (
+        <Controller control={control} name="categoriaId" render={({ field }) => <CampoCategoria valor={field.value ?? null} onChange={field.onChange} />} />
+      )}
       <Controller control={control} name="contaId" render={({ field }) => <SeletorConta contas={contas} valor={field.value ?? ""} onChange={field.onChange} />} />
       {(salvar.error ?? desativar.error) && <Alert severity="error">{(salvar.error ?? desativar.error)!.message}</Alert>}
     </Janela>

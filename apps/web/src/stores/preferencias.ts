@@ -7,6 +7,9 @@ import { persist } from "zustand/middleware";
 interface Preferencias {
   ocultarValores: boolean;
   alternarOcultarValores: () => void;
+  /** Como as parcelas do cartão entram na tela de Gastos. */
+  baseGastos: "compra" | "fatura";
+  definirBaseGastos: (base: "compra" | "fatura") => void;
 }
 
 export const usePreferencias = create<Preferencias>()(
@@ -14,6 +17,8 @@ export const usePreferencias = create<Preferencias>()(
     (set) => ({
       ocultarValores: false,
       alternarOcultarValores: () => set((s) => ({ ocultarValores: !s.ocultarValores })),
+      baseGastos: "compra",
+      definirBaseGastos: (baseGastos) => set({ baseGastos }),
     }),
     { name: "financas-preferencias" },
   ),

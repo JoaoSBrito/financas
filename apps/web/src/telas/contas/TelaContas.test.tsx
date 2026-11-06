@@ -19,8 +19,10 @@ const agendado = {
   tipo: "saida" as const,
   recorrenteId: null,
   transferenciaId: null,
+  categoriaId: null,
   entreContas: false,
 };
+const MERCADO = "2c9e2b6a-2222-4c2d-9e3f-0a1b2c3d4e5f";
 const BB = "9a8b7c6d-2222-4a2b-9c3d-0e1f2a3b4c5d";
 const ajustar = vi.fn();
 
@@ -39,6 +41,9 @@ const projecao = () =>
     agendados: [{ id: agendado.id, data: agendado.data, descricao: agendado.descricao, valor: agendado.valor }],
   });
 
+vi.mock("@/hooks/useGastos", () => ({
+  useCategorias: () => ({ isPending: false, data: [{ id: "2c9e2b6a-2222-4c2d-9e3f-0a1b2c3d4e5f", nome: "Mercado" }] }),
+}));
 vi.mock("@/hooks/useContas", () => ({
   useContas: () => ({ isPending: false, isError: false, data: contas }),
   useRecorrentes: () => ({ isPending: false, isError: false, data: recorrentes }),
@@ -118,10 +123,11 @@ describe("TelaContas", () => {
     await user.click(screen.getByRole("button", { name: "Saída / Pix" }));
     const dialogo = screen.getByRole("dialog");
     await user.type(within(dialogo).getByLabelText("Valor"), "120");
-    await user.type(within(dialogo).getByLabelText("Descrição"), "Pix para Ana");
+    await user.type(within(dialogo).getByLabelText("Descrição"), "Pix feira");
+    await user.click(within(dialogo).getByRole("button", { name: "Mercado" }));
     await user.click(within(dialogo).getByRole("button", { name: "Lançar" }));
     expect(registrar.mock.calls[0]![0]).toEqual({
-      form: { contaId: CONTA, tipo: "saida", valor: 12000, descricao: "Pix para Ana", data: "2026-11-01", categoriaId: null },
+      form: { contaId: CONTA, tipo: "saida", valor: 12000, descricao: "Pix feira", data: "2026-11-01", categoriaId: MERCADO },
       recorrenteId: undefined,
     });
   });

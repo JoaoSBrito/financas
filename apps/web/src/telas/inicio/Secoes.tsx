@@ -14,7 +14,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   formatarDiaMes,
-  gastoPorCategoria,
   nomeDoMes,
   situacaoDoOrcamento,
   type Mes,
@@ -24,8 +23,11 @@ import { cores } from "@financas/ui/tokens";
 import type { Categoria } from "@/services/categorias";
 import type { CartaoCompleto } from "@/services/cartoes-mapeamento";
 import type { Lancamento } from "@/services/faturas";
+import type { LinhaDeCategoria } from "@financas/core";
+import type { MovimentoConta } from "@/services/contas";
+import { ListaCategorias } from "@/telas/gastos/ListaCategorias";
 import type { CompraRecente } from "@/services/inicio";
-import type { ResumoInicio } from "./resumo";
+import { gastoDoOrcamento, type ResumoInicio } from "./resumo";
 
 const LinkSecao = ({ href, children }: { href: string; children: ReactNode }) => (
   <Typography component={Link} href={href} variant="body2" sx={{ fontWeight: 700, textDecoration: "none", color: "primary.main" }}>
@@ -155,18 +157,17 @@ export function AgendaCartoes({ r }: { r: ResumoInicio }) {
 export function OrcamentoDoMes({
   mes,
   lancamentos,
+  saidas,
   orcamentos,
   categorias,
 }: {
   mes: Mes;
   lancamentos: Lancamento[];
+  saidas: MovimentoConta[];
   orcamentos: Map<string, number>;
   categorias: Categoria[];
 }) {
-  const gastos = gastoPorCategoria(
-    lancamentos.map((l) => ({ mes: l.mes, valor: l.valor, categoriaId: l.categoriaId, historico: false })),
-    mes,
-  );
+  const gastos = gastoDoOrcamento(mes, lancamentos, saidas);
   const nome = new Map(categorias.map((c) => [c.id, c.nome]));
   const comOrcamento = [...orcamentos.entries()]
     .map(([id, orcamento]) => ({ id, orcamento, gasto: gastos.get(id) ?? 0, ...situacaoDoOrcamento(gastos.get(id) ?? 0, orcamento) }))
@@ -312,6 +313,18 @@ export function ResumoCaixinhas({
           }
         />
       ))}
+    </SecaoCard>
+  );
+}
+
+/** Card do Início: as 3 maiores categorias do mês. */
+export function ParaOndeFoi({ mes, total, linhas, nomes }: { mes: Mes; total: number; linhas: LinhaDeCategoria[]; nomes: Map<string, string> }) {
+  return (
+    <SecaoCard titulo="Para onde foi o dinheiro" acao={<LinkSecao href="/gastos">Ver tudo</LinkSecao>}>
+      <Typography variant="caption" component="p">
+        {nomeDoMes(mes, false).charAt(0).toUpperCase() + nomeDoMes(mes, false).slice(1)}: <Valor valor={total} sx={{ font: "inherit", fontWeight: 700 }} />
+      </Typography>
+      <ListaCategorias linhas={linhas} nomes={nomes} limite={3} />
     </SecaoCard>
   );
 }
