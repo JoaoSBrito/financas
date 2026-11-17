@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./tokens": "./src/tokens.ts",
-    "./tema": "./src/tema.ts"
+    "./tema": "./src/tema.ts",
+    "./contraste": "./src/contraste.ts"
   },
   "scripts": {
     "test": "vitest run",
