@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { formatar, nomeDoMes, type Mes } from "@financas/core";
 import { useValoresOcultos } from "@financas/ui";
-import { cores } from "@financas/ui/tokens";
+import { grafico, paleta } from "@financas/ui/tokens";
 
 const curto = (mes: Mes) => {
   const n = nomeDoMes(mes, false).slice(0, 3);
@@ -29,11 +29,15 @@ export default function GraficoEvolucao({ pontos, altura = 200 }: { pontos: { me
               data: pontos.map((p) => p.total),
               area: true,
               showMark: false,
-              color: cores.investimento,
+              color: grafico.linha,
               valueFormatter: (v) => (oculto ? "Valor oculto" : formatar(v ?? 0)),
             },
           ]}
-          sx={{ "& .MuiAreaElement-root": { fill: cores.investimentoClaro } }}
+          sx={{
+            "& .MuiAreaElement-root": { fill: grafico.area },
+            "& .MuiLineElement-root": { strokeWidth: 1.5 },
+            "& .MuiChartsAxis-tickLabel": { fill: paleta.textoSecundario },
+          }}
         />
       </Box>
     </Box>
