@@ -79,7 +79,8 @@ export function corDoCartao(indice: number): string {
 /** Cores dos gráficos: o item em destaque (ex.: fatura aberta) usa a cor do texto. */
 export const grafico = {
   destaque: paleta.texto,
-  inativo: "#4a4a5c",
+  // 2,5:1 sobre o card (antes 1,9:1); cada barra também traz o valor escrito.
+  inativo: "#5c5c70",
   area: paleta.interativo,
   linha: paleta.texto,
 } as const;

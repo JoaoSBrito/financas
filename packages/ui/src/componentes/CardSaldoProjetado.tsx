@@ -5,7 +5,7 @@ import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import { formatarDiaMes, type Centavos, type Data } from "@financas/core";
-import { cores } from "../tokens";
+import { paleta, semantica, tipografia } from "../tokens";
 import { Valor } from "./Valor";
 
 export interface CardSaldoProjetadoProps {
@@ -28,7 +28,7 @@ function Linha({ rotulo, valor, sinal, cor }: { rotulo: string; valor: Centavos;
       <Typography component="dt" variant="body2" sx={{ color: "text.secondary" }}>
         {rotulo}
       </Typography>
-      <Typography component="dd" variant="body2" sx={{ m: 0, fontWeight: 700, color: cor }}>
+      <Typography component="dd" variant="body2" sx={{ m: 0, color: cor }}>
         <Valor valor={valor} sinal={sinal} sx={{ font: "inherit" }} />
       </Typography>
     </Box>
@@ -52,10 +52,10 @@ export function CardSaldoProjetado({
     <Card
       component="section"
       aria-label={`Sobra em ${formatarDiaMes(ate)}`}
-      sx={{ p: 5, border: `2px solid ${negativo ? cores.erro : cores.primaria}`, display: "flex", flexDirection: "column", gap: 3 }}
+      sx={{ p: { xs: "20px", md: "24px" }, bgcolor: "transparent", border: `1px solid ${negativo ? semantica.estouro.texto : paleta.bordaCampo}`, display: "flex", flexDirection: "column", gap: 3 }}
     >
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="subtitle2" sx={{ color: negativo ? cores.erro : cores.primaria, fontWeight: 700 }}>
+        <Typography variant="subtitle2" sx={{ color: negativo ? semantica.estouro.texto : "text.secondary" }}>
           Sobra em {formatarDiaMes(ate)}
         </Typography>
         {acessorio}
@@ -63,7 +63,7 @@ export function CardSaldoProjetado({
       <Valor
         valor={saldoFinal}
         component="p"
-        sx={{ m: 0, fontSize: compacto ? 28 : 34, fontWeight: 800, letterSpacing: "-0.5px", color: negativo ? cores.erro : undefined }}
+        sx={{ m: 0, fontSize: compacto ? 26 : 36, fontWeight: 500, lineHeight: 1.15, letterSpacing: `${tipografia.escala.valorDestaque.espacamento}em`, color: negativo ? semantica.estouro.texto : undefined }}
       />
       {compacto ? (
         <Typography variant="caption" component="p">
@@ -77,7 +77,7 @@ export function CardSaldoProjetado({
       ) : (
         <Box component="dl" sx={{ m: 0, display: "flex", flexDirection: "column", gap: 2 }}>
           <Linha rotulo="Saldo hoje" valor={saldoHoje} />
-          <Linha rotulo="Entradas previstas" valor={entradas} sinal="sempre" cor={cores.investimento} />
+          <Linha rotulo="Entradas previstas" valor={entradas} sinal="sempre" cor={semantica.receita.texto} />
           <Linha rotulo="Faturas a pagar" valor={-faturas} />
           <Linha rotulo="Contas fixas" valor={-contasFixas} />
           {outros !== 0 && <Linha rotulo="Já agendados" valor={outros} sinal="sempre" />}

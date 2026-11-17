@@ -2,7 +2,7 @@
 
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
-import { cores } from "../tokens";
+import { toqueMinimo } from "../tokens";
 
 export interface OpcaoCategoria {
   id: string;
@@ -32,11 +32,10 @@ export function ChipsCategoria({ opcoes, valor, onChange, rotulo }: ChipsCategor
             color={selecionada ? "primary" : "default"}
             variant={selecionada ? "filled" : "outlined"}
             sx={{
-              height: 40,
+              height: toqueMinimo,
               px: 1,
               fontSize: 13,
-              fontWeight: selecionada ? 700 : 600,
-              borderColor: cores.bordaForte,
+              fontWeight: 400,
             }}
           />
         );

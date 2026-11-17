@@ -7,7 +7,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cores } from "@financas/ui/tokens";
+import { layout, paleta, raio } from "@financas/ui/tokens";
 import { BotaoOcultarValores } from "./BotaoOcultarValores";
 import { estaAtivo, ITENS_NAVEGACAO } from "./itens";
 
@@ -27,17 +27,18 @@ export function MenuPrincipal() {
         flexWrap: { sm: "wrap", md: "nowrap" },
         alignItems: { sm: "center", md: "stretch" },
         gap: 1.5,
-        bgcolor: "background.paper",
-        borderRight: { md: `1px solid ${cores.borda}` },
-        borderBottom: { sm: `1px solid ${cores.borda}`, md: "none" },
+        bgcolor: paleta.fundo,
+        borderRight: { md: `1px solid ${paleta.divisor}` },
+        borderBottom: { sm: `1px solid ${paleta.divisor}`, md: "none" },
         px: 4,
-        py: { sm: 3, md: 7 },
-        width: { md: 248 },
+        py: { sm: 3, md: 8 },
+        width: { md: layout.larguraMenuLateral },
+        boxSizing: "border-box",
         flexShrink: 0,
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 3, pb: { md: 5 }, mr: { sm: 2, md: 0 } }}>
-        <Typography component="span" sx={{ fontSize: 20, fontWeight: 800 }}>
+        <Typography component="span" sx={{ fontSize: 18, fontWeight: 500 }}>
           Finanças
         </Typography>
         <Box sx={{ display: { sm: "none", md: "block" } }}>
@@ -56,13 +57,12 @@ export function MenuPrincipal() {
               justifyContent: "flex-start",
               gap: 3,
               minHeight: 44,
-              px: 3,
-              borderRadius: 3,
+              px: 4,
+              borderRadius: `${raio.pilula}px`,
               fontSize: 14,
-              fontWeight: ativo ? 700 : 600,
-              color: ativo ? cores.primaria : "#374151",
-              bgcolor: ativo ? cores.primariaClara : "transparent",
-              "&:hover": { bgcolor: ativo ? cores.primariaClara : cores.fundo },
+              color: ativo ? paleta.texto : paleta.textoSecundario,
+              bgcolor: ativo ? paleta.interativo : "transparent",
+              "&:hover": { bgcolor: paleta.interativo, color: paleta.texto },
             }}
           >
             {item.icone}
@@ -73,10 +73,12 @@ export function MenuPrincipal() {
       <Box sx={{ display: { sm: "flex", md: "none" }, ml: "auto", gap: 2 }}>
         <BotaoOcultarValores />
       </Box>
+      {/* Cobalto só no Início, onde "Novo gasto" é a ação principal; nas demais telas ela é secundária. */}
       <Button
         component={Link}
         href="/gastos/novo"
         variant="contained"
+        color={pathname === "/" ? "primary" : "secondary"}
         startIcon={<AddRounded />}
         sx={{ mt: { md: 5 }, minHeight: 48 }}
       >

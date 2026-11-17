@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 import { useRef, type KeyboardEvent } from "react";
-import { cores } from "../tokens";
+import { paleta, raio } from "../tokens";
 
 export interface OpcaoCartao {
   id: string;
@@ -13,6 +13,8 @@ export interface OpcaoCartao {
   detalhe: string;
   /** Marca a opção recomendada (ex.: "Melhor hoje"). */
   recomendado?: boolean;
+  /** Cor de identificação do cartão (ponto ao lado do nome). Opcional. */
+  cor?: string;
 }
 
 export interface SeletorCartaoProps {
@@ -59,9 +61,9 @@ export function SeletorCartao({ opcoes, valor, onChange, rotulo }: SeletorCartao
             onKeyDown={(e) => aoTeclar(e, i)}
             sx={{
               minHeight: 64,
-              borderRadius: 3.5,
-              border: selecionado ? `2px solid ${cores.primaria}` : `1px solid ${cores.bordaForte}`,
-              bgcolor: selecionado ? cores.primariaClara : cores.superficie,
+              borderRadius: `${raio.card}px`,
+              border: `1px solid ${selecionado ? paleta.bordaSelecionada : paleta.bordaCampo}`,
+              bgcolor: selecionado ? paleta.interativo : "transparent",
               px: 3,
               py: 2.5,
               display: "flex",
@@ -71,10 +73,11 @@ export function SeletorCartao({ opcoes, valor, onChange, rotulo }: SeletorCartao
               gap: 0.5,
             }}
           >
-            <Typography sx={{ fontSize: 14, fontWeight: 800 }}>{o.nome}</Typography>
-            <Typography
-              sx={{ fontSize: 11, fontWeight: o.recomendado ? 700 : 600, color: o.recomendado ? cores.primaria : cores.textoSuave }}
-            >
+            <Typography sx={{ fontSize: 14, fontWeight: 500, display: "flex", alignItems: "center", gap: 2 }}>
+              {o.cor && <Box component="span" aria-hidden sx={{ width: 8, height: 8, borderRadius: "4px", bgcolor: o.cor }} />}
+              {o.nome}
+            </Typography>
+            <Typography sx={{ fontSize: 12, color: o.recomendado ? "text.primary" : "text.secondary" }}>
               {o.recomendado ? `Melhor hoje · ${o.detalhe}` : o.detalhe}
             </Typography>
           </ButtonBase>

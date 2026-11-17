@@ -97,7 +97,7 @@ export const tema = createTheme({
           ],
         },
         sizeLarge: { minHeight: 52 },
-        sizeSmall: { minHeight: 36, paddingInline: 14 },
+        sizeSmall: { minHeight: toqueMinimo, paddingInline: 14 },
       },
     },
     MuiIconButton: { styleOverrides: { root: { minWidth: toqueMinimo, minHeight: toqueMinimo } } },
@@ -156,11 +156,22 @@ export const tema = createTheme({
         root: {
           textTransform: "none",
           fontWeight: 400,
-          minHeight: 40,
+          minHeight: toqueMinimo,
           borderRadius: raio.pilula,
           color: paleta.textoSecundario,
           borderColor: paleta.bordaCampo,
           "&.Mui-selected, &.Mui-selected:hover": { backgroundColor: paleta.texto, color: paleta.sobreClaro, fontWeight: 500 },
+        },
+      },
+    },
+    // Grupos de pílulas separadas (segmentos, meses, parcelas): cada botão com raio próprio.
+    MuiToggleButtonGroup: {
+      styleOverrides: {
+        grouped: {
+          margin: "0 !important",
+          borderRadius: `${raio.pilula}px !important`,
+          border: `1px solid ${paleta.bordaCampo} !important`,
+          "&.Mui-selected": { borderColor: `${paleta.texto} !important` },
         },
       },
     },
