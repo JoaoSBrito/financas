@@ -19,7 +19,7 @@ import {
   type Mes,
 } from "@financas/core";
 import { BarraProgresso, EstadoVazio, ItemLancamento, SecaoCard, SeloStatus, Valor } from "@financas/ui";
-import { cores } from "@financas/ui/tokens";
+import { paleta, raio, semantica, tipografia, toqueMinimo } from "@financas/ui/tokens";
 import type { Categoria } from "@/services/categorias";
 import type { CartaoCompleto } from "@/services/cartoes-mapeamento";
 import type { Lancamento } from "@/services/faturas";
@@ -30,7 +30,13 @@ import type { CompraRecente } from "@/services/inicio";
 import { gastoDoOrcamento, type ResumoInicio } from "./resumo";
 
 const LinkSecao = ({ href, children }: { href: string; children: ReactNode }) => (
-  <Typography component={Link} href={href} variant="body2" sx={{ fontWeight: 700, textDecoration: "none", color: "primary.main" }}>
+  <Typography
+    component={Link}
+    href={href}
+    variant="body2"
+    // Área de toque de 44px sem aumentar a altura visual do cabeçalho.
+    sx={{ color: "text.secondary", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: toqueMinimo, my: -3, "&:hover": { color: "text.primary", textDecoration: "underline" } }}
+  >
     {children}
   </Typography>
 );
@@ -41,21 +47,26 @@ export function DestaqueFatura({ r, melhorDia }: { r: ResumoInicio; melhorDia: s
   const pctOutros = r.limiteTotal ? ((r.comprometido - r.faturaAtual) / r.limiteTotal) * 100 : 0;
   const fecha = r.proximoFechamento;
   return (
-    <Card component="section" aria-label="Fatura atual de todos os cartões" sx={{ bgcolor: cores.destaque, color: "#FFFFFF", borderRadius: 6, p: 5.5, display: "flex", flexDirection: "column", gap: 4 }}>
+    <Card component="section" aria-label="Fatura atual de todos os cartões" sx={{ p: "20px", display: "flex", flexDirection: "column", gap: 4 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
-        <Typography variant="subtitle2" sx={{ color: "#E0E7FF" }}>
+        <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
           Fatura atual · todos os cartões
         </Typography>
         {fecha && fecha.dias >= 0 && (
-          <Typography sx={{ fontSize: 12, fontWeight: 700, bgcolor: "rgba(255,255,255,0.16)", px: 2.5, py: 1, borderRadius: 999, whiteSpace: "nowrap" }}>
+          <Typography sx={{ fontSize: 12, bgcolor: paleta.interativo, px: 2.5, py: 1, borderRadius: `${raio.chip}px`, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box component="span" aria-hidden sx={{ width: 6, height: 6, borderRadius: "3px", bgcolor: semantica.atencao.texto }} />
             {fecha.dias === 0 ? `${fecha.cartao} fecha hoje` : fecha.dias === 1 ? `${fecha.cartao} fecha amanhã` : `${fecha.cartao} fecha em ${fecha.dias} dias`}
           </Typography>
         )}
       </Box>
       <Box>
-        <Valor valor={r.faturaAtual} component="p" sx={{ m: 0, fontSize: 36, fontWeight: 800, letterSpacing: "-0.5px" }} />
+        <Valor
+          valor={r.faturaAtual}
+          component="p"
+          sx={{ m: 0, fontSize: tipografia.escala.valorDestaque.tamanho, fontWeight: 500, lineHeight: tipografia.escala.valorDestaque.alturaLinha, letterSpacing: "-0.02em" }}
+        />
         {melhorDia && (
-          <Typography variant="body2" sx={{ color: "#E0E7FF" }}>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
             Melhor dia de compra: {formatarDiaMes(melhorDia)}
           </Typography>
         )}
@@ -64,15 +75,15 @@ export function DestaqueFatura({ r, melhorDia }: { r: ResumoInicio; melhorDia: s
         <Box
           role="img"
           aria-label={`Limite usado: ${Math.round(pctAberta + pctOutros)}%`}
-          sx={{ height: 8, bgcolor: "rgba(255,255,255,0.2)", borderRadius: 1, overflow: "hidden", display: "flex" }}
+          sx={{ height: 6, bgcolor: paleta.interativo, borderRadius: "3px", overflow: "hidden", display: "flex" }}
         >
-          <Box sx={{ width: `${Math.min(100, pctAberta)}%`, bgcolor: "#FFFFFF" }} />
-          <Box sx={{ width: `${Math.min(100 - pctAberta, Math.max(0, pctOutros))}%`, bgcolor: cores.primariaMedia }} />
+          <Box sx={{ width: `${Math.min(100, pctAberta)}%`, bgcolor: paleta.texto }} />
+          <Box sx={{ width: `${Math.min(100 - pctAberta, Math.max(0, pctOutros))}%`, bgcolor: paleta.bordaCampo }} />
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#E0E7FF" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "text.secondary" }}>
           <span>Fatura + parcelas futuras</span>
-          <Box component="span" sx={{ fontWeight: 700, color: "#FFFFFF" }}>
-            Disponível <Valor valor={r.limiteDisponivel} sx={{ font: "inherit" }} />
+          <Box component="span">
+            Disponível <Valor valor={r.limiteDisponivel} sx={{ font: "inherit", color: "text.primary" }} />
           </Box>
         </Box>
       </Box>
@@ -83,15 +94,15 @@ export function DestaqueFatura({ r, melhorDia }: { r: ResumoInicio; melhorDia: s
 /** Saldo projetado e caixinhas entram com as telas de Contas e Caixinhas. */
 export function CardEmBreve({ titulo, texto, href, rotulo }: { titulo: string; texto: string; href: string; rotulo: string }) {
   return (
-    <Card component="section" aria-label={titulo} sx={{ p: 5, border: `2px dashed ${cores.bordaForte}`, display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="subtitle1" sx={{ color: "primary.main" }}>
+    <Card component="section" aria-label={titulo} sx={{ p: "20px", bgcolor: "transparent", border: `1px dashed ${paleta.bordaCampo}`, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
         {titulo}
       </Typography>
       <Typography variant="body2" sx={{ color: "text.secondary" }}>
         {texto}
       </Typography>
       <Box>
-        <Button component={Link} href={href} size="small" sx={{ minHeight: 36, px: 0 }}>
+        <Button component={Link} href={href} variant="contained" color="secondary" size="small">
           {rotulo}
         </Button>
       </Box>
@@ -100,9 +111,9 @@ export function CardEmBreve({ titulo, texto, href, rotulo }: { titulo: string; t
 }
 
 const ATALHOS = [
-  { href: "/gastos/novo", rotulo: "Novo gasto", icone: <AddRounded />, cor: cores.primaria },
-  { href: "/cartoes", rotulo: "Faturas", icone: <CreditCardRounded />, cor: cores.primaria },
-  { href: "/caixinhas", rotulo: "Guardar", icone: <SavingsRounded />, cor: cores.investimento },
+  { href: "/gastos/novo", rotulo: "Novo gasto", icone: <AddRounded fontSize="small" /> },
+  { href: "/cartoes", rotulo: "Faturas", icone: <CreditCardRounded fontSize="small" /> },
+  { href: "/caixinhas", rotulo: "Guardar", icone: <SavingsRounded fontSize="small" /> },
 ];
 
 export function Atalhos() {
@@ -113,9 +124,9 @@ export function Atalhos() {
           key={a.rotulo}
           component={Link}
           href={a.href}
-          sx={{ bgcolor: "background.paper", borderRadius: 4, py: 3, flexDirection: "column", gap: 2, fontSize: 12, fontWeight: 600, color: "text.primary" }}
+          sx={{ bgcolor: "background.paper", borderRadius: `${raio.pilula}px`, minHeight: 48, gap: 1.5, fontSize: 13, color: "text.primary" }}
         >
-          <Box component="span" aria-hidden sx={{ color: a.cor, display: "flex" }}>
+          <Box component="span" aria-hidden sx={{ display: "flex" }}>
             {a.icone}
           </Box>
           {a.rotulo}
@@ -137,14 +148,14 @@ export function AgendaCartoes({ r }: { r: ResumoInicio }) {
           <Box key={`${a.data}-${a.tipo}-${a.cartao}`}>
             {i > 0 && <Divider />}
             <Box sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 52 }}>
-              <Typography sx={{ width: 48, fontSize: 13, fontWeight: 800 }}>{formatarDiaMes(a.data)}</Typography>
+              <Typography sx={{ width: 48, fontSize: 14 }}>{formatarDiaMes(a.data)}</Typography>
               <Typography variant="body2" sx={{ flex: 1 }}>
                 {a.tipo === "fechamento" ? "Fechamento" : "Vencimento"} {a.cartao}
               </Typography>
               {a.tipo === "fechamento" ? (
                 <SeloStatus status={a.status} />
               ) : (
-                <Valor valor={a.valor ?? 0} sx={{ fontSize: 13, fontWeight: 700 }} />
+                <Valor valor={a.valor ?? 0} sx={{ fontSize: 14 }} />
               )}
             </Box>
           </Box>
@@ -189,7 +200,7 @@ export function OrcamentoDoMes({
           key={o.id}
           rotulo={nome.get(o.id) ?? "Categoria"}
           percentual={o.percentual}
-          tom={o.nivel === "normal" ? "primario" : "alerta"}
+          tom={o.nivel === "normal" ? "primario" : o.nivel === "atencao" ? "alerta" : "estouro"}
           detalhe={
             <>
               {o.percentual}% · <Valor valor={o.gasto} sx={{ font: "inherit" }} /> de <Valor valor={o.orcamento} sx={{ font: "inherit" }} />
@@ -203,10 +214,10 @@ export function OrcamentoDoMes({
           <Typography variant="caption">Sem orçamento definido</Typography>
           {semOrcamento.slice(0, 4).map(([id, gasto]) => (
             <Box key={id} sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <Typography sx={{ fontSize: 14 }}>
                 {nome.get(id) ?? "Categoria"}
               </Typography>
-              <Valor valor={gasto} sx={{ fontSize: 13, fontWeight: 700 }} />
+              <Valor valor={gasto} sx={{ fontSize: 14 }} />
             </Box>
           ))}
         </Box>
@@ -281,21 +292,21 @@ export function ResumoCaixinhas({
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 2 }}>
         <Box>
           <Typography variant="caption">Total guardado</Typography>
-          <Valor valor={total} component="div" sx={{ fontSize: 24, fontWeight: 800 }} />
+          <Valor valor={total} component="div" sx={{ fontSize: 24, fontWeight: 500 }} />
         </Box>
-        <Typography variant="body2" sx={{ color: cores.investimento, fontWeight: 700 }}>
+        <Typography variant="body2" sx={{ color: semantica.receita.texto }}>
           <Valor valor={rendeuNoMes} sinal="sempre" sx={{ font: "inherit" }} /> no mês
         </Typography>
       </Box>
       {reserva && (
-        <Box sx={{ bgcolor: cores.investimentoClaro, borderRadius: 3, p: 3, display: "flex", flexDirection: "column", gap: 1.5 }}>
-          <Typography variant="caption" sx={{ color: cores.investimentoEscuro, fontWeight: 700 }}>
+        <Box sx={{ bgcolor: paleta.interativo, borderRadius: `${raio.card}px`, p: 3.5, display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Typography variant="caption">
             Reserva de emergência · {reserva.nome}
           </Typography>
           {reserva.sugerida ? (
             <BarraProgresso compacta tom="investimento" percentual={Math.floor((reserva.saldo / reserva.sugerida) * 100)} rotulo={reserva.texto} />
           ) : null}
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+          <Typography sx={{ fontSize: 14 }}>
             {reserva.texto}
           </Typography>
         </Box>
@@ -322,7 +333,7 @@ export function ParaOndeFoi({ mes, total, linhas, nomes }: { mes: Mes; total: nu
   return (
     <SecaoCard titulo="Para onde foi o dinheiro" acao={<LinkSecao href="/gastos">Ver tudo</LinkSecao>}>
       <Typography variant="caption" component="p">
-        {nomeDoMes(mes, false).charAt(0).toUpperCase() + nomeDoMes(mes, false).slice(1)}: <Valor valor={total} sx={{ font: "inherit", fontWeight: 700 }} />
+        {nomeDoMes(mes, false).charAt(0).toUpperCase() + nomeDoMes(mes, false).slice(1)}: <Valor valor={total} sx={{ font: "inherit", color: "text.primary" }} />
       </Typography>
       <ListaCategorias linhas={linhas} nomes={nomes} limite={3} />
     </SecaoCard>

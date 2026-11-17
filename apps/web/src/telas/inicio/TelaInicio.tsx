@@ -15,6 +15,7 @@ import { formatarDiaMes, hojeEmSaoPaulo, mesDe, nomeDoMes } from "@financas/core
 import { CardIndicador, CardSaldoProjetado, CarregandoLista, EstadoErro, EstadoVazio, SecaoCard, Valor } from "@financas/ui";
 import ChevronRightRounded from "@mui/icons-material/ChevronRightRounded";
 import { BotaoOcultarValores } from "@/componentes/navegacao/BotaoOcultarValores";
+import { semantica } from "@financas/ui/tokens";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { useCaixinhas, useMovimentosCaixinhas } from "@/hooks/useCaixinhas";
@@ -55,7 +56,7 @@ function Cabecalho() {
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 5 }}>
       <Box>
-        <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500 }}>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {saudacao()}
         </Typography>
         <Typography variant="h1">{mes.charAt(0).toUpperCase() + mes.slice(1)}</Typography>
@@ -96,8 +97,8 @@ export function TelaInicio() {
       <>
         <Cabecalho />
         <Stack spacing={4} aria-busy="true" aria-label="Carregando">
-          <Skeleton variant="rounded" height={200} sx={{ borderRadius: 6 }} />
-          <Skeleton variant="rounded" height={260} sx={{ borderRadius: 5 }} />
+          <Skeleton variant="rounded" height={200} />
+          <Skeleton variant="rounded" height={260} />
         </Stack>
       </>
     );
@@ -146,7 +147,7 @@ export function TelaInicio() {
     />
   );
   const sobraCelular = projecao.isPending ? (
-    <Skeleton variant="rounded" height={120} sx={{ borderRadius: 5 }} />
+    <Skeleton variant="rounded" height={120} />
   ) : p ? (
     <Box component={Link} href="/contas" aria-label={`Sobra em ${formatarDiaMes(p.ate)}: ver contas`} sx={{ textDecoration: "none", color: "inherit" }}>
       <CardSaldoProjetado
@@ -157,7 +158,7 @@ export function TelaInicio() {
         entradas={p.entradasPrevistas}
         faturas={p.faturasAVencer}
         contasFixas={p.contasFixas}
-        acessorio={<ChevronRightRounded aria-hidden sx={{ color: "primary.main" }} />}
+        acessorio={<ChevronRightRounded aria-hidden sx={{ color: "text.secondary" }} />}
       />
     </Box>
   ) : (
@@ -168,7 +169,7 @@ export function TelaInicio() {
       tom="contorno"
       titulo={`Sobra em ${formatarDiaMes(p.ate)}`}
       valor={p.saldoFinal}
-      corValor={p.saldoFinal < 0 ? "#B91C1C" : undefined}
+      corValor={p.saldoFinal < 0 ? semantica.estouro.texto : undefined}
       detalhe={
         <>
           Saldo hoje <Valor valor={p.saldoHoje} sx={{ font: "inherit" }} />
@@ -176,7 +177,7 @@ export function TelaInicio() {
       }
     />
   ) : projecao.isPending ? (
-    <Skeleton variant="rounded" height={130} sx={{ borderRadius: 5 }} />
+    <Skeleton variant="rounded" height={130} />
   ) : (
     semConta
   );
@@ -245,7 +246,7 @@ export function TelaInicio() {
           </Box>
           <Box sx={{ flex: "1 1 380px", minWidth: 0 }}>
             {caixinhas.isPending || movCaixinhas.isPending ? (
-              <Skeleton variant="rounded" height={180} sx={{ borderRadius: 5 }} />
+              <Skeleton variant="rounded" height={180} />
             ) : caixinhas.data && caixinhas.data.length > 0 && movCaixinhas.data ? (
               <ResumoCaixinhas
                 {...resumirPatrimonio(caixinhas.data, movCaixinhas.data, hoje)}
