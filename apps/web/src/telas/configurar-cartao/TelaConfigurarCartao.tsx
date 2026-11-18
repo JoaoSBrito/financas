@@ -27,8 +27,8 @@ function Cabecalho({ titulo }: { titulo: string }) {
 function Carregando() {
   return (
     <Box aria-busy="true" aria-label="Carregando cartão" sx={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-      <Skeleton variant="rounded" height={420} sx={{ flex: "1 1 420px", borderRadius: 5 }} />
-      <Skeleton variant="rounded" height={320} sx={{ flex: "1 1 320px", borderRadius: 5 }} />
+      <Skeleton variant="rounded" height={420} sx={{ flex: "1 1 420px" }} />
+      <Skeleton variant="rounded" height={320} sx={{ flex: "1 1 320px" }} />
     </Box>
   );
 }

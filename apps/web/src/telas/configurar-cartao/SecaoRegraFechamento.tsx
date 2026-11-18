@@ -10,7 +10,7 @@ import { useRef, type ReactNode } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import type { CartaoForm, RegraFechamento } from "@financas/core";
 import { ContadorNumerico, ControleSegmentado, SecaoCard } from "@financas/ui";
-import { cores } from "@financas/ui/tokens";
+import { paleta, raio } from "@financas/ui/tokens";
 import { REGRA_PADRAO } from "./valores";
 
 const OPCOES: { tipo: RegraFechamento["tipo"]; titulo: string; descricao: string }[] = [
@@ -33,9 +33,9 @@ function OpcaoRegra({ selecionada, titulo, descricao, valor, children }: {
   return (
     <Box
       sx={{
-        border: selecionada ? `2px solid ${cores.primaria}` : `1px solid ${cores.bordaForte}`,
-        bgcolor: selecionada ? cores.primariaClara : "transparent",
-        borderRadius: 3.5,
+        border: `1px solid ${selecionada ? paleta.bordaSelecionada : paleta.bordaCampo}`,
+        bgcolor: selecionada ? paleta.interativo : "transparent",
+        borderRadius: `${raio.card}px`,
         px: 3.5,
         py: 2.5,
       }}

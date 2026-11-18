@@ -3,7 +3,7 @@
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import Link from "next/link";
+import { LinkDiscreto } from "@/componentes/LinkDiscreto";
 import { nomeDoMes, type ParcelamentoAtivo } from "@financas/core";
 import { BarraParcelas, ItemFaturaFutura, SecaoCard, Valor } from "@financas/ui";
 import type { FaturaResumo } from "@/services/cartoes-mapeamento";
@@ -23,9 +23,7 @@ export function ProximasFaturas({
       titulo="Próximas faturas"
       gap={1}
       acao={
-        <Typography component={Link} href={`/cartoes/${cartaoId}/configurar`} variant="body2" sx={{ fontWeight: 700, textDecoration: "none", color: "primary.main" }}>
-          Ajustar regra
-        </Typography>
+        <LinkDiscreto href={`/cartoes/${cartaoId}/configurar`}>Ajustar regra</LinkDiscreto>
       }
     >
       {faturas.length === 0 ? (
@@ -60,14 +58,7 @@ export function ParcelamentosAtivos({ itens, cartaoId }: { itens: ParcelamentoAt
     <SecaoCard
       titulo="Parcelamentos ativos"
       acao={
-        <Typography
-          component={Link}
-          href={`/parcelamentos/em-andamento?cartao=${cartaoId}`}
-          variant="body2"
-          sx={{ fontWeight: 700, textDecoration: "none", color: "primary.main" }}
-        >
-          + Em andamento
-        </Typography>
+        <LinkDiscreto href={`/parcelamentos/em-andamento?cartao=${cartaoId}`}>+ Em andamento</LinkDiscreto>
       }
     >
       {itens.length === 0 ? (

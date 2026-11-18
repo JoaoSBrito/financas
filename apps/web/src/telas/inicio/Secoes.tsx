@@ -19,27 +19,18 @@ import {
   type Mes,
 } from "@financas/core";
 import { BarraProgresso, EstadoVazio, ItemLancamento, SecaoCard, SeloStatus, Valor } from "@financas/ui";
-import { paleta, raio, semantica, tipografia, toqueMinimo } from "@financas/ui/tokens";
+import { paleta, raio, semantica, tipografia } from "@financas/ui/tokens";
 import type { Categoria } from "@/services/categorias";
 import type { CartaoCompleto } from "@/services/cartoes-mapeamento";
 import type { Lancamento } from "@/services/faturas";
 import type { LinhaDeCategoria } from "@financas/core";
 import type { MovimentoConta } from "@/services/contas";
+import { LinkDiscreto } from "@/componentes/LinkDiscreto";
 import { ListaCategorias } from "@/telas/gastos/ListaCategorias";
 import type { CompraRecente } from "@/services/inicio";
 import { gastoDoOrcamento, type ResumoInicio } from "./resumo";
 
-const LinkSecao = ({ href, children }: { href: string; children: ReactNode }) => (
-  <Typography
-    component={Link}
-    href={href}
-    variant="body2"
-    // Área de toque de 44px sem aumentar a altura visual do cabeçalho.
-    sx={{ color: "text.secondary", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: toqueMinimo, my: -3, "&:hover": { color: "text.primary", textDecoration: "underline" } }}
-  >
-    {children}
-  </Typography>
-);
+const LinkSecao = LinkDiscreto;
 
 /** Celular: fatura de todos os cartões com o uso do limite. */
 export function DestaqueFatura({ r, melhorDia }: { r: ResumoInicio; melhorDia: string | null }) {
@@ -136,7 +127,7 @@ export function Atalhos() {
   );
 }
 
-export function AgendaCartoes({ r }: { r: ResumoInicio }) {
+export function AgendaCartoes({ r, corPorCartao }: { r: ResumoInicio; corPorCartao?: Map<string, string> }) {
   return (
     <SecaoCard titulo="Agenda dos cartões" gap={1}>
       {r.agenda.length === 0 ? (
@@ -150,6 +141,9 @@ export function AgendaCartoes({ r }: { r: ResumoInicio }) {
             <Box sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 52 }}>
               <Typography sx={{ width: 48, fontSize: 14 }}>{formatarDiaMes(a.data)}</Typography>
               <Typography variant="body2" sx={{ flex: 1 }}>
+                {corPorCartao?.get(a.cartao) && (
+                  <Box component="span" aria-hidden sx={{ display: "inline-block", width: 8, height: 8, borderRadius: "4px", bgcolor: corPorCartao.get(a.cartao), mr: 2 }} />
+                )}
                 {a.tipo === "fechamento" ? "Fechamento" : "Vencimento"} {a.cartao}
               </Typography>
               {a.tipo === "fechamento" ? (

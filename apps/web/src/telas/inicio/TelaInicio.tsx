@@ -15,7 +15,7 @@ import { formatarDiaMes, hojeEmSaoPaulo, mesDe, nomeDoMes } from "@financas/core
 import { CardIndicador, CardSaldoProjetado, CarregandoLista, EstadoErro, EstadoVazio, SecaoCard, Valor } from "@financas/ui";
 import ChevronRightRounded from "@mui/icons-material/ChevronRightRounded";
 import { BotaoOcultarValores } from "@/componentes/navegacao/BotaoOcultarValores";
-import { semantica } from "@financas/ui/tokens";
+import { corDoCartao, semantica } from "@financas/ui/tokens";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { useCaixinhas, useMovimentosCaixinhas } from "@/hooks/useCaixinhas";
@@ -220,7 +220,7 @@ export function TelaInicio() {
             </SecaoCard>
           </Box>
           <Box sx={{ flex: "1 1 300px", minWidth: 0, display: { xs: "none", md: "block" } }}>
-            <AgendaCartoes r={r} />
+            <AgendaCartoes r={r} corPorCartao={new Map(cartoes.data.map((c, i) => [c.nome, corDoCartao(i)]))} />
           </Box>
         </Box>
 

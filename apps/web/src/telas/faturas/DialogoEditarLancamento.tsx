@@ -69,7 +69,7 @@ export function DialogoEditarLancamento({ lancamento, categorias, onFechar }: Di
 
   return (
     <Dialog open onClose={ocupado ? undefined : onFechar} fullWidth maxWidth="xs">
-      <DialogTitle sx={{ fontWeight: 800 }}>{confirmandoExclusao ? "Excluir gasto?" : "Editar gasto"}</DialogTitle>
+      <DialogTitle>{confirmandoExclusao ? "Excluir gasto?" : "Editar gasto"}</DialogTitle>
       <DialogContent>
         {confirmandoExclusao ? (
           <Typography variant="body2">
@@ -83,7 +83,7 @@ export function DialogoEditarLancamento({ lancamento, categorias, onFechar }: Di
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 {parcelado ? `Parcela ${lancamento.numero} de ${lancamento.totalParcelas}` : "Valor"}
               </Typography>
-              <Valor valor={lancamento.valor} sx={{ fontWeight: 800 }} />
+              <Valor valor={lancamento.valor} sx={{ fontWeight: 500 }} />
             </Box>
             <TextField
               label="Descrição"
@@ -96,7 +96,7 @@ export function DialogoEditarLancamento({ lancamento, categorias, onFechar }: Di
               helperText={erroDescricao}
             />
             <Stack spacing={2}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 Categoria
               </Typography>
               <ChipsCategoria rotulo="Categoria" opcoes={categorias} valor={categoriaId} onChange={setCategoriaId} />

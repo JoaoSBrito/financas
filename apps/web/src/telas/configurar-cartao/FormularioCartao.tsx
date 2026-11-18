@@ -120,7 +120,7 @@ export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo }: Formul
                 )}
               />
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   Se cair em fim de semana ou feriado
                 </Typography>
                 <Controller
@@ -179,7 +179,7 @@ export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo }: Formul
               <Alert severity="warning">Confira os campos destacados antes de salvar.</Alert>
             )}
 
-            <Button type="submit" variant="contained" size="large" disabled={salvar.isPending} sx={{ minHeight: 54, fontSize: 16, fontWeight: 800 }}>
+            <Button type="submit" variant="contained" size="large" disabled={salvar.isPending}>
               {salvar.isPending ? "Salvando…" : "Salvar cartão"}
             </Button>
           </Stack>
