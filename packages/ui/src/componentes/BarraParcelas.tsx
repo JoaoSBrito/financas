@@ -1,7 +1,7 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import { cores } from "../tokens";
+import { paleta, raio } from "../tokens";
 
 export interface BarraParcelasProps {
   total: number;
@@ -9,15 +9,16 @@ export interface BarraParcelasProps {
   atual: number;
 }
 
-/** Barra segmentada: parcelas pagas, a atual e as futuras. */
+/** Barra segmentada: parcelas até a atual em destaque, as futuras no tom interativo. */
 export function BarraParcelas({ total, atual }: BarraParcelasProps) {
   return (
     <Box role="img" aria-label={`Parcela ${atual} de ${total}`} sx={{ display: "flex", gap: "3px" }}>
-      {Array.from({ length: total }, (_, i) => {
-        const numero = i + 1;
-        const cor = numero <= atual ? cores.primaria : cores.borda;
-        return <Box key={numero} sx={{ flex: 1, height: 6, borderRadius: 3, bgcolor: cor }} />;
-      })}
+      {Array.from({ length: total }, (_, i) => (
+        <Box
+          key={i + 1}
+          sx={{ flex: 1, height: 4, borderRadius: `${raio.barraFina}px`, bgcolor: i + 1 <= atual ? paleta.texto : paleta.interativo }}
+        />
+      ))}
     </Box>
   );
 }

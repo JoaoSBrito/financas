@@ -22,6 +22,7 @@ import {
   type NovoGasto,
   type SimulacaoDeCompra,
 } from "@financas/core";
+import { corDoCartao, paleta } from "@financas/ui/tokens";
 import { CampoMoeda, ChipsCategoria, ResumoImpacto, SeletorCartao, SeletorParcelas, Valor } from "@financas/ui";
 import { useRegistrarGasto } from "@/hooks/useGastos";
 import type { Categoria } from "@/services/categorias";
@@ -42,7 +43,7 @@ const abreviar = (mes: string) => nomeDoMes(mes, false).slice(0, 3);
 
 function Rotulo({ children, id }: { children: string; id?: string }) {
   return (
-    <Typography id={id} variant="body2" sx={{ fontWeight: 700 }}>
+    <Typography id={id} variant="body2" sx={{ color: "text.secondary" }}>
       {children}
     </Typography>
   );
@@ -89,13 +90,14 @@ export function FormularioGasto({ cartoes, categorias, faturas, hoje, onConcluir
     name: ["cartaoId", "valor", "parcelas", "dataCompra"],
   });
 
-  const opcoesCartao = cartoes.map((c) => {
+  const opcoesCartao = cartoes.map((c, indice) => {
     const ciclo = faturaDaCompra(c, dataCompra || hoje, confirmadasDe(faturasPorCartao.get(c.id) ?? []));
     return {
       id: c.id,
       nome: c.nome,
       detalhe: `Paga em ${formatarDiaMes(ciclo.vencimento)}`,
       recomendado: cartoes.length > 1 && dataCompra === hoje && melhorHoje?.cartaoId === c.id,
+      cor: corDoCartao(indice),
     };
   });
 
@@ -212,13 +214,12 @@ export function FormularioGasto({ cartoes, categorias, faturas, hoje, onConcluir
         variant="contained"
         size="large"
         disabled={registrar.isPending}
-        sx={{ minHeight: 54, fontSize: 16, fontWeight: 800 }}
       >
         {registrar.isPending ? "Salvando…" : "Salvar gasto"}
       </Button>
       <Typography variant="body2" sx={{ textAlign: "center", color: "text.secondary" }}>
         Já começou a pagar e sabe só a parcela atual?{" "}
-        <Link href="/parcelamentos/em-andamento" style={{ color: "inherit", fontWeight: 700 }}>
+        <Link href="/parcelamentos/em-andamento" style={{ color: paleta.texto }}>
           Lançar parcelamento em andamento
         </Link>
       </Typography>

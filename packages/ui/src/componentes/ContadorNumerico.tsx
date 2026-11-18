@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { useId, type ReactNode } from "react";
-import { cores } from "../tokens";
+import { paleta, raio, toqueMinimo } from "../tokens";
 
 export interface ContadorNumericoProps {
   valor: number;
@@ -25,9 +25,9 @@ export function ContadorNumerico({ valor, onChange, min = 0, max = Infinity, rot
   const estiloBotao = {
     width: 48,
     height: 48,
-    borderRadius: 3.5,
-    border: `1px solid ${cores.bordaForte}`,
-    color: cores.primaria,
+    borderRadius: `${raio.pilula}px`,
+    border: `1px solid ${paleta.bordaCampo}`,
+    color: paleta.texto,
   };
   return (
     <Box role="group" aria-labelledby={id} sx={{ display: "flex", alignItems: "center", gap: 3 }}>
@@ -37,14 +37,14 @@ export function ContadorNumerico({ valor, onChange, min = 0, max = Infinity, rot
       <IconButton aria-label={`Diminuir ${rotulo.toLowerCase()}`} disabled={valor <= min} onClick={() => onChange(valor - 1)} sx={estiloBotao}>
         <RemoveRounded />
       </IconButton>
-      <Typography aria-live="polite" sx={{ fontSize: 22, fontWeight: 800, minWidth: 32, textAlign: "center" }}>
+      <Typography aria-live="polite" sx={{ fontSize: 22, fontWeight: 500, minWidth: 32, textAlign: "center" }}>
         {valor}
       </Typography>
       <IconButton aria-label={`Aumentar ${rotulo.toLowerCase()}`} disabled={valor >= max} onClick={() => onChange(valor + 1)} sx={estiloBotao}>
         <AddRounded />
       </IconButton>
       {sufixo && (
-        <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {sufixo}
         </Typography>
       )}

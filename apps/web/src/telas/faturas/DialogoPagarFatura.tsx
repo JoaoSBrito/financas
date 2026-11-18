@@ -48,25 +48,25 @@ export function DialogoPagarFatura({ fatura, total, onFechar }: { fatura: Fatura
 
   return (
     <Dialog open onClose={pagar.isPending ? undefined : onFechar} fullWidth maxWidth="xs">
-      <DialogTitle sx={{ fontWeight: 800 }}>Pagar fatura de {nomeDoMes(fatura.mes, false)}</DialogTitle>
+      <DialogTitle>Pagar fatura de {nomeDoMes(fatura.mes, false)}</DialogTitle>
       <DialogContent>
         <Stack spacing={4} sx={{ pt: 1 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
               Valor
             </Typography>
-            <Valor valor={total} sx={{ fontWeight: 800 }} />
+            <Valor valor={total} sx={{ fontWeight: 500 }} />
           </Box>
           {contas.isPending ? null : lista.length === 0 ? (
             <Alert severity="info">
               Sem contas cadastradas: a fatura só será marcada como paga, sem mexer em saldo.{" "}
-              <Link href="/contas" style={{ color: "inherit", fontWeight: 700 }}>
+              <Link href="/contas" style={{ color: "inherit" }}>
                 Cadastrar conta
               </Link>
             </Alert>
           ) : (
             <Stack spacing={2}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 Pago com
               </Typography>
               <PilulasSelecao

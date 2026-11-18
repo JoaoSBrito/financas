@@ -2,7 +2,7 @@
 
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { cores } from "../tokens";
+import { paleta, raio } from "../tokens";
 
 export interface OpcaoSegmentada<T extends string> {
   valor: T;
@@ -26,12 +26,11 @@ export function ControleSegmentado<T extends string>({ opcoes, valor, onChange, 
       onChange={(_, v: T | null) => v !== null && onChange(v)}
       aria-label={rotulo}
       sx={{
-        bgcolor: cores.borda,
+        bgcolor: paleta.interativo,
         p: 1,
-        borderRadius: 3.5,
+        borderRadius: `${raio.pilula}px`,
         gap: 1,
-        "& .MuiToggleButton-root": { border: "none", borderRadius: "10px !important", color: cores.textoSuave },
-        "& .Mui-selected": { bgcolor: `${cores.superficie} !important`, color: `${cores.texto} !important`, fontWeight: 700 },
+        "& .MuiToggleButtonGroup-grouped": { border: "none !important", color: paleta.textoSecundario },
       }}
     >
       {opcoes.map((o) => (

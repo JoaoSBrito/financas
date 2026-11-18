@@ -47,7 +47,7 @@ export function ItemFaturaFutura({
         </Typography>
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
-        {valor !== undefined && <Valor valor={valor} sx={{ fontSize: 14, fontWeight: 700 }} />}
+        {valor !== undefined && <Valor valor={valor} sx={{ fontSize: 14 }} />}
         <SeloStatus status={status} />
       </Box>
       {onCorrigir && (

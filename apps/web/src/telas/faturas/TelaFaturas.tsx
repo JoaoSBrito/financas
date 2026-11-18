@@ -21,6 +21,7 @@ import {
   somarMeses,
   type Mes,
 } from "@financas/core";
+import { corDoCartao, raio } from "@financas/ui/tokens";
 import { CarregandoLista, EstadoErro, EstadoVazio, PilulasSelecao, SecaoCard } from "@financas/ui";
 import { DialogoCorrigirData } from "@/componentes/DialogoCorrigirData";
 import { useCartoes, useCorrigirFatura } from "@/hooks/useCartoes";
@@ -64,9 +65,9 @@ export function TelaFaturas() {
       <>
         <Cabecalho />
         <Stack spacing={4} aria-busy="true" aria-label="Carregando faturas">
-          <Skeleton variant="rounded" height={44} sx={{ borderRadius: 6, maxWidth: 360 }} />
-          <Skeleton variant="rounded" height={220} sx={{ borderRadius: 5 }} />
-          <Skeleton variant="rounded" height={320} sx={{ borderRadius: 5 }} />
+          <Skeleton variant="rounded" height={44} sx={{ borderRadius: `${raio.pilula}px`, maxWidth: 360 }} />
+          <Skeleton variant="rounded" height={220} />
+          <Skeleton variant="rounded" height={320} />
         </Stack>
       </>
     );
@@ -154,7 +155,15 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
             rotulo="Cartão"
             valor={cartao.id}
             onChange={(id) => navegar({ cartao: id })}
-            opcoes={cartoes.map((c) => ({ valor: c.id, rotulo: c.final ? `${c.nome} •••• ${c.final}` : c.nome }))}
+            opcoes={cartoes.map((c, indice) => ({
+              valor: c.id,
+              rotulo: (
+                <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+                  <Box component="span" aria-hidden sx={{ width: 8, height: 8, borderRadius: "4px", bgcolor: corDoCartao(indice) }} />
+                  {c.final ? `${c.nome} •••• ${c.final}` : c.nome}
+                </Box>
+              ),
+            }))}
           />
         )}
         <PilulasSelecao

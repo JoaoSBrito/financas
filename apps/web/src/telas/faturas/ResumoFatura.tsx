@@ -25,7 +25,7 @@ function Indicador({ rotulo, valor }: { rotulo: string; valor: number }) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, minWidth: 0 }}>
       <Typography variant="caption">{rotulo}</Typography>
-      <Valor valor={valor} sx={{ fontSize: 14, fontWeight: 700 }} />
+      <Valor valor={valor} sx={{ fontSize: 14 }} />
     </Box>
   );
 }
@@ -42,7 +42,7 @@ export function ResumoFatura({
   const pct = divisao.quantidade ? Math.round((divisao.conferidos / divisao.quantidade) * 100) : 0;
 
   return (
-    <Card component="section" aria-label={`Fatura de ${nomeDoMes(fatura.mes)}`} sx={{ p: { xs: 5, md: 6 }, display: "flex", flexDirection: "column", gap: 5 }}>
+    <Card component="section" aria-label={`Fatura de ${nomeDoMes(fatura.mes)}`} sx={{ p: { xs: 5, md: 8 }, display: "flex", flexDirection: "column", gap: 5 }}>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 4, md: 8 }, alignItems: "flex-start" }}>
         <Box sx={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -51,23 +51,23 @@ export function ResumoFatura({
             </Typography>
             <Chip size="small" label={s.rotulo} sx={{ height: 22, fontSize: 11, color: s.cor, bgcolor: s.fundo }} />
           </Box>
-          <Valor valor={divisao.total} component="p" sx={{ m: 0, fontSize: { xs: 32, md: 34 }, fontWeight: 800, letterSpacing: "-0.5px" }} />
+          <Valor valor={divisao.total} component="p" sx={{ m: 0, fontSize: { xs: 36, md: 40 }, fontWeight: 500, lineHeight: 1.15, letterSpacing: "-0.02em" }} />
         </Box>
 
         <Box sx={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="caption">Fechamento</Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Typography sx={{ fontWeight: 800 }}>{formatarDiaMes(fatura.fechamento)}</Typography>
+              <Typography sx={{ fontSize: 16 }}>{formatarDiaMes(fatura.fechamento)}</Typography>
               <SeloStatus status={fatura.status} />
-              <IconButton size="small" aria-label="Corrigir datas desta fatura" onClick={onCorrigirDatas} sx={{ color: "primary.main" }}>
+              <IconButton size="small" aria-label="Corrigir datas desta fatura" onClick={onCorrigirDatas} sx={{ color: "text.primary" }}>
                 <EditRounded fontSize="small" />
               </IconButton>
             </Box>
           </Box>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="caption">Vencimento</Typography>
-            <Typography sx={{ fontWeight: 800, lineHeight: "44px" }}>{formatarDiaMes(fatura.vencimento)}</Typography>
+            <Typography sx={{ fontSize: 16, lineHeight: "44px" }}>{formatarDiaMes(fatura.vencimento)}</Typography>
           </Box>
         </Box>
       </Box>

@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import type { ReactNode } from "react";
-import { cores } from "../tokens";
+import { paleta, toqueMinimo } from "../tokens";
 
 export interface OpcaoPilula<T extends string> {
   valor: T;
@@ -32,7 +32,8 @@ export function PilulasSelecao<T extends string>({
   rotulo,
   tamanho = "medio",
 }: PilulasSelecaoProps<T>) {
-  const altura = tamanho === "pequeno" ? 36 : 44;
+  // As duas variações mantêm a área de toque mínima; muda só o contorno e a fonte.
+  const altura = toqueMinimo;
   return (
     <Box sx={{ overflowX: "auto", mx: -1, px: 1, pb: 1, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
       <ToggleButtonGroup
@@ -43,21 +44,14 @@ export function PilulasSelecao<T extends string>({
         sx={{
           gap: 1.5,
           flexWrap: "nowrap",
-          "& .MuiToggleButton-root": {
+          "& .MuiToggleButtonGroup-grouped": {
             whiteSpace: "nowrap",
             minHeight: altura,
-            px: tamanho === "pequeno" ? 3 : 4,
-            borderRadius: `${altura / 2}px !important`,
-            border: `1px solid ${cores.bordaForte} !important`,
-            bgcolor: cores.superficie,
-            color: cores.texto,
-            fontSize: tamanho === "pequeno" ? 12 : 13,
-          },
-          "& .Mui-selected": {
-            bgcolor: `${cores.destaque} !important`,
-            borderColor: `${cores.destaque} !important`,
-            color: "#FFFFFF !important",
-            fontWeight: 700,
+            px: tamanho === "pequeno" ? 3.5 : 4,
+            fontSize: tamanho === "pequeno" ? 13 : 14,
+            color: paleta.textoSecundario,
+            // Meses (pequeno) sem borda; cartões e filtros (médio) com contorno.
+            ...(tamanho === "pequeno" ? { border: "none !important" } : {}),
           },
         }}
       >

@@ -60,7 +60,7 @@ export function DialogoCorrigirData({
   return (
     <Dialog open={aberto} onClose={salvando ? undefined : onFechar} fullWidth maxWidth="xs">
       <form onSubmit={handleSubmit(onConfirmar)} noValidate>
-        <DialogTitle sx={{ fontWeight: 800 }}>Fatura de {nomeMes}</DialogTitle>
+        <DialogTitle>Fatura de {nomeMes}</DialogTitle>
         <DialogContent>
           <Stack spacing={4} sx={{ pt: 1 }}>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>

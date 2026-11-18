@@ -124,11 +124,11 @@ export function ListaLancamentos({ lancamentos, onEditar }: ListaLancamentosProp
                       />
                     </TableCell>
                     <TableCell sx={{ color: "text.secondary" }}>{l.dataCompra ? formatarDiaMes(l.dataCompra) : "—"}</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>{l.descricao}</TableCell>
+                    <TableCell>{l.descricao}</TableCell>
                     <TableCell>{l.categoriaNome ?? "Sem categoria"}</TableCell>
                     <TableCell sx={{ color: "text.secondary" }}>{textoParcela(l)}</TableCell>
                     <TableCell align="right">
-                      <Valor valor={l.valor} sx={{ fontSize: 14, fontWeight: 700 }} />
+                      <Valor valor={l.valor} sx={{ fontSize: 14 }} />
                     </TableCell>
                     <TableCell>
                       <IconButton aria-label={`Editar ${l.descricao}`} onClick={() => onEditar(l)}>

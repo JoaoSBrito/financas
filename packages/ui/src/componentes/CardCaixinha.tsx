@@ -6,7 +6,7 @@ import Card from "@mui/material/Card";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import { formatarData, type Centavos, type Data } from "@financas/core";
-import { cores } from "../tokens";
+import { raio, semantica } from "../tokens";
 import { BarraProgresso } from "./BarraProgresso";
 import { Valor } from "./Valor";
 
@@ -34,16 +34,16 @@ export function CardCaixinha({ nome, detalhe, saldo, meta, dataMeta, dica, selo,
           <Chip
             size="small"
             label={selo}
-            sx={{ height: 22, fontSize: 11, mb: 1.5, color: cores.investimentoEscuro, bgcolor: cores.investimentoClaro }}
+            sx={{ height: 22, fontSize: 11, mb: 1.5, color: semantica.confirmado.texto, bgcolor: semantica.confirmado.fundo }}
           />
         )}
-        <Typography variant="subtitle1" sx={{ fontSize: 15, fontWeight: 800 }}>
+        <Typography variant="subtitle1" sx={{ fontSize: 16, fontWeight: 500 }}>
           {nome}
         </Typography>
         {detalhe && <Typography variant="caption">{detalhe}</Typography>}
       </Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 2, flexWrap: "wrap" }}>
-        <Valor valor={saldo} sx={{ fontSize: 22, fontWeight: 800 }} />
+        <Valor valor={saldo} sx={{ fontSize: 22, fontWeight: 500 }} />
         {meta ? (
           <Typography variant="caption">
             meta <Valor valor={meta} sx={{ font: "inherit" }} />
@@ -53,7 +53,7 @@ export function CardCaixinha({ nome, detalhe, saldo, meta, dataMeta, dica, selo,
       </Box>
       {pct !== null && <BarraProgresso compacta tom="investimento" percentual={pct} rotulo={`${nome}: ${pct}% da meta`} />}
       {dica && (
-        <Typography variant="caption" sx={{ color: cores.investimento, fontWeight: 700 }}>
+        <Typography variant="body2" sx={{ color: semantica.receita.texto }}>
           {dica}
         </Typography>
       )}
@@ -62,7 +62,7 @@ export function CardCaixinha({ nome, detalhe, saldo, meta, dataMeta, dica, selo,
   return (
     <Card component="article" aria-label={nome} sx={{ display: "flex" }}>
       {onAbrir ? (
-        <ButtonBase onClick={onAbrir} sx={{ flex: 1, p: 5, borderRadius: 5, alignItems: "stretch" }}>
+        <ButtonBase onClick={onAbrir} sx={{ flex: 1, p: 5, borderRadius: `${raio.card}px`, alignItems: "stretch" }}>
           {conteudo}
         </ButtonBase>
       ) : (

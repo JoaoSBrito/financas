@@ -31,7 +31,7 @@ export function CampoMoeda({ valor, onChange, destaque = false, sx, ...props }: 
       sx={[
         destaque && {
           "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-          "& input": { textAlign: "center", fontSize: 40, fontWeight: 800, py: 1 },
+          "& input": { textAlign: "center", fontSize: 44, fontWeight: 500, letterSpacing: "-0.02em", py: 1, fontVariantNumeric: "tabular-nums" },
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

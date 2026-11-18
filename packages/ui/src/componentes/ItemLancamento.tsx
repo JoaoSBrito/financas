@@ -6,7 +6,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import type { Centavos } from "@financas/core";
-import { cores, toqueMinimo } from "../tokens";
+import { paleta, raio, toqueMinimo } from "../tokens";
 import { Valor } from "./Valor";
 
 export interface ItemLancamentoProps {
@@ -51,13 +51,13 @@ export function ItemLancamento({
         )}
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-        <Valor valor={valor} sinal={sinal} sx={{ fontSize: 14, fontWeight: 700, color: corValor ?? "inherit" }} />
+        <Valor valor={valor} sinal={sinal} sx={{ fontSize: 15, color: corValor ?? "inherit" }} />
         {extra}
       </Box>
     </>
   );
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 52 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 60 }}>
       {conferido !== undefined && (
         <Checkbox
           checked={conferido}
@@ -70,11 +70,11 @@ export function ItemLancamento({
         <Box
           aria-hidden
           sx={{
-            width: 40,
-            height: 40,
-            borderRadius: 3,
-            bgcolor: cores.primariaClara,
-            color: cores.primaria,
+            width: 36,
+            height: 36,
+            borderRadius: `${raio.circulo}px`,
+            bgcolor: paleta.interativo,
+            color: paleta.texto,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -87,7 +87,7 @@ export function ItemLancamento({
       {onAbrir ? (
         <ButtonBase
           onClick={onAbrir}
-          sx={{ flex: 1, minWidth: 0, gap: 3, minHeight: 52, borderRadius: 2, justifyContent: "space-between" }}
+          sx={{ flex: 1, minWidth: 0, gap: 3, minHeight: 60, borderRadius: `${raio.card}px`, justifyContent: "space-between" }}
         >
           {conteudo}
         </ButtonBase>

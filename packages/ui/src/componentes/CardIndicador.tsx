@@ -4,9 +4,14 @@ import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import type { Centavos } from "@financas/core";
-import { cores } from "../tokens";
+import { paleta, tipografia } from "../tokens";
 import { Valor } from "./Valor";
 
+/**
+ * Os tons continuam aceitos para não mudar a API. No visual Mercury,
+ * "destaque" e "investimento" viram cards comuns (o destaque vem do tamanho do número)
+ * e "contorno" usa borda neutra.
+ */
 export type TomIndicador = "padrao" | "destaque" | "investimento" | "contorno";
 
 export interface CardIndicadorProps {
@@ -14,18 +19,11 @@ export interface CardIndicadorProps {
   valor: Centavos;
   detalhe?: ReactNode;
   tom?: TomIndicador;
-  /** Cor do valor (ex.: verde para rendimentos). */
+  /** Cor do valor (ex.: verde para rendimentos, sempre com o sinal "+"). */
   corValor?: string;
   sinal?: "padrao" | "sempre";
   tamanho?: "medio" | "grande";
 }
-
-const estilos: Record<TomIndicador, { bg: string; texto: string; suave: string; borda?: string }> = {
-  padrao: { bg: cores.superficie, texto: cores.texto, suave: cores.textoSuave },
-  destaque: { bg: cores.destaque, texto: "#FFFFFF", suave: "#E0E7FF" },
-  investimento: { bg: cores.investimentoEscuro, texto: "#FFFFFF", suave: cores.investimentoClaro },
-  contorno: { bg: cores.superficie, texto: cores.texto, suave: cores.textoSuave, borda: cores.primaria },
-};
 
 /** Número com rótulo: fatura atual, limite disponível, sobra do mês, patrimônio. */
 export function CardIndicador({
@@ -37,37 +35,35 @@ export function CardIndicador({
   sinal,
   tamanho = "medio",
 }: CardIndicadorProps) {
-  const e = estilos[tom];
+  const contorno = tom === "contorno";
+  const estilo = tamanho === "grande" ? tipografia.escala.valorDestaque : tipografia.escala.valorGrande;
   return (
     <Card
       sx={{
-        p: 5,
-        bgcolor: e.bg,
-        color: e.texto,
-        border: e.borda ? `2px solid ${e.borda}` : "none",
+        p: { xs: "20px", md: "24px" },
+        bgcolor: contorno ? "transparent" : paleta.card,
+        border: contorno ? `1px solid ${paleta.bordaCampo}` : "none",
         display: "flex",
         flexDirection: "column",
-        gap: 1.5,
+        gap: 1,
       }}
     >
-      <Typography
-        variant="subtitle2"
-        sx={{ color: tom === "contorno" ? cores.primaria : e.suave, fontWeight: tom === "contorno" ? 700 : 600 }}
-      >
+      <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
         {titulo}
       </Typography>
       <Valor
         valor={valor}
         sinal={sinal}
         sx={{
-          fontSize: tamanho === "grande" ? { xs: 34, md: 36 } : 28,
-          fontWeight: 800,
-          letterSpacing: "-0.5px",
-          color: corValor ?? "inherit",
+          fontSize: estilo.tamanho,
+          fontWeight: estilo.peso,
+          lineHeight: estilo.alturaLinha,
+          letterSpacing: `${estilo.espacamento ?? 0}em`,
+          color: corValor ?? "text.primary",
         }}
       />
       {detalhe && (
-        <Typography variant="caption" component="div" sx={{ color: e.suave }}>
+        <Typography variant="caption" component="div">
           {detalhe}
         </Typography>
       )}

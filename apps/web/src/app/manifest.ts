@@ -6,8 +6,8 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Finanças",
     start_url: "/",
     display: "standalone",
-    background_color: "#F3F4F6",
-    theme_color: "#1E1B4B",
+    background_color: "#171721",
+    theme_color: "#171721",
     lang: "pt-BR",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },

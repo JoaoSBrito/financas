@@ -5,7 +5,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 import type { LinhaDeCategoria } from "@financas/core";
 import { Valor } from "@financas/ui";
-import { cores } from "@financas/ui/tokens";
+import { paleta, raio, semantica } from "@financas/ui/tokens";
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 
@@ -17,7 +17,7 @@ function Variacao({ variacao }: { variacao: number | null }) {
     <Typography
       component="span"
       aria-label={`${subiu ? "Aumentou" : "Diminuiu"} ${Math.abs(Math.round(variacao * 100))}% em relação ao mês anterior`}
-      sx={{ fontSize: 11, fontWeight: 700, color: subiu ? cores.alerta : cores.investimento }}
+      sx={{ fontSize: 12, color: subiu ? semantica.atencao.texto : semantica.receita.texto }}
     >
       {texto}
     </Typography>
@@ -49,12 +49,12 @@ export function ListaCategorias({
               </Typography>
               <Box sx={{ display: "flex", alignItems: "baseline", gap: 2 }}>
                 {!limite && <Variacao variacao={l.variacao} />}
-                <Valor valor={l.total} sx={{ fontSize: 14, fontWeight: 700 }} />
+                <Valor valor={l.total} sx={{ fontSize: 15 }} />
               </Box>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ flex: 1, height: 8, borderRadius: 1, bgcolor: cores.borda, overflow: "hidden" }} aria-hidden>
-                <Box sx={{ width: pct(l.participacao), height: "100%", bgcolor: l.categoriaId ? cores.primaria : cores.textoSuave }} />
+              <Box sx={{ flex: 1, height: 4, borderRadius: `${raio.barraFina}px`, bgcolor: paleta.interativo, overflow: "hidden" }} aria-hidden>
+                <Box sx={{ width: pct(l.participacao), height: "100%", borderRadius: `${raio.barraFina}px`, bgcolor: l.categoriaId ? paleta.texto : paleta.bordaCampo }} />
               </Box>
               <Typography variant="caption" sx={{ minWidth: 36, textAlign: "right" }}>
                 {pct(l.participacao)}
@@ -64,7 +64,7 @@ export function ListaCategorias({
           </Box>
         );
         return onAbrir ? (
-          <ButtonBase key={l.categoriaId ?? "sem"} onClick={() => onAbrir(l)} sx={{ borderRadius: 2, px: 1, mx: -1 }}>
+          <ButtonBase key={l.categoriaId ?? "sem"} onClick={() => onAbrir(l)} sx={{ borderRadius: `${raio.card}px`, px: 1, mx: -1 }}>
             {conteudo}
           </ButtonBase>
         ) : (

@@ -7,7 +7,7 @@ import Fab from "@mui/material/Fab";
 import Paper from "@mui/material/Paper";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cores } from "@financas/ui/tokens";
+import { paleta, raio } from "@financas/ui/tokens";
 import { estaAtivo, ITENS_NAVEGACAO, type ItemNavegacao } from "./itens";
 
 function ItemBarra({ item, ativo }: { item: ItemNavegacao; ativo: boolean }) {
@@ -20,13 +20,18 @@ function ItemBarra({ item, ativo }: { item: ItemNavegacao; ativo: boolean }) {
         flexDirection: "column",
         gap: 1,
         minHeight: 56,
-        borderRadius: 3,
+        borderRadius: `${raio.card}px`,
         fontSize: 11,
-        fontWeight: ativo ? 700 : 600,
-        color: ativo ? cores.primaria : cores.textoSuave,
+        color: ativo ? paleta.texto : paleta.textoSecundario,
       }}
     >
-      {item.icone}
+      {/* Item ativo: pílula no tom interativo atrás do ícone (além da cor e do aria-current). */}
+      <Box
+        component="span"
+        sx={{ display: "flex", px: 3.5, py: 1, borderRadius: `${raio.chip}px`, bgcolor: ativo ? paleta.interativo : "transparent" }}
+      >
+        {item.icone}
+      </Box>
       {item.rotulo}
     </ButtonBase>
   );
@@ -49,7 +54,8 @@ export function BottomNav() {
         insetInline: 0,
         bottom: 0,
         zIndex: (t) => t.zIndex.appBar,
-        borderTop: `1px solid ${cores.borda}`,
+        bgcolor: paleta.card,
+        borderTop: `1px solid ${paleta.divisor}`,
         pt: 1,
         pb: "calc(8px + env(safe-area-inset-bottom))",
         px: 2,
@@ -60,7 +66,7 @@ export function BottomNav() {
           <ItemBarra key={i.href} item={i} ativo={estaAtivo(pathname, i.href, i.exato)} />
         ))}
         <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <Fab component={Link} href="/gastos/novo" color="primary" aria-label="Novo gasto" sx={{ mt: -6, boxShadow: 3 }}>
+          <Fab component={Link} href="/gastos/novo" color="primary" aria-label="Novo gasto" sx={{ mt: -5 }}>
             <AddRounded sx={{ fontSize: 28 }} />
           </Fab>
         </Box>

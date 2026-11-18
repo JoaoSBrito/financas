@@ -28,6 +28,7 @@ import {
   SecaoCard,
   Valor,
 } from "@financas/ui";
+import { corDoCartao } from "@financas/ui/tokens";
 import { useRegistrarParcelamento } from "@/hooks/useGastos";
 import type { Categoria } from "@/services/categorias";
 import { faturasDeReferencia, resumirFaturas, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
@@ -110,7 +111,7 @@ export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, car
             <TextField label="Descrição" placeholder="Ex.: Notebook" error={Boolean(errors.descricao)} helperText={errors.descricao?.message} {...register("descricao")} />
             {cartoes.length > 1 && (
               <Stack spacing={2}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   Cartão
                 </Typography>
                 <Controller
@@ -125,7 +126,15 @@ export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, car
                         const novo = cartoes.find((c) => c.id === id)!;
                         setValue("mesFatura", faturasDeReferencia(novo, faturas, hoje).aberta);
                       }}
-                      opcoes={cartoes.map((c) => ({ valor: c.id, rotulo: c.nome }))}
+                      opcoes={cartoes.map((c, indice) => ({
+                        valor: c.id,
+                        rotulo: (
+                          <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+                            <Box component="span" aria-hidden sx={{ width: 8, height: 8, borderRadius: "4px", bgcolor: corDoCartao(indice) }} />
+                            {c.nome}
+                          </Box>
+                        ),
+                      }))}
                     />
                   )}
                 />
@@ -161,7 +170,7 @@ export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, car
               />
             </Box>
             <Stack spacing={2}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 Categoria
               </Typography>
               <Controller
@@ -177,7 +186,7 @@ export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, car
           <SecaoCard titulo="Onde a compra está hoje">
             {referencia.meses.length > 1 && (
               <Stack spacing={2}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   Fatura de referência
                 </Typography>
                 <Controller
@@ -199,7 +208,7 @@ export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, car
               </Stack>
             )}
             <Stack spacing={2}>
-              <Typography id="rotulo-parcela-atual" variant="body2" sx={{ fontWeight: 700 }}>
+              <Typography id="rotulo-parcela-atual" variant="h3" component="p">
                 Qual parcela vem na fatura de {nomeDoMes(mesFatura, false)}?
               </Typography>
               <Controller
@@ -262,7 +271,7 @@ export function FormularioParcelamento({ cartoes, categorias, faturas, hoje, car
             />
           )}
           {registrar.error && <Alert severity="error">{registrar.error.message}</Alert>}
-          <Button type="submit" variant="contained" size="large" disabled={registrar.isPending} sx={{ minHeight: 54, fontSize: 16, fontWeight: 800 }}>
+          <Button type="submit" variant="contained" size="large" disabled={registrar.isPending}>
             {registrar.isPending ? "Salvando…" : "Adicionar parcelamento"}
           </Button>
         </Stack>

@@ -2,7 +2,7 @@
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { cores } from "../tokens";
+import { paleta, raio } from "../tokens";
 
 export interface LinhaDoTempoParcelasProps {
   total: number;
@@ -15,9 +15,9 @@ export interface LinhaDoTempoParcelasProps {
 }
 
 const LEGENDA = [
-  { cor: cores.borda, texto: "Já pagas (histórico)" },
-  { cor: cores.primaria, texto: "Fatura escolhida" },
-  { cor: "#C7D2FE", texto: "Futuras" },
+  { cor: paleta.interativo, borda: undefined, texto: "Já pagas (histórico)" },
+  { cor: paleta.texto, borda: undefined, texto: "Fatura escolhida" },
+  { cor: "transparent", borda: paleta.bordaCampo, texto: "Futuras" },
 ];
 
 /** Grade com todas as parcelas: as pagas, a atual e as que faltam. */
@@ -45,21 +45,23 @@ export function LinhaDoTempoParcelas({ total, atual, meses, mesesAcessiveis }: L
                 sx={{
                   width: "100%",
                   height: 34,
-                  borderRadius: 2,
+                  borderRadius: `${raio.pilula}px`,
+                  boxSizing: "border-box",
+                  border: tipo === "futura" ? `1px solid ${paleta.bordaCampo}` : "none",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: 12,
-                  fontWeight: tipo === "atual" ? 800 : 700,
-                  bgcolor: tipo === "paga" ? cores.borda : tipo === "atual" ? cores.primaria : "#C7D2FE",
-                  color: tipo === "paga" ? cores.textoSuave : tipo === "atual" ? "#FFFFFF" : cores.destaque,
+                  fontWeight: tipo === "atual" ? 500 : 400,
+                  bgcolor: tipo === "paga" ? paleta.interativo : tipo === "atual" ? paleta.texto : "transparent",
+                  color: tipo === "paga" ? paleta.textoSecundario : tipo === "atual" ? paleta.sobreClaro : paleta.texto,
                 }}
               >
                 {n}
               </Box>
               <Typography
                 aria-hidden
-                sx={{ fontSize: 11, fontWeight: tipo === "atual" ? 700 : 400, color: tipo === "atual" ? cores.primaria : cores.textoSuave }}
+                sx={{ fontSize: 11, fontWeight: tipo === "atual" ? 500 : 400, color: tipo === "atual" ? paleta.texto : paleta.textoSecundario }}
               >
                 {meses[i]}
               </Typography>
@@ -69,8 +71,8 @@ export function LinhaDoTempoParcelas({ total, atual, meses, mesesAcessiveis }: L
       </Box>
       <Box aria-hidden sx={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {LEGENDA.map((l) => (
-          <Box key={l.texto} sx={{ display: "flex", alignItems: "center", gap: 1.5, fontSize: 12, color: cores.textoSuave }}>
-            <Box sx={{ width: 10, height: 10, borderRadius: 0.75, bgcolor: l.cor }} />
+          <Box key={l.texto} sx={{ display: "flex", alignItems: "center", gap: 1.5, fontSize: 12, color: paleta.textoSecundario }}>
+            <Box sx={{ width: 10, height: 10, boxSizing: "border-box", borderRadius: "5px", bgcolor: l.cor, border: l.borda ? `1px solid ${l.borda}` : "none" }} />
             {l.texto}
           </Box>
         ))}

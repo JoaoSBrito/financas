@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import { layout } from "@financas/ui/tokens";
 import type { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
 import { MenuPrincipal } from "./MenuPrincipal";
@@ -18,12 +19,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         sx={{
           flex: 1,
           minWidth: 0,
-          px: { xs: 5, md: 10 },
+          px: { xs: 4, md: 10 },
           pt: { xs: 6, md: 8 },
           pb: { xs: "calc(104px + env(safe-area-inset-bottom))", sm: 12 },
         }}
       >
-        <Box sx={{ maxWidth: 1120, mx: "auto" }}>{children}</Box>
+        <Box sx={{ maxWidth: layout.larguraConteudo, mx: "auto" }}>{children}</Box>
       </Box>
       <BottomNav />
     </Box>

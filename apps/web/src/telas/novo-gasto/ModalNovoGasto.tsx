@@ -32,7 +32,7 @@ export function ModalNovoGasto() {
         <IconButton aria-label="Fechar" onClick={fechar}>
           <CloseRounded />
         </IconButton>
-        <Typography id="titulo-novo-gasto" component="h1" sx={{ fontSize: 16, fontWeight: 800 }}>
+        <Typography id="titulo-novo-gasto" component="h1" sx={{ fontSize: 16, fontWeight: 500 }}>
           Novo gasto
         </Typography>
         <Box sx={{ width: 44 }} />
