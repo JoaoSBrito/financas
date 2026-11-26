@@ -1,7 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
+import VisibilityOffRounded from "@mui/icons-material/VisibilityOffRounded";
+import VisibilityRounded from "@mui/icons-material/VisibilityRounded";
 import Alert from "@mui/material/Alert";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
@@ -20,6 +25,7 @@ type Login = z.infer<typeof loginSchema>;
 export function FormularioEntrar() {
   const router = useRouter();
   const [erro, setErro] = useState<string | null>(null);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const {
     register,
     handleSubmit,
@@ -42,7 +48,11 @@ export function FormularioEntrar() {
 
   return (
     <Stack component="form" onSubmit={handleSubmit(entrar)} noValidate spacing={4}>
-      {erro && <Alert severity="error">{erro}</Alert>}
+      {erro && (
+        <Alert severity="error" role="alert">
+          {erro}
+        </Alert>
+      )}
       <TextField
         label="E-mail"
         type="email"
@@ -53,13 +63,30 @@ export function FormularioEntrar() {
       />
       <TextField
         label="Senha"
-        type="password"
+        type={mostrarSenha ? "text" : "password"}
         autoComplete="current-password"
         error={Boolean(errors.senha)}
         helperText={errors.senha?.message}
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={mostrarSenha ? "Esconder senha" : "Mostrar senha"}
+                  aria-pressed={mostrarSenha}
+                  onClick={() => setMostrarSenha((v) => !v)}
+                  edge="end"
+                  sx={{ color: "text.secondary" }}
+                >
+                  {mostrarSenha ? <VisibilityOffRounded fontSize="small" /> : <VisibilityRounded fontSize="small" />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
+        }}
         {...register("senha")}
       />
-      <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
+      <Button type="submit" variant="contained" size="large" disabled={isSubmitting} endIcon={<ArrowForwardRounded />}>
         {isSubmitting ? "Entrando…" : "Entrar"}
       </Button>
     </Stack>

@@ -84,14 +84,15 @@ afterAll(() => vi.useRealTimers());
 const normalizar = (t: string | null | undefined) => (t ?? "").replace(/\u00a0/g, " ");
 
 describe("TelaInicio", () => {
-  it("mostra a fatura atual, o fechamento próximo e o limite real", () => {
+  it("mostra a fatura atual, o fechamento próximo por cartão e o limite real", () => {
     render(<TelaInicio />);
-    const destaque = screen.getByRole("region", { name: "Fatura atual de todos os cartões" });
-    const t = normalizar(destaque.textContent);
+    const painel = screen.getByRole("region", { name: "Fatura atual de todos os cartões" });
+    const t = normalizar(painel.textContent);
     expect(t).toContain("R$ 2.384,90");
-    expect(t).toContain("XP fecha em 2 dias");
     expect(t).toContain("Melhor dia de compra: 04/11");
-    expect(t).toContain("Disponível R$ 4.315,10");
+    expect(t).toContain("Limite livreR$ 4.315,10");
+    const porCartao = within(painel).getByRole("list", { name: "Fatura atual por cartão" });
+    expect(normalizar(porCartao.textContent)).toBe("XPFecha em 2 diasR$ 2.384,90");
   });
 
   it("atalhos não têm mais o Simular", () => {
@@ -112,9 +113,9 @@ describe("TelaInicio", () => {
 
   it("mostra quanto sobra no fim do mês", () => {
     render(<TelaInicio />);
-    const card = screen.getByRole("region", { name: "Sobra em 30/11" });
-    expect(normalizar(card.textContent)).toContain("R$ 3.865,10");
-    expect(screen.getByRole("link", { name: "Sobra em 30/11: ver contas" })).toHaveAttribute("href", "/contas");
+    const sobra = screen.getByRole("link", { name: "Sobra em 30/11: ver contas" });
+    expect(normalizar(sobra.textContent)).toContain("R$ 3.865,10");
+    expect(sobra).toHaveAttribute("href", "/contas");
   });
 
   it("resume as caixinhas", () => {
