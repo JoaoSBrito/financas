@@ -1,5 +1,6 @@
 "use client";
 
+import { estiloMono } from "./estilos";
 import Typography, { type TypographyProps } from "@mui/material/Typography";
 import { createContext, useContext, type ReactNode } from "react";
 import { formatar, type Centavos } from "@financas/core";
@@ -30,17 +31,19 @@ export function formatarComSinal(valor: Centavos, sinal: "padrao" | "sempre"): s
   return texto;
 }
 
-export function Valor({ valor, sinal = "padrao", ignorarOcultar = false, ...props }: ValorProps) {
+/** Valores em mono com algarismos de largura fixa (pode ser sobrescrito por sx, ex.: font: "inherit"). */
+export function Valor({ valor, sinal = "padrao", ignorarOcultar = false, sx, ...props }: ValorProps) {
   const oculto = useValoresOcultos() && !ignorarOcultar;
+  const estilo = [estiloMono, ...(Array.isArray(sx) ? sx : [sx])];
   if (oculto) {
     return (
-      <Typography component="span" aria-label="Valor oculto" {...props}>
+      <Typography component="span" aria-label="Valor oculto" {...props} sx={estilo}>
         R$ ••••
       </Typography>
     );
   }
   return (
-    <Typography component="span" {...props}>
+    <Typography component="span" {...props} sx={estilo}>
       {formatarComSinal(valor, sinal)}
     </Typography>
   );

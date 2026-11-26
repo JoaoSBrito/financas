@@ -29,7 +29,7 @@ export function SecaoCard({ titulo, acao, children, nivelTitulo = "h2", gap = 3.
       {(titulo || acao) && (
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "baseline", gap: 2 }}>
           {titulo && (
-            <Typography id={idTitulo} variant="h2" component={nivelTitulo} sx={{ fontSize: { xs: 16, md: 18 } }}>
+            <Typography id={idTitulo} variant="h2" component={nivelTitulo} sx={{ fontSize: { xs: 16, md: 17 } }}>
               {titulo}
             </Typography>
           )}

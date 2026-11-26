@@ -1,12 +1,12 @@
 "use client";
 
-import ErrorOutlineRounded from "@mui/icons-material/ErrorOutlineRounded";
 import InboxRounded from "@mui/icons-material/InboxRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import { paleta, semantica } from "../tokens";
+import { Rotulo } from "./Rotulo";
 import type { ReactNode } from "react";
 
 export interface EstadoVazioProps {
@@ -19,7 +19,7 @@ export interface EstadoVazioProps {
 export function EstadoVazio({ titulo, descricao, acao }: EstadoVazioProps) {
   return (
     <Box sx={{ textAlign: "center", py: 8, px: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-      <Box aria-hidden sx={{ width: 48, height: 48, borderRadius: "24px", bgcolor: paleta.interativo, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <Box aria-hidden sx={{ width: 48, height: 48, border: `1px dashed ${paleta.bordaControle}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <InboxRounded sx={{ fontSize: 22, color: "text.primary" }} />
       </Box>
       <Typography variant="h3" component="p">
@@ -46,14 +46,14 @@ export function EstadoErro({ mensagem, onTentarNovamente }: EstadoErroProps) {
       role="alert"
       sx={{ textAlign: "center", py: 8, px: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}
     >
-      <Box aria-hidden sx={{ width: 48, height: 48, borderRadius: "24px", bgcolor: semantica.estouro.fundo, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <ErrorOutlineRounded sx={{ fontSize: 22, color: "error.main" }} />
-      </Box>
+      <Rotulo sx={{ color: semantica.estouro.texto }} aria-hidden>
+        Erro
+      </Rotulo>
       <Typography variant="h3" component="p">
         {mensagem}
       </Typography>
       {onTentarNovamente && (
-        <Button variant="contained" color="secondary" onClick={onTentarNovamente}>
+        <Button variant="outlined" onClick={onTentarNovamente}>
           Tentar de novo
         </Button>
       )}
@@ -67,7 +67,7 @@ export function CarregandoLista({ linhas = 3 }: { linhas?: number }) {
     <Box aria-busy="true" aria-label="Carregando" sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {Array.from({ length: linhas }, (_, i) => (
         <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-          <Skeleton variant="circular" width={36} height={36} />
+          <Skeleton variant="rectangular" width={4} height={28} />
           <Box sx={{ flex: 1 }}>
             <Skeleton width="60%" />
             <Skeleton width="35%" />

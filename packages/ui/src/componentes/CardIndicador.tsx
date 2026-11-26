@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import type { Centavos } from "@financas/core";
 import { paleta, tipografia } from "../tokens";
+import { Rotulo } from "./Rotulo";
 import { Valor } from "./Valor";
 
 /**
@@ -40,7 +41,7 @@ export function CardIndicador({
   return (
     <Card
       sx={{
-        p: { xs: "20px", md: "24px" },
+        p: { xs: "16px", md: "20px 24px" },
         bgcolor: contorno ? "transparent" : paleta.card,
         border: contorno ? `1px solid ${paleta.bordaCampo}` : "none",
         display: "flex",
@@ -48,9 +49,7 @@ export function CardIndicador({
         gap: 1,
       }}
     >
-      <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
-        {titulo}
-      </Typography>
+      <Rotulo>{titulo}</Rotulo>
       <Valor
         valor={valor}
         sinal={sinal}

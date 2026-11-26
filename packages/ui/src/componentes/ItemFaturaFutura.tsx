@@ -6,6 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { formatarDiaMes, type Centavos, type Data } from "@financas/core";
 import { SeloStatus, type StatusData } from "./SeloStatus";
+import { tipografia } from "../tokens";
 import { Valor } from "./Valor";
 
 export interface ItemFaturaFuturaProps {
@@ -42,7 +43,7 @@ export function ItemFaturaFutura({
     <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, minHeight: 58 }}>
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
         <Typography variant="subtitle1">{principal}</Typography>
-        <Typography variant="caption" component="div">
+        <Typography variant="caption" component="div" sx={{ fontFamily: tipografia.familiaMono, fontSize: 11 }}>
           {observacao ? `${secundario} · ${observacao}` : secundario}
         </Typography>
       </Box>
@@ -54,7 +55,7 @@ export function ItemFaturaFutura({
         <IconButton
           onClick={onCorrigir}
           aria-label={`Corrigir datas da fatura${nomeMes ? ` de ${nomeMes}` : ""}`}
-          sx={{ color: "primary.main", mr: -2 }}
+          sx={{ color: "text.primary", mr: -2 }}
         >
           <EditRounded fontSize="small" />
         </IconButton>

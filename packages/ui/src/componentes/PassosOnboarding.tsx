@@ -2,7 +2,7 @@
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { paleta, raio } from "../tokens";
+import { paleta, tipografia } from "../tokens";
 
 export interface PassosOnboardingProps {
   /** Passo atual, começando em 1. */
@@ -23,8 +23,18 @@ export function PassosOnboarding({ atual, passos }: PassosOnboardingProps) {
               key={nome}
               aria-current={n === atual ? "step" : undefined}
               aria-label={`${n}. ${nome}${n < atual ? ", concluído" : ""}`}
-              sx={{ height: 4, borderRadius: `${raio.barraFina}px`, bgcolor: n <= atual ? paleta.texto : paleta.interativo }}
-            />
+              sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+            >
+              {/* Concluídos em lima, o atual em claro, os próximos no trilho. */}
+              <Box aria-hidden sx={{ height: 4, bgcolor: n < atual ? paleta.acao : n === atual ? paleta.texto : paleta.divisor }} />
+              <Box
+                aria-hidden
+                component="span"
+                sx={{ fontFamily: tipografia.familiaMono, fontSize: 10, textTransform: "uppercase", color: n === atual ? paleta.texto : paleta.textoSecundario, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+              >
+                {String(n).padStart(2, "0")} {nome}
+              </Box>
+            </Box>
           );
         })}
       </Box>

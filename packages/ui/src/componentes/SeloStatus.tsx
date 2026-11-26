@@ -1,7 +1,7 @@
 "use client";
 
 import Chip from "@mui/material/Chip";
-import { raio, semantica } from "../tokens";
+import { raio, semantica, tipografia } from "../tokens";
 
 export type StatusData = "estimado" | "confirmado";
 
@@ -14,9 +14,13 @@ export function SeloStatus({ status }: { status: StatusData }) {
       label={confirmado ? "Confirmado" : "Estimado"}
       variant={confirmado ? "filled" : "outlined"}
       sx={{
-        fontSize: 11,
+        // Mono em caixa alta (só visual: o texto no DOM continua "Confirmado"/"Estimado").
+        fontFamily: tipografia.familiaMono,
+        textTransform: "uppercase",
+        letterSpacing: "0.04em",
+        fontSize: 10,
         height: 22,
-        borderRadius: `${raio.chip}px`,
+        borderRadius: `${raio.selo}px`,
         color: confirmado ? semantica.confirmado.texto : semantica.estimado.texto,
         bgcolor: confirmado ? semantica.confirmado.fundo : "transparent",
         border: confirmado ? "none" : `1px ${semantica.estimado.estiloBorda} ${semantica.estimado.borda}`,

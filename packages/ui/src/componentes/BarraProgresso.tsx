@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import { estiloMono } from "./estilos";
 
 /** "estouro" é novo (orçamento a partir de 100%); os demais seguem iguais. */
 export type TomProgresso = "primario" | "investimento" | "alerta" | "estouro";
@@ -29,7 +30,7 @@ export function BarraProgresso({ percentual, rotulo, detalhe, tom = "primario", 
       {!compacta && (
         <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
           <Typography sx={{ fontSize: 14 }}>{rotulo}</Typography>
-          {detalhe && <Typography sx={{ fontSize: 14, color: corTexto[tom], textAlign: "right" }}>{detalhe}</Typography>}
+          {detalhe && <Typography sx={{ ...estiloMono, fontSize: 13, color: corTexto[tom], textAlign: "right" }}>{detalhe}</Typography>}
         </Box>
       )}
       <LinearProgress variant="determinate" value={limitado} color={corMui[tom]} aria-label={rotulo} />
