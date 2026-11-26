@@ -1,89 +1,106 @@
 "use client";
 
 import AddRounded from "@mui/icons-material/AddRounded";
+import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
-import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { layout, paleta, raio } from "@financas/ui/tokens";
+import { LogoLastro } from "@financas/ui";
+import { layout, paleta } from "@financas/ui/tokens";
 import { BotaoOcultarValores } from "./BotaoOcultarValores";
 import { estaAtivo, ITENS_NAVEGACAO } from "./itens";
 
+/** Ajustes fica no ícone de engrenagem, não nas abas. */
+const ABAS = ITENS_NAVEGACAO.filter((i) => i.href !== "/ajustes");
+
 /**
- * Menu do tablet e do desktop.
- * No desktop (md+) é lateral; em janelas médias (sm) sobe para o topo e quebra linha.
+ * Barra superior a partir de 600 px (tablet e desktop): logotipo, abas, ocultar valores,
+ * Ajustes e "Novo gasto". No celular, quem navega é a barra inferior.
  */
 export function MenuPrincipal() {
   const pathname = usePathname();
+  const emAjustes = estaAtivo(pathname, "/ajustes");
   return (
     <Box
-      component="nav"
-      aria-label="Navegação principal"
+      component="header"
       sx={{
-        display: { xs: "none", sm: "flex" },
-        flexDirection: { sm: "row", md: "column" },
-        flexWrap: { sm: "wrap", md: "nowrap" },
-        alignItems: { sm: "center", md: "stretch" },
-        gap: 1.5,
+        display: { xs: "none", sm: "block" },
+        position: "sticky",
+        top: 0,
+        zIndex: (t) => t.zIndex.appBar,
         bgcolor: paleta.fundo,
-        borderRight: { md: `1px solid ${paleta.divisor}` },
-        borderBottom: { sm: `1px solid ${paleta.divisor}`, md: "none" },
-        px: 4,
-        py: { sm: 3, md: 8 },
-        width: { md: layout.larguraMenuLateral },
-        boxSizing: "border-box",
-        flexShrink: 0,
+        borderBottom: `1px solid ${paleta.divisor}`,
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 3, pb: { md: 5 }, mr: { sm: 2, md: 0 } }}>
-        <Typography component="span" sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.08em" }}>
-          LASTRO
-        </Typography>
-        <Box sx={{ display: { sm: "none", md: "block" } }}>
+      <Box
+        sx={{
+          maxWidth: layout.larguraConteudo + 2 * layout.margemDesktop,
+          mx: "auto",
+          px: { sm: 6, md: 8 },
+          minHeight: layout.alturaBarraTopo,
+          display: "flex",
+          alignItems: "center",
+          gap: { sm: 3, md: 6 },
+        }}
+      >
+        <Box component={Link} href="/" aria-label="Lastro, início" sx={{ display: "flex", alignItems: "center", minHeight: 44, textDecoration: "none" }}>
+          <LogoLastro tamanho={22} />
+        </Box>
+        <Box
+          component="nav"
+          aria-label="Navegação principal"
+          sx={{ flex: 1, minWidth: 0, alignSelf: "stretch", display: "flex", flexDirection: "row", gap: 1, overflowX: "auto", scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}
+        >
+          {ABAS.map((item) => {
+            const ativo = estaAtivo(pathname, item.href, item.exato);
+            return (
+              <ButtonBase
+                key={item.href}
+                component={Link}
+                href={item.href}
+                aria-current={ativo ? "page" : undefined}
+                sx={{
+                  px: 3,
+                  minHeight: 44,
+                  whiteSpace: "nowrap",
+                  fontSize: 14,
+                  color: ativo ? paleta.texto : paleta.textoSecundario,
+                  // Aba ativa: sublinhado lima (além da cor e do aria-current).
+                  borderBottom: `2px solid ${ativo ? paleta.acao : "transparent"}`,
+                  "&:hover": { color: paleta.texto, bgcolor: paleta.painel },
+                }}
+              >
+                {item.rotuloLongo}
+              </ButtonBase>
+            );
+          })}
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <BotaoOcultarValores />
+          <IconButton
+            component={Link}
+            href="/ajustes"
+            aria-label="Ajustes"
+            aria-current={emAjustes ? "page" : undefined}
+            sx={{ border: `1px solid ${emAjustes ? paleta.acao : paleta.divisor}`, color: emAjustes ? paleta.texto : paleta.textoSecundario }}
+          >
+            <SettingsOutlined fontSize="small" />
+          </IconButton>
+          {/* Lima só no Início, onde "Novo gasto" é a ação principal; nas demais telas ela é secundária. */}
+          <Button
+            component={Link}
+            href="/gastos/novo"
+            variant={pathname === "/" ? "contained" : "outlined"}
+            startIcon={<AddRounded />}
+            sx={{ whiteSpace: "nowrap" }}
+          >
+            Novo gasto
+          </Button>
         </Box>
       </Box>
-      {ITENS_NAVEGACAO.map((item) => {
-        const ativo = estaAtivo(pathname, item.href, item.exato);
-        return (
-          <ButtonBase
-            key={item.href}
-            component={Link}
-            href={item.href}
-            aria-current={ativo ? "page" : undefined}
-            sx={{
-              justifyContent: "flex-start",
-              gap: 3,
-              minHeight: 44,
-              px: 4,
-              borderRadius: `${raio.pilula}px`,
-              fontSize: 14,
-              color: ativo ? paleta.texto : paleta.textoSecundario,
-              bgcolor: ativo ? paleta.interativo : "transparent",
-              "&:hover": { bgcolor: paleta.interativo, color: paleta.texto },
-            }}
-          >
-            {item.icone}
-            {item.rotuloLongo}
-          </ButtonBase>
-        );
-      })}
-      <Box sx={{ display: { sm: "flex", md: "none" }, ml: "auto", gap: 2 }}>
-        <BotaoOcultarValores />
-      </Box>
-      {/* Cobalto só no Início, onde "Novo gasto" é a ação principal; nas demais telas ela é secundária. */}
-      <Button
-        component={Link}
-        href="/gastos/novo"
-        variant="contained"
-        color={pathname === "/" ? "primary" : "secondary"}
-        startIcon={<AddRounded />}
-        sx={{ mt: { md: 5 }, minHeight: 48 }}
-      >
-        Novo gasto
-      </Button>
     </Box>
   );
 }

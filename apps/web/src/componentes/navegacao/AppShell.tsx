@@ -12,15 +12,15 @@ import { MenuPrincipal } from "./MenuPrincipal";
  */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, minHeight: "100dvh" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100dvh" }}>
       <MenuPrincipal />
       <Box
         component="main"
         sx={{
           flex: 1,
           minWidth: 0,
-          px: { xs: 4, md: 10 },
-          pt: { xs: 6, md: 8 },
+          px: { xs: `${layout.margemCelular}px`, sm: 6, md: `${layout.margemDesktop}px` },
+          pt: { xs: 4, md: 7 },
           pb: { xs: "calc(104px + env(safe-area-inset-bottom))", sm: 12 },
         }}
       >

@@ -3,6 +3,7 @@
 import VisibilityOffRounded from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRounded from "@mui/icons-material/VisibilityRounded";
 import IconButton from "@mui/material/IconButton";
+import { paleta } from "@financas/ui/tokens";
 import { usePreferencias } from "@/stores/preferencias";
 
 export function BotaoOcultarValores() {
@@ -12,7 +13,7 @@ export function BotaoOcultarValores() {
       onClick={alternarOcultarValores}
       aria-label={ocultarValores ? "Mostrar valores" : "Ocultar valores"}
       aria-pressed={ocultarValores}
-      sx={{ bgcolor: "background.paper" }}
+      sx={{ border: `1px solid ${paleta.divisor}`, color: ocultarValores ? paleta.texto : paleta.textoSecundario }}
     >
       {ocultarValores ? <VisibilityOffRounded /> : <VisibilityRounded />}
     </IconButton>
