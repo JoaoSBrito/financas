@@ -27,7 +27,7 @@ export default function PaginaEntrar() {
           <Box aria-hidden sx={{ width: 44, height: 44, mb: 4, borderRadius: `${raio.card}px`, bgcolor: { xs: "background.paper", sm: paleta.interativo }, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <CreditCardRounded fontSize="small" />
           </Box>
-          <Typography variant="h1">Finanças</Typography>
+          <Typography variant="h1">Lastro</Typography>
           <Typography variant="body2" sx={{ color: "text.secondary", mt: 1 }}>
             Entre com o e-mail e a senha cadastrados no Supabase.
           </Typography>

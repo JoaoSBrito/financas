@@ -38,8 +38,8 @@ export function MenuPrincipal() {
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 3, pb: { md: 5 }, mr: { sm: 2, md: 0 } }}>
-        <Typography component="span" sx={{ fontSize: 18, fontWeight: 500 }}>
-          Finanças
+        <Typography component="span" sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.08em" }}>
+          LASTRO
         </Typography>
         <Box sx={{ display: { sm: "none", md: "block" } }}>
           <BotaoOcultarValores />
