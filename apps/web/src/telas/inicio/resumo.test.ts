@@ -56,3 +56,42 @@ describe("resumirInicio em 01/11", () => {
     ]);
   });
 });
+
+describe("próximas datas (agenda)", () => {
+  const linhas = (r: ReturnType<typeof resumirInicio>) =>
+    r.agenda.map((a) => `${a.data} ${a.tipo} ${a.cartao}${a.vencida ? " vencida" : ""}`);
+
+  it("faturas de novembro pagas: mostra as datas de dezembro", () => {
+    const pagas = faturas.map((x) => (x.mes === "2026-11" ? { ...x, pagaEm: "2026-11-10" } : x));
+    expect(linhas(resumirInicio([xp, viagens], pagas, "2026-11-23"))).toEqual([
+      "2026-12-03 fechamento XP",
+      "2026-12-10 vencimento XP",
+      "2026-12-21 fechamento Viagens",
+      "2026-12-28 vencimento Viagens",
+    ]);
+  });
+
+  it("fatura fechada e não paga: mostra o vencimento dela antes das datas da aberta", () => {
+    const soXpPaga = faturas.map((x) => (x.cartaoId === "xp" && x.mes === "2026-11" ? { ...x, pagaEm: "2026-11-10" } : x));
+    expect(linhas(resumirInicio([xp, viagens], soXpPaga, "2026-11-23"))).toEqual([
+      "2026-11-30 vencimento Viagens",
+      "2026-12-03 fechamento XP",
+      "2026-12-10 vencimento XP",
+      "2026-12-21 fechamento Viagens",
+      "2026-12-28 vencimento Viagens",
+    ]);
+  });
+
+  it("fatura vencida e não paga continua aparecendo, marcada como vencida", () => {
+    const soXpPaga = faturas.map((x) => (x.cartaoId === "xp" && x.mes === "2026-11" ? { ...x, pagaEm: "2026-11-10" } : x));
+    expect(linhas(resumirInicio([xp, viagens], soXpPaga, "2026-12-01"))[0]).toBe("2026-11-30 vencimento Viagens vencida");
+  });
+
+  it("datas que já passaram e faturas pagas saem", () => {
+    const r = resumirInicio([xp, viagens], faturas, "2026-11-23");
+    // Outubro (paga) não aparece; o fechamento de novembro (já passou) também não.
+    expect(linhas(r)).not.toContain("2026-10-09 vencimento XP");
+    expect(linhas(r)).not.toContain("2026-11-03 fechamento XP");
+    expect(linhas(r)).toContain("2026-11-10 vencimento XP vencida");
+  });
+});

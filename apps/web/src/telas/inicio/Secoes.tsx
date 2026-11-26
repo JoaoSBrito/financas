@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
 import Card from "@mui/material/Card";
+import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
@@ -129,10 +130,10 @@ export function Atalhos() {
 
 export function AgendaCartoes({ r, corPorCartao }: { r: ResumoInicio; corPorCartao?: Map<string, string> }) {
   return (
-    <SecaoCard titulo="Agenda dos cartões" gap={1}>
+    <SecaoCard titulo="Próximas datas" gap={1}>
       {r.agenda.length === 0 ? (
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Nenhum fechamento ou vencimento neste mês.
+          Nenhuma fatura a fechar ou a pagar.
         </Typography>
       ) : (
         r.agenda.map((a, i) => (
@@ -149,7 +150,16 @@ export function AgendaCartoes({ r, corPorCartao }: { r: ResumoInicio; corPorCart
               {a.tipo === "fechamento" ? (
                 <SeloStatus status={a.status} />
               ) : (
-                <Valor valor={a.valor ?? 0} sx={{ fontSize: 14 }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  {a.vencida && (
+                    <Chip
+                      size="small"
+                      label="Vencida"
+                      sx={{ height: 22, fontSize: 11, color: semantica.estouro.texto, bgcolor: semantica.estouro.fundo }}
+                    />
+                  )}
+                  <Valor valor={a.valor ?? 0} sx={{ fontSize: 14 }} />
+                </Box>
               )}
             </Box>
           </Box>

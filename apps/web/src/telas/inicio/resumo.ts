@@ -28,7 +28,19 @@ export interface ResumoInicio {
   mesOrcamento: Mes;
   /** Totais por mês somando os cartões, a partir do mês da fatura aberta mais antiga. */
   proximasFaturas: { mes: Mes; total: number; aberta: boolean }[];
-  agenda: { data: Data; tipo: "fechamento" | "vencimento"; cartao: string; valor?: number; status: "estimado" | "confirmado" }[];
+  /**
+   * Próximas datas dos cartões: fechamento e vencimento da fatura aberta e o vencimento
+   * de faturas fechadas ainda não pagas (mesmo vencidas). Faturas pagas e datas passadas saem.
+   */
+  agenda: {
+    data: Data;
+    tipo: "fechamento" | "vencimento";
+    cartao: string;
+    valor?: number;
+    status: "estimado" | "confirmado";
+    /** Vencimento que já passou e a fatura continua sem pagamento. */
+    vencida?: boolean;
+  }[];
 }
 
 function diasEntre(de: Data, ate: Data): number {
@@ -59,11 +71,19 @@ export function resumirInicio(cartoes: CartaoCompleto[], faturas: FaturaResumo[]
         comprometidoFuturo += f.total;
         if (!ultimoMesComprometido || f.mes > ultimoMesComprometido) ultimoMesComprometido = f.mes;
       }
-      if (mesDe(f.fechamento) === mesHoje) {
-        agenda.push({ data: f.fechamento, tipo: "fechamento", cartao: c.nome, status: f.status });
-      }
-      if (mesDe(f.vencimento) === mesHoje) {
-        agenda.push({ data: f.vencimento, tipo: "vencimento", cartao: c.nome, valor: f.total, status: f.status });
+      // Agenda: só faturas não pagas, da aberta para trás (as futuras ainda não têm datas próximas).
+      if (!f.pagaEm && f.mes <= aberta.mes) {
+        if (f.mes === aberta.mes && f.fechamento >= hoje) {
+          agenda.push({ data: f.fechamento, tipo: "fechamento", cartao: c.nome, status: f.status });
+        }
+        agenda.push({
+          data: f.vencimento,
+          tipo: "vencimento",
+          cartao: c.nome,
+          valor: f.total,
+          status: f.status,
+          vencida: f.vencimento < hoje,
+        });
       }
     }
 
