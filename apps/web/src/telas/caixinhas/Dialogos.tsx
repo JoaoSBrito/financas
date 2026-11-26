@@ -20,7 +20,7 @@ import Switch from "@mui/material/Switch";
 import { useWatch } from "react-hook-form";
 import { caixinhaFormSchema, dataSchema, hojeEmSaoPaulo, situacaoDaReserva, type CaixinhaForm } from "@financas/core";
 import { CampoMoeda, ContadorNumerico, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
-import { cores } from "@financas/ui/tokens";
+import { paleta, raio } from "@financas/ui/tokens";
 import { useCustoDeVida } from "@/hooks/useReserva";
 import { textoCustoDeVida } from "./resumo";
 import { useArquivarCaixinha, useAtualizarSaldoCaixinha, useMovimentarCaixinha, useSalvarCaixinha } from "@/hooks/useCaixinhas";
@@ -46,7 +46,7 @@ function Janela({ titulo, ocupado, onFechar, onEnviar, acoes, children }: {
           onEnviar?.();
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800 }}>{titulo}</DialogTitle>
+        <DialogTitle>{titulo}</DialogTitle>
         <DialogContent>
           <Stack spacing={4} sx={{ pt: 1 }}>
             {children}
@@ -59,7 +59,7 @@ function Janela({ titulo, ocupado, onFechar, onEnviar, acoes, children }: {
 }
 
 const Rotulo = ({ children }: { children: string }) => (
-  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+  <Typography variant="body2" sx={{ color: "text.secondary" }}>
     {children}
   </Typography>
 );
@@ -306,7 +306,7 @@ export function DialogoMovimentar({
       <Janela titulo="Cadastre uma conta" ocupado={false} onFechar={onFechar} acoes={<Button onClick={onFechar}>Fechar</Button>}>
         <Typography variant="body2">
           Guardar e resgatar movem dinheiro entre a conta e a caixinha.{" "}
-          <Link href="/contas" style={{ color: "inherit", fontWeight: 700 }}>
+          <Link href="/contas" style={{ color: "inherit" }}>
             Cadastrar conta
           </Link>
           . Para só informar o valor que já está na caixinha, use &quot;Atualizar saldo&quot;.
@@ -324,7 +324,7 @@ export function DialogoMovimentar({
       acoes={
         <>
           <Button onClick={onFechar}>Cancelar</Button>
-          <Button type="submit" variant="contained" color="success" disabled={movimentar.isPending}>
+          <Button type="submit" variant="contained" disabled={movimentar.isPending}>
             {movimentar.isPending ? "Salvando…" : tipo === "deposito" ? "Guardar" : "Resgatar"}
           </Button>
         </>
@@ -357,7 +357,7 @@ export function DialogoMovimentar({
       )}
       {caixinha && tipo === "resgate" && (
         <Typography variant="caption">
-          Disponível: <Valor valor={caixinha.saldo} sx={{ font: "inherit", fontWeight: 700 }} />
+          Disponível: <Valor valor={caixinha.saldo} sx={{ font: "inherit", color: "text.primary" }} />
         </Typography>
       )}
       {contas.length > 1 && (
@@ -398,12 +398,12 @@ export function DialogoAtualizarSaldo({ caixinha, onFechar }: { caixinha: Caixin
       }
     >
       <Typography variant="body2" sx={{ color: "text.secondary" }}>
-        No app: <Valor valor={caixinha.saldo} sx={{ font: "inherit", fontWeight: 700 }} />
+        No app: <Valor valor={caixinha.saldo} sx={{ font: "inherit", color: "text.primary" }} />
       </Typography>
       <CampoMoeda label="Saldo no banco agora" valor={saldoReal} onChange={setSaldoReal} />
       {diferenca !== 0 && (
         <Alert severity="info">
-          <Valor valor={diferenca} sinal="sempre" sx={{ font: "inherit", fontWeight: 700 }} /> será registrado como rendimento.
+          <Valor valor={diferenca} sinal="sempre" sx={{ font: "inherit", color: "text.primary" }} /> será registrado como rendimento.
         </Alert>
       )}
       {atualizar.error && <Alert severity="error">{atualizar.error.message}</Alert>}
@@ -424,8 +424,8 @@ export function DialogoAcoes({
 }) {
   return (
     <Janela titulo={caixinha.nome} ocupado={false} onFechar={onFechar} acoes={<Button onClick={onFechar}>Fechar</Button>}>
-      <Valor valor={caixinha.saldo} sx={{ fontSize: 24, fontWeight: 800 }} />
-      <Button variant="contained" color="success" onClick={() => onEscolher("deposito")}>
+      <Valor valor={caixinha.saldo} sx={{ fontSize: 24, fontWeight: 500 }} />
+      <Button variant="contained" onClick={() => onEscolher("deposito")}>
         Guardar
       </Button>
       <Button variant="outlined" onClick={() => onEscolher("resgate")}>
@@ -465,7 +465,7 @@ function PainelReserva({ meses, saldo, outra, contador }: { meses: number; saldo
   const custo = useCustoDeVida();
   const s = custo.data ? situacaoDaReserva(saldo, meses, custo.data.valor) : null;
   return (
-    <Stack spacing={3} sx={{ bgcolor: cores.investimentoClaro, borderRadius: 4, p: 4 }}>
+    <Stack spacing={3} sx={{ bgcolor: paleta.interativo, borderRadius: `${raio.card}px`, p: 4 }}>
       {contador}
       {custo.isPending ? (
         <Typography variant="caption">Calculando o custo de vida…</Typography>
@@ -474,7 +474,7 @@ function PainelReserva({ meses, saldo, outra, contador }: { meses: number; saldo
           <Typography component="dt" variant="caption">
             Custo de vida
           </Typography>
-          <Typography component="dd" variant="body2" sx={{ m: 0, fontWeight: 700 }}>
+          <Typography component="dd" variant="body2" sx={{ m: 0, fontSize: 14 }}>
             {textoCustoDeVida(custo.data)}
           </Typography>
           {s?.sugerida != null && (
@@ -482,7 +482,7 @@ function PainelReserva({ meses, saldo, outra, contador }: { meses: number; saldo
               <Typography component="dt" variant="caption">
                 Reserva sugerida
               </Typography>
-              <Typography component="dd" variant="body2" sx={{ m: 0, fontWeight: 700 }}>
+              <Typography component="dd" variant="body2" sx={{ m: 0, fontSize: 14 }}>
                 {meses} × custo de vida = <Valor valor={s.sugerida} sx={{ font: "inherit" }} />
               </Typography>
             </>

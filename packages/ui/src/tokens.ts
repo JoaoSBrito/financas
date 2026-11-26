@@ -43,6 +43,14 @@ export const paleta = {
   veu: "rgba(10, 10, 16, 0.6)",
 } as const;
 
+/** Estados de interação: o texto principal em baixa opacidade. */
+export const estados = {
+  hover: "rgba(237, 237, 243, 0.06)",
+  foco: "rgba(237, 237, 243, 0.12)",
+  desabilitado: "rgba(237, 237, 243, 0.38)",
+  textoDesabilitado: "rgba(237, 237, 243, 0.4)",
+} as const;
+
 // ───────────────────────── Cores semânticas ─────────────────────────
 
 /** Fundo suave das semânticas: 14% da cor sobre o card. */
@@ -83,6 +91,8 @@ export const grafico = {
   inativo: "#5c5c70",
   area: paleta.interativo,
   linha: paleta.texto,
+  /** Faixas de distribuição (neutras); cada faixa também traz nome e percentual na legenda. */
+  distribuicao: [paleta.texto, paleta.textoSecundario, "#9a9aa8", paleta.bordaCampo, "#5c5c70"],
 } as const;
 
 // ───────────────────────── Tipografia ─────────────────────────
@@ -156,43 +166,3 @@ export const toqueMinimo = 44;
 export const iconeTraco = 1.5;
 
 export const breakpoints = { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 } as const;
-
-// ───────────────────────── Legado (visual anterior) ─────────────────────────
-// Mantidos só enquanto componentes e telas migram (etapas 2 a 4).
-// Removidos ao final da etapa 4; não use em código novo.
-
-/** @deprecated Use `paleta` e `semantica`. */
-export const cores = {
-  fundo: "#F3F4F6",
-  superficie: "#FFFFFF",
-  borda: "#E5E7EB",
-  bordaForte: "#D1D5DB",
-  texto: "#111827",
-  textoSuave: "#4B5563",
-  primaria: "#4338CA",
-  primariaEscura: "#312E81",
-  primariaClara: "#EEF2FF",
-  primariaMedia: "#A5B4FC",
-  destaque: "#1E1B4B",
-  investimento: "#0F766E",
-  investimentoEscuro: "#0F3D3A",
-  investimentoClaro: "#CCFBF1",
-  alerta: "#B45309",
-  alertaClaro: "#FEF3C7",
-  erro: "#B91C1C",
-} as const;
-
-/** @deprecated Use `raio`. */
-export const raios = {
-  pequeno: 8,
-  medio: 14,
-  card: 20,
-  destaque: 24,
-  pilula: 999,
-} as const;
-
-/** @deprecated Use `tipografia`. */
-export const fonte = {
-  familia: "var(--fonte-manrope), Manrope, system-ui, -apple-system, sans-serif",
-  pesos: { regular: 400, medio: 500, semi: 600, negrito: 700, extra: 800 },
-} as const;

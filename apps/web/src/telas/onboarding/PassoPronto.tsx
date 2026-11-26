@@ -33,7 +33,7 @@ export function PassoPronto() {
         <Dica titulo="Confirme o fechamento">Quando o banco divulgar a data, corrija a fatura estimada com um toque.</Dica>
         <Dica titulo="Confira a fatura">Em Cartões, marque cada lançamento que bate com o app do banco.</Dica>
       </SecaoCard>
-      <Button component={Link} href="/" variant="contained" size="large" sx={{ minHeight: 54, fontWeight: 800 }}>
+      <Button component={Link} href="/" variant="contained" size="large">
         Começar a usar
       </Button>
     </Stack>

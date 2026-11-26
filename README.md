@@ -91,3 +91,14 @@ O login por e-mail e senha funciona com o preenchimento automático do iCloud
 Pendências de infraestrutura: service worker com Serwist e notificações push
 (entram junto com os lembretes) e, na tarefa diária, a renovação das faturas
 futuras e os alertas de fechamento.
+
+## Visual (inspirado no Mercury)
+
+- Tema escuro, sem sombras; a profundidade vem dos tons fundo → card → interativo.
+- Fonte Inter (pesos 400 e 500), números tabulares.
+- Cobalto só na ação principal de cada tela; seleções usam pílula clara ou borda clara.
+- Cores semânticas dessaturadas (receita, atenção 80%, estouro 100%, confirmado/estimado),
+  sempre acompanhadas de sinal, percentual ou texto.
+- Tokens puros em `packages/ui/src/tokens.ts` (reaproveitáveis no Expo) e tema MUI em
+  `packages/ui/src/tema.ts`. Os contrastes WCAG AA são verificados em `packages/ui/test/tokens.test.ts`.
+- Alvos de toque de no mínimo 44px; navegação responsiva testada em `AppShell.test.tsx`.

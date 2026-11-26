@@ -59,7 +59,7 @@ export function FormularioEntrar() {
         helperText={errors.senha?.message}
         {...register("senha")}
       />
-      <Button type="submit" variant="contained" size="large" disabled={isSubmitting} sx={{ minHeight: 52 }}>
+      <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
         {isSubmitting ? "Entrando…" : "Entrar"}
       </Button>
     </Stack>

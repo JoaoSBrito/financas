@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { hojeEmSaoPaulo, nomeDoMes, situacaoDoOrcamento } from "@financas/core";
 import { BarraProgresso, CardIndicador, CarregandoLista, EstadoErro, EstadoVazio, SecaoCard, Valor } from "@financas/ui";
+import { raio } from "@financas/ui/tokens";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { useLancamentosDoMes, useOrcamentos, useSaidasDoMes } from "@/hooks/useInicio";
@@ -117,12 +118,12 @@ function Conteudo({
                 {i > 0 && <Divider />}
                 <ButtonBase
                   onClick={() => onEditar({ categoria: { ...c, orcamento } })}
-                  sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "stretch", gap: 1.5, py: 3, borderRadius: 2, textAlign: "left" }}
+                  sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "stretch", gap: 1.5, py: 3, borderRadius: `${raio.card}px`, textAlign: "left" }}
                 >
                   <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
                     <Typography variant="subtitle1">{c.nome}</Typography>
                     {orcamento ? (
-                      <Valor valor={orcamento} sx={{ fontSize: 14, fontWeight: 700 }} />
+                      <Valor valor={orcamento} sx={{ fontSize: 15 }} />
                     ) : (
                       <Typography variant="body2" sx={{ color: "text.secondary" }}>
                         Sem orçamento
@@ -134,10 +135,10 @@ function Conteudo({
                       compacta
                       rotulo={`${c.nome}: ${s.percentual}% do orçamento`}
                       percentual={s.percentual}
-                      tom={s.nivel === "normal" ? "primario" : "alerta"}
+                      tom={s.nivel === "normal" ? "primario" : s.nivel === "atencao" ? "alerta" : "estouro"}
                     />
                   ) : null}
-                  <Typography variant="caption" component="span" sx={{ color: s && s.nivel !== "normal" ? "warning.main" : undefined, fontWeight: s && s.nivel !== "normal" ? 700 : 400 }}>
+                  <Typography variant="caption" component="span" sx={{ color: !s || s.nivel === "normal" ? undefined : s.nivel === "atencao" ? "warning.main" : "error.main" }}>
                     {orcamento ? (
                       <>
                         {s!.percentual}% · <Valor valor={gasto} sx={{ font: "inherit" }} /> de <Valor valor={orcamento} sx={{ font: "inherit" }} />

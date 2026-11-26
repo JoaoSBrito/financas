@@ -66,7 +66,7 @@ function Janela({
           onEnviar?.();
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800 }}>{titulo}</DialogTitle>
+        <DialogTitle>{titulo}</DialogTitle>
         <DialogContent>
           <Stack spacing={4} sx={{ pt: 1 }}>
             {children}
@@ -82,7 +82,7 @@ function SeletorConta({ contas, valor, onChange }: { contas: Conta[]; valor: str
   if (contas.length <= 1) return null;
   return (
     <Stack spacing={2}>
-      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
         Conta
       </Typography>
       <PilulasSelecao rotulo="Conta" tamanho="pequeno" valor={valor} onChange={onChange} opcoes={contas.map((c) => ({ valor: c.id, rotulo: c.nome }))} />
@@ -96,7 +96,7 @@ function CampoCategoria({ valor, onChange }: { valor: string | null; onChange: (
   if (!categorias.data || categorias.data.length === 0) return null;
   return (
     <Stack spacing={2}>
-      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
         Categoria
       </Typography>
       <ChipsCategoria rotulo="Categoria" opcoes={categorias.data} valor={valor} onChange={onChange} />
@@ -208,12 +208,12 @@ export function DialogoAjustarSaldo({ conta, onFechar }: { conta: Conta; onFecha
       }
     >
       <Typography variant="body2" sx={{ color: "text.secondary" }}>
-        No app: <Valor valor={conta.saldo} sx={{ font: "inherit", fontWeight: 700 }} />
+        No app: <Valor valor={conta.saldo} sx={{ font: "inherit", color: "text.primary" }} />
       </Typography>
       <CampoMoeda label="Saldo no banco agora" valor={saldoReal} onChange={setSaldoReal} />
       {diferenca !== 0 && (
         <Alert severity="info">
-          A diferença de <Valor valor={diferenca} sinal="sempre" sx={{ font: "inherit", fontWeight: 700 }} /> será lançada como ajuste.
+          A diferença de <Valor valor={diferenca} sinal="sempre" sx={{ font: "inherit", color: "text.primary" }} /> será lançada como ajuste.
         </Alert>
       )}
       {ajustar.error && <Alert severity="error">{ajustar.error.message}</Alert>}
@@ -605,7 +605,7 @@ export function DialogoTransferir({ contas, onFechar }: { contas: Conta[]; onFec
         name="origemId"
         render={({ field }) => (
           <Stack spacing={2}>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
               De
             </Typography>
             <PilulasSelecao
@@ -628,7 +628,7 @@ export function DialogoTransferir({ contas, onFechar }: { contas: Conta[]; onFec
         name="destinoId"
         render={({ field, fieldState }) => (
           <Stack spacing={2}>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
               Para
             </Typography>
             <PilulasSelecao rotulo="Conta de destino" tamanho="pequeno" valor={field.value} onChange={field.onChange} opcoes={opcoes} />

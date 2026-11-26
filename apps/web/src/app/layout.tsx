@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
+import { paleta } from "@financas/ui/tokens";
 import { Providers } from "./providers";
 
 // Inter substitui a fonte do Mercury; o tema lê a variável --fonte-inter.
@@ -16,7 +17,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#171721",
+  themeColor: paleta.fundo,
   colorScheme: "dark",
 };
 

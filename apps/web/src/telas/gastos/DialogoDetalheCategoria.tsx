@@ -54,7 +54,7 @@ export function DialogoDetalheCategoria({ titulo, itens, cartoes, contas, catego
             <CloseRounded />
           </IconButton>
           <Box sx={{ flex: 1 }}>
-            <Typography id="titulo-detalhe-categoria" component="h2" sx={{ fontSize: 16, fontWeight: 800 }}>
+            <Typography id="titulo-detalhe-categoria" component="h2" sx={{ fontSize: 16, fontWeight: 500 }}>
               {titulo}
             </Typography>
             <Typography variant="caption">

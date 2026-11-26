@@ -52,7 +52,7 @@ export function PassoCartao({ cartoes, onContinuar }: { cartoes: CartaoCompleto[
                 </Typography>
                 <Typography variant="caption">{descreverRegra(c)}</Typography>
               </Box>
-              <Valor valor={c.limite} sx={{ fontSize: 14, fontWeight: 700 }} />
+              <Valor valor={c.limite} sx={{ fontSize: 15 }} />
             </Box>
           </Box>
         ))}
@@ -60,7 +60,7 @@ export function PassoCartao({ cartoes, onContinuar }: { cartoes: CartaoCompleto[
       <Button startIcon={<AddRounded />} onClick={() => setNovo(true)} sx={{ alignSelf: "flex-start" }}>
         Adicionar outro cartão
       </Button>
-      <Button variant="contained" size="large" onClick={onContinuar} sx={{ minHeight: 54, fontWeight: 800 }}>
+      <Button variant="contained" size="large" onClick={onContinuar}>
         Continuar
       </Button>
     </Stack>

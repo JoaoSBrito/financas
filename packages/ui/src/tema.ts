@@ -1,14 +1,14 @@
 "use client";
 
 import { createTheme } from "@mui/material/styles";
-import { breakpoints, espacoBase, paleta, raio, semantica, tipografia, toqueMinimo } from "./tokens";
+import { breakpoints, espacoBase, estados, paleta, raio, semantica, tipografia, toqueMinimo } from "./tokens";
 
 const { escala } = tipografia;
 const px = (n: number) => `${n}px`;
 const em = (n?: number) => (n ? `${n}em` : undefined);
 
 /** Fundo de hover discreto (texto a 6%). */
-const hover = "rgba(237, 237, 243, 0.06)";
+const hover = estados.hover;
 
 /**
  * Tema escuro "Mercury": sem sombras, cards de raio 12, controles em pílula,
@@ -26,13 +26,13 @@ export const tema = createTheme({
     error: { main: semantica.estouro.texto, contrastText: paleta.sobreClaro },
     info: { main: paleta.textoSecundario, contrastText: paleta.sobreClaro },
     background: { default: paleta.fundo, paper: paleta.card },
-    text: { primary: paleta.texto, secondary: paleta.textoSecundario, disabled: "rgba(237, 237, 243, 0.4)" },
+    text: { primary: paleta.texto, secondary: paleta.textoSecundario, disabled: estados.textoDesabilitado },
     divider: paleta.divisor,
     action: {
       hover,
       selected: paleta.interativo,
-      focus: "rgba(237, 237, 243, 0.12)",
-      disabled: "rgba(237, 237, 243, 0.38)",
+      focus: estados.foco,
+      disabled: estados.desabilitado,
       disabledBackground: paleta.interativo,
     },
   },

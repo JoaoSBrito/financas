@@ -45,7 +45,7 @@ export function TelaGastos() {
           <IconButton aria-label="Mês anterior" onClick={() => setMes(somarMeses(mes, -1))}>
             <ChevronLeftRounded />
           </IconButton>
-          <Typography aria-live="polite" sx={{ fontWeight: 800, fontSize: 18, minWidth: 180, textAlign: "center" }}>
+          <Typography aria-live="polite" sx={{ fontWeight: 500, fontSize: 17, minWidth: 180, textAlign: "center" }}>
             {maiuscula(nomeDoMes(mes))}
           </Typography>
           <IconButton aria-label="Próximo mês" onClick={() => setMes(somarMeses(mes, 1))}>
@@ -66,8 +66,8 @@ export function TelaGastos() {
 
       {gastos.isPending || categorias.isPending ? (
         <Stack spacing={4} aria-busy="true" aria-label="Carregando">
-          <Skeleton variant="rounded" height={120} sx={{ borderRadius: 5 }} />
-          <Skeleton variant="rounded" height={300} sx={{ borderRadius: 5 }} />
+          <Skeleton variant="rounded" height={120} />
+          <Skeleton variant="rounded" height={300} />
         </Stack>
       ) : gastos.isError || !gastos.resumo ? (
         <EstadoErro mensagem="Não foi possível carregar os gastos." onTentarNovamente={gastos.refetch} />

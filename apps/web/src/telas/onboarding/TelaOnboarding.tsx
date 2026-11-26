@@ -35,7 +35,7 @@ export function TelaOnboarding({ passo }: { passo: SlugPasso }) {
 
   let conteudo: React.ReactNode;
   if (cartoes.isPending || categorias.isPending || faturas.isPending) {
-    conteudo = <Skeleton variant="rounded" height={320} sx={{ borderRadius: 5 }} aria-label="Carregando" />;
+    conteudo = <Skeleton variant="rounded" height={320} aria-label="Carregando" />;
   } else if (cartoes.isError || categorias.isError || faturas.isError) {
     conteudo = (
       <EstadoErro

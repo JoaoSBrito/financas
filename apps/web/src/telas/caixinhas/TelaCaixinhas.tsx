@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { evolucaoMensal, hojeEmSaoPaulo } from "@financas/core";
 import { CardCaixinha, EstadoErro, EstadoVazio, SecaoCard, Valor } from "@financas/ui";
-import { cores } from "@financas/ui/tokens";
+import { grafico, paleta, semantica } from "@financas/ui/tokens";
 import { useCaixinhas, useMovimentosCaixinhas } from "@/hooks/useCaixinhas";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useContas } from "@/hooks/useContas";
@@ -26,7 +26,7 @@ const GraficoEvolucao = dynamic(() => import("@/componentes/graficos/GraficoEvol
   loading: () => <Skeleton variant="rounded" height={200} />,
 });
 
-const CORES_DISTRIBUICAO = ["#0F766E", "#5EEAD4", "#B45309", "#4338CA", "#A5B4FC", "#9CA3AF"];
+const CORES_DISTRIBUICAO = grafico.distribuicao;
 
 type Dialogo =
   | { tipo: "nova" }
@@ -55,8 +55,8 @@ export function TelaCaixinhas() {
   if (carregando) {
     corpo = (
       <Stack spacing={4} aria-busy="true" aria-label="Carregando">
-        <Skeleton variant="rounded" height={180} sx={{ borderRadius: 6 }} />
-        <Skeleton variant="rounded" height={260} sx={{ borderRadius: 5 }} />
+        <Skeleton variant="rounded" height={180} />
+        <Skeleton variant="rounded" height={260} />
       </Stack>
     );
   } else if (erro) {
@@ -92,36 +92,36 @@ export function TelaCaixinhas() {
 
     corpo = (
       <Stack spacing={4}>
-        <Card component="section" aria-label="Patrimônio guardado" sx={{ bgcolor: cores.investimentoEscuro, color: "#FFFFFF", borderRadius: 6, p: { xs: 5.5, md: 6 }, display: "flex", flexDirection: "column", gap: 4 }}>
-          <Typography variant="subtitle2" sx={{ color: cores.investimentoClaro }}>
+        <Card component="section" aria-label="Patrimônio guardado" sx={{ p: { xs: "20px", md: "32px" }, display: "flex", flexDirection: "column", gap: 4 }}>
+          <Typography variant="subtitle2" sx={{ color: "text.secondary" }}>
             Patrimônio guardado
           </Typography>
-          <Valor valor={r.total} component="p" sx={{ m: 0, fontSize: { xs: 34, md: 38 }, fontWeight: 800, letterSpacing: "-0.5px" }} />
+          <Valor valor={r.total} component="p" sx={{ m: 0, fontSize: 40, fontWeight: 500, lineHeight: 1.15, letterSpacing: "-0.02em" }} />
           <Box sx={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             <Box>
-              <Typography variant="caption" sx={{ color: cores.investimentoClaro }}>
+              <Typography variant="caption">
                 Rendeu no mês
               </Typography>
-              <Valor valor={r.rendeuNoMes} sinal="sempre" component="div" sx={{ fontWeight: 800 }} />
+              <Valor valor={r.rendeuNoMes} sinal="sempre" component="div" sx={{ fontSize: 14, color: semantica.receita.texto }} />
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ color: cores.investimentoClaro }}>
+              <Typography variant="caption">
                 Rendeu no ano
               </Typography>
-              <Valor valor={r.rendeuNoAno} sinal="sempre" component="div" sx={{ fontWeight: 800 }} />
+              <Valor valor={r.rendeuNoAno} sinal="sempre" component="div" sx={{ fontSize: 14, color: semantica.receita.texto }} />
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ color: cores.investimentoClaro }}>
+              <Typography variant="caption">
                 Guardado no mês
               </Typography>
-              <Valor valor={r.guardadoNoMes} sinal="sempre" component="div" sx={{ fontWeight: 800 }} />
+              <Valor valor={r.guardadoNoMes} sinal="sempre" component="div" sx={{ fontSize: 14 }} />
             </Box>
           </Box>
           <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 2.5, maxWidth: { md: 420 } }}>
-            <Button onClick={() => setDialogo({ tipo: "movimentar", mov: "deposito" })} sx={{ bgcolor: "#FFFFFF", color: cores.investimentoEscuro, fontWeight: 800, "&:hover": { bgcolor: cores.investimentoClaro } }}>
+            <Button variant="contained" onClick={() => setDialogo({ tipo: "movimentar", mov: "deposito" })}>
               Guardar
             </Button>
-            <Button onClick={() => setDialogo({ tipo: "movimentar", mov: "resgate" })} variant="outlined" sx={{ color: "#FFFFFF", borderColor: "rgba(255,255,255,0.5)" }}>
+            <Button variant="contained" color="secondary" onClick={() => setDialogo({ tipo: "movimentar", mov: "resgate" })}>
               Resgatar
             </Button>
           </Box>
@@ -141,7 +141,7 @@ export function TelaCaixinhas() {
                 </Typography>
               ) : (
                 <>
-                  <Box role="img" aria-label={comSaldo.map((c) => `${c.nome}: ${Math.round((c.saldo / r.total) * 100)}%`).join(", ")} sx={{ height: 14, borderRadius: 2, overflow: "hidden", display: "flex" }}>
+                  <Box role="img" aria-label={comSaldo.map((c) => `${c.nome}: ${Math.round((c.saldo / r.total) * 100)}%`).join(", ")} sx={{ height: 8, borderRadius: "4px", overflow: "hidden", display: "flex", gap: "2px" }}>
                     {comSaldo.map((c, i) => (
                       <Box key={c.id} sx={{ width: `${(c.saldo / r.total) * 100}%`, bgcolor: CORES_DISTRIBUICAO[i % CORES_DISTRIBUICAO.length] }} />
                     ))}
@@ -149,11 +149,11 @@ export function TelaCaixinhas() {
                   <Stack spacing={2}>
                     {comSaldo.map((c, i) => (
                       <Box key={c.id} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Box aria-hidden sx={{ width: 12, height: 12, borderRadius: 1.5, bgcolor: CORES_DISTRIBUICAO[i % CORES_DISTRIBUICAO.length] }} />
+                        <Box aria-hidden sx={{ width: 10, height: 10, borderRadius: "5px", bgcolor: CORES_DISTRIBUICAO[i % CORES_DISTRIBUICAO.length] }} />
                         <Typography variant="body2" sx={{ flex: 1 }}>
                           {c.nome}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        <Typography variant="body2">
                           {Math.round((c.saldo / r.total) * 100)}%
                         </Typography>
                       </Box>

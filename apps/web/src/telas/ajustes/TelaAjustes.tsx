@@ -14,13 +14,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { SecaoCard } from "@financas/ui";
-import { cores } from "@financas/ui/tokens";
+import { paleta, raio } from "@financas/ui/tokens";
 import { supabaseNavegador } from "@/lib/supabase/client";
 
 function ItemMenu({ href, icone, titulo, descricao }: { href: string; icone: ReactNode; titulo: string; descricao: string }) {
   return (
-    <ButtonBase component={Link} href={href} sx={{ width: "100%", justifyContent: "flex-start", gap: 3, minHeight: 64, borderRadius: 3, textAlign: "left" }}>
-      <Box aria-hidden sx={{ width: 40, height: 40, borderRadius: 3, bgcolor: cores.primariaClara, color: cores.primaria, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <ButtonBase component={Link} href={href} sx={{ width: "100%", justifyContent: "flex-start", gap: 3.5, minHeight: 68, borderRadius: `${raio.card}px`, textAlign: "left" }}>
+      <Box aria-hidden sx={{ width: 36, height: 36, borderRadius: `${raio.circulo}px`, bgcolor: paleta.interativo, color: paleta.texto, display: "flex", alignItems: "center", justifyContent: "center" }}>
         {icone}
       </Box>
       <Box sx={{ flex: 1 }}>

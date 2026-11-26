@@ -76,7 +76,7 @@ export function PassoParcelamentos({ cartoes, categorias, faturas, hoje, onConti
                       {nomeCartao.get(c.cartaoId)} · {c.parcelaAtual ? `parcela ${c.parcelaAtual} de ${c.totalParcelas}` : "só histórico"}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
+                  <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
                     faltam <Valor valor={c.restante} sx={{ font: "inherit" }} />
                   </Typography>
                   <IconButton
@@ -94,7 +94,7 @@ export function PassoParcelamentos({ cartoes, categorias, faturas, hoje, onConti
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 Comprometido nas próximas faturas
               </Typography>
-              <Valor valor={comprometido} sx={{ fontWeight: 800 }} />
+              <Valor valor={comprometido} sx={{ fontWeight: 500 }} />
             </Box>
           </SecaoCard>
         )
@@ -104,11 +104,11 @@ export function PassoParcelamentos({ cartoes, categorias, faturas, hoje, onConti
         variant="outlined"
         startIcon={<AddRounded />}
         onClick={() => setAdicionando(true)}
-        sx={{ minHeight: 52, borderStyle: "dashed", borderWidth: 1.5, fontWeight: 800 }}
+        sx={{ minHeight: 52, borderStyle: "dashed" }}
       >
         Adicionar parcelamento
       </Button>
-      <Button variant="contained" size="large" onClick={onContinuar} sx={{ minHeight: 54, fontWeight: 800 }}>
+      <Button variant="contained" size="large" onClick={onContinuar}>
         {itens.length === 0 ? "Não tenho parcelamentos" : "Continuar"}
       </Button>
     </Stack>

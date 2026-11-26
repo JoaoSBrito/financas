@@ -68,7 +68,7 @@ export function DialogoCategoria({ mes, categoria, onFechar }: DialogoCategoriaP
   return (
     <Dialog open onClose={ocupado ? undefined : onFechar} fullWidth maxWidth="xs">
       <form onSubmit={handleSubmit(enviar)} noValidate>
-        <DialogTitle sx={{ fontWeight: 800 }}>
+        <DialogTitle>
           {confirmandoArquivo ? "Arquivar categoria?" : categoria ? "Editar categoria" : "Nova categoria"}
         </DialogTitle>
         <DialogContent>

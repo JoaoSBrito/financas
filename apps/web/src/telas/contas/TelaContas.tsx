@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { formatarDiaMes, hojeEmSaoPaulo, mesDe, type ItemProjetado } from "@financas/core";
 import { CardSaldoProjetado, EstadoErro, EstadoVazio, ItemLancamento, SecaoCard, Valor } from "@financas/ui";
-import { cores } from "@financas/ui/tokens";
+import { paleta, raio, semantica } from "@financas/ui/tokens";
 import { useContas, useMovimentosDoMes, useProjecao, useRecorrentes } from "@/hooks/useContas";
 import type { Conta, MovimentoConta, Recorrente } from "@/services/contas";
 import {
@@ -86,8 +86,8 @@ export function TelaContas() {
   if (projecao.isPending) {
     corpo = (
       <Stack spacing={4} aria-busy="true" aria-label="Carregando">
-        <Skeleton variant="rounded" height={240} sx={{ borderRadius: 5 }} />
-        <Skeleton variant="rounded" height={300} sx={{ borderRadius: 5 }} />
+        <Skeleton variant="rounded" height={240} />
+        <Skeleton variant="rounded" height={300} />
       </Stack>
     );
   } else if (projecao.isError) {
@@ -124,14 +124,14 @@ export function TelaContas() {
           outros={p.outros}
         />
         <Box sx={{ display: "grid", gridTemplateColumns: `repeat(${listaContas.length > 1 ? 3 : 2}, minmax(0, 1fr))`, gap: 3 }}>
-          <Button variant="outlined" startIcon={<AddRounded />} onClick={() => setDialogo({ tipo: "movimento", mov: "entrada" })} sx={{ minHeight: 50, color: cores.investimento, borderColor: cores.bordaForte, bgcolor: "background.paper" }}>
+          <Button variant="contained" color="secondary" startIcon={<AddRounded />} onClick={() => setDialogo({ tipo: "movimento", mov: "entrada" })} sx={{ minHeight: 48 }}>
             Entrada
           </Button>
-          <Button variant="outlined" startIcon={<RemoveRounded />} onClick={() => setDialogo({ tipo: "movimento", mov: "saida" })} sx={{ minHeight: 50, color: "text.primary", borderColor: cores.bordaForte, bgcolor: "background.paper" }}>
+          <Button variant="contained" color="secondary" startIcon={<RemoveRounded />} onClick={() => setDialogo({ tipo: "movimento", mov: "saida" })} sx={{ minHeight: 48 }}>
             Saída / Pix
           </Button>
           {listaContas.length > 1 && (
-            <Button variant="outlined" startIcon={<SwapHorizRounded />} onClick={() => setDialogo({ tipo: "transferir" })} sx={{ minHeight: 50, color: "text.primary", borderColor: cores.bordaForte, bgcolor: "background.paper" }}>
+            <Button variant="contained" color="secondary" startIcon={<SwapHorizRounded />} onClick={() => setDialogo({ tipo: "transferir" })} sx={{ minHeight: 48 }}>
               Transferir
             </Button>
           )}
@@ -161,7 +161,7 @@ export function TelaContas() {
                         detalhe={`${formatarDiaMes(i.data)} · ${ROTULO_ORIGEM[i.origem]}${recorrente ? " · tocar para lançar" : agendado ? " · tocar para editar" : ""}`}
                         valor={i.valor}
                         sinal="sempre"
-                        corValor={i.valor > 0 ? cores.investimento : undefined}
+                        corValor={i.valor > 0 ? semantica.receita.texto : undefined}
                         extra={
                           <Typography variant="caption" sx={{ color: i.saldoApos < 0 ? "error.main" : undefined }}>
                             <Valor valor={i.saldoApos} sx={{ font: "inherit" }} />
@@ -194,7 +194,7 @@ export function TelaContas() {
                       detalhe={`${formatarDiaMes(m.data)} · ${m.entreContas ? "entre contas" : ROTULO_TIPO[m.tipo]} · ${listaContas.find((c) => c.id === m.contaId)?.nome ?? ""}`}
                       valor={m.valor}
                       sinal="sempre"
-                      corValor={m.valor > 0 ? cores.investimento : undefined}
+                      corValor={m.valor > 0 ? semantica.receita.texto : undefined}
                       onAbrir={acaoDoMovimento(m) ? () => setDialogo(acaoDoMovimento(m)) : undefined}
                     />
                   </Box>
@@ -210,16 +210,16 @@ export function TelaContas() {
                   {n > 0 && <Divider />}
                   <ButtonBase
                     onClick={() => setDialogo({ tipo: "ajustar", conta: c })}
-                    sx={{ width: "100%", gap: 3, minHeight: 64, borderRadius: 2, justifyContent: "flex-start", textAlign: "left" }}
+                    sx={{ width: "100%", gap: 3, minHeight: 64, borderRadius: `${raio.card}px`, justifyContent: "flex-start", textAlign: "left" }}
                   >
-                    <Box aria-hidden sx={{ width: 40, height: 40, borderRadius: 3, bgcolor: cores.primariaClara, color: cores.primaria, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Box aria-hidden sx={{ width: 36, height: 36, borderRadius: `${raio.circulo}px`, bgcolor: paleta.interativo, color: paleta.texto, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <AccountBalanceRounded fontSize="small" />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant="subtitle1">{c.nome}</Typography>
                       <Typography variant="caption">{diasDesde(c.conferidaEm, hoje)}</Typography>
                     </Box>
-                    <Valor valor={c.saldo} sx={{ fontSize: 15, fontWeight: 800 }} />
+                    <Valor valor={c.saldo} sx={{ fontSize: 15 }} />
                   </ButtonBase>
                 </Box>
               ))}
@@ -247,7 +247,7 @@ export function TelaContas() {
                     {n > 0 && <Divider />}
                     <ButtonBase
                       onClick={() => setDialogo({ tipo: "recorrente", recorrente: r })}
-                      sx={{ width: "100%", justifyContent: "space-between", minHeight: 48, borderRadius: 2 }}
+                      sx={{ width: "100%", justifyContent: "space-between", minHeight: 48, borderRadius: `${raio.card}px` }}
                     >
                       <Typography variant="body2">
                         {r.descricao} · dia {r.dia}
@@ -255,7 +255,7 @@ export function TelaContas() {
                       <Valor
                         valor={r.tipo === "entrada" ? r.valor : -r.valor}
                         sinal="sempre"
-                        sx={{ fontSize: 14, fontWeight: 700, color: r.tipo === "entrada" ? cores.investimento : undefined }}
+                        sx={{ fontSize: 14, color: r.tipo === "entrada" ? semantica.receita.texto : undefined }}
                       />
                     </ButtonBase>
                   </Box>

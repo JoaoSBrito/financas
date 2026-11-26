@@ -60,7 +60,7 @@ function SaldoDoCartao({
             <Typography variant="body2" sx={{ flex: 1 }}>
               Saldo inicial{m ? ` · fatura de ${nomeDoMes(m, false)}` : ""}
             </Typography>
-            <Valor valor={c.valorTotal} sx={{ fontWeight: 700 }} />
+            <Valor valor={c.valorTotal} />
             <IconButton
               aria-label="Excluir saldo inicial"
               disabled={excluir.isPending}
@@ -129,11 +129,11 @@ export function PassoFatura({
       ))}
       <Typography variant="body2" sx={{ textAlign: "center", color: "text.secondary" }}>
         Prefere lançar um a um, com categoria?{" "}
-        <Link href="/gastos/novo" style={{ color: "inherit", fontWeight: 700 }}>
+        <Link href="/gastos/novo" style={{ color: "inherit" }}>
           Lançar gastos
         </Link>
       </Typography>
-      <Button variant="contained" size="large" onClick={onContinuar} sx={{ minHeight: 54, fontWeight: 800 }}>
+      <Button variant="contained" size="large" onClick={onContinuar}>
         Continuar
       </Button>
     </Stack>
