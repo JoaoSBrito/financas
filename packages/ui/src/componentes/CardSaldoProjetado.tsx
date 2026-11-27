@@ -20,6 +20,8 @@ export interface CardSaldoProjetadoProps {
   outros?: Centavos;
   /** Só o valor e uma linha de apoio (Início no celular). */
   compacto?: boolean;
+  /** Gráfico opcional abaixo do valor (ex.: saldo ao longo do mês). */
+  grafico?: ReactNode;
   /** Ex.: seta indicando que o card leva para Contas. */
   acessorio?: ReactNode;
 }
@@ -47,6 +49,7 @@ export function CardSaldoProjetado({
   contasFixas,
   outros = 0,
   compacto = false,
+  grafico,
   acessorio,
 }: CardSaldoProjetadoProps) {
   const negativo = saldoFinal < 0;
@@ -65,6 +68,7 @@ export function CardSaldoProjetado({
         component="p"
         sx={{ m: 0, fontSize: compacto ? 26 : 36, fontWeight: 500, lineHeight: 1.1, letterSpacing: `${tipografia.escala.valorDestaque.espacamento}em`, color: negativo ? semantica.estouro.texto : undefined }}
       />
+      {grafico}
       {compacto ? (
         <Typography variant="caption" component="p">
           Saldo hoje <Valor valor={saldoHoje} sx={{ font: "inherit" }} />

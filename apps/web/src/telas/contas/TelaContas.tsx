@@ -1,9 +1,6 @@
 "use client";
 
-import AccountBalanceRounded from "@mui/icons-material/AccountBalanceRounded";
 import AddRounded from "@mui/icons-material/AddRounded";
-import RemoveRounded from "@mui/icons-material/RemoveRounded";
-import SwapHorizRounded from "@mui/icons-material/SwapHorizRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
@@ -13,8 +10,9 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { formatarDiaMes, hojeEmSaoPaulo, mesDe, type ItemProjetado } from "@financas/core";
-import { CardSaldoProjetado, EstadoErro, EstadoVazio, ItemLancamento, SecaoCard, Valor } from "@financas/ui";
-import { paleta, raio, semantica } from "@financas/ui/tokens";
+import { CardSaldoProjetado, EstadoErro, EstadoVazio, ItemMovimento, Rotulo, SecaoCard, Valor } from "@financas/ui";
+import { paleta, raio, semantica, tipografia } from "@financas/ui/tokens";
+import GraficoDegraus from "@/componentes/graficos/GraficoDegraus";
 import { useContas, useMovimentosDoMes, useProjecao, useRecorrentes } from "@/hooks/useContas";
 import type { Conta, MovimentoConta, Recorrente } from "@/services/contas";
 import {
@@ -122,24 +120,35 @@ export function TelaContas() {
           faturas={p.faturasAVencer}
           contasFixas={p.contasFixas}
           outros={p.outros}
+          grafico={<GraficoDegraus hoje={hoje} ate={p.ate} saldoHoje={p.saldoHoje} pontos={p.itens.map((i) => ({ data: i.data, saldo: i.saldoApos }))} />}
         />
-        <Box sx={{ display: "grid", gridTemplateColumns: `repeat(${listaContas.length > 1 ? 3 : 2}, minmax(0, 1fr))`, gap: 3 }}>
-          <Button variant="contained" color="secondary" startIcon={<AddRounded />} onClick={() => setDialogo({ tipo: "movimento", mov: "entrada" })} sx={{ minHeight: 48 }}>
-            Entrada
-          </Button>
-          <Button variant="contained" color="secondary" startIcon={<RemoveRounded />} onClick={() => setDialogo({ tipo: "movimento", mov: "saida" })} sx={{ minHeight: 48 }}>
-            Saída / Pix
-          </Button>
-          {listaContas.length > 1 && (
-            <Button variant="contained" color="secondary" startIcon={<SwapHorizRounded />} onClick={() => setDialogo({ tipo: "transferir" })} sx={{ minHeight: 48 }}>
-              Transferir
-            </Button>
-          )}
+        {/* Lançar: controle segmentado, cada opção com o sinal na frente. */}
+        <Box
+          role="group"
+          aria-label="Lançar"
+          sx={{ display: "grid", gridTemplateColumns: `repeat(${listaContas.length > 1 ? 3 : 2}, minmax(0, 1fr))`, border: `1px solid ${paleta.bordaControle}`, borderRadius: "8px", overflow: "hidden" }}
+        >
+          {[
+            { sinal: "+", rotulo: "Entrada", cor: semantica.receita.texto, acao: () => setDialogo({ tipo: "movimento", mov: "entrada" }) },
+            { sinal: "−", rotulo: "Saída / Pix", cor: paleta.texto, acao: () => setDialogo({ tipo: "movimento", mov: "saida" }) },
+            ...(listaContas.length > 1 ? [{ sinal: "⇄", rotulo: "Transferir", cor: paleta.texto, acao: () => setDialogo({ tipo: "transferir" }) }] : []),
+          ].map((b, i, todos) => (
+            <ButtonBase
+              key={b.rotulo}
+              onClick={b.acao}
+              sx={{ minHeight: 48, gap: 1.5, fontSize: 14, color: "text.primary", borderRight: i < todos.length - 1 ? `1px solid ${paleta.bordaControle}` : "none", "&:hover": { bgcolor: paleta.elevado } }}
+            >
+              <Box component="span" aria-hidden sx={{ fontFamily: tipografia.familiaMono, color: b.cor }}>
+                {b.sinal}
+              </Box>
+              {b.rotulo}
+            </ButtonBase>
+          ))}
         </Box>
 
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "flex-start" }}>
           <Stack spacing={4} sx={{ flex: "2 1 460px", minWidth: 0 }}>
-            <SecaoCard titulo="Próximos movimentos" acao={<Typography variant="caption">saldo após</Typography>} gap={1}>
+            <SecaoCard titulo="Próximos movimentos" acao={<Rotulo aria-hidden>Valor · Saldo após</Rotulo>} gap={1}>
               {p.itens.length === 0 ? (
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   Nada previsto até {formatarDiaMes(p.ate)}.
@@ -156,17 +165,11 @@ export function TelaContas() {
                   return (
                     <Box key={`${i.data}-${i.descricao}-${n}`}>
                       {n > 0 && <Divider />}
-                      <ItemLancamento
+                      <ItemMovimento
                         descricao={i.descricao}
                         detalhe={`${formatarDiaMes(i.data)} · ${ROTULO_ORIGEM[i.origem]}${recorrente ? " · tocar para lançar" : agendado ? " · tocar para editar" : ""}`}
                         valor={i.valor}
-                        sinal="sempre"
-                        corValor={i.valor > 0 ? semantica.receita.texto : undefined}
-                        extra={
-                          <Typography variant="caption" sx={{ color: i.saldoApos < 0 ? "error.main" : undefined }}>
-                            <Valor valor={i.saldoApos} sx={{ font: "inherit" }} />
-                          </Typography>
-                        }
+                        saldoApos={i.saldoApos}
                         onAbrir={abrir}
                       />
                     </Box>
@@ -189,12 +192,10 @@ export function TelaContas() {
                 realizados.slice(0, 15).map((m, n) => (
                   <Box key={m.id}>
                     {n > 0 && <Divider />}
-                    <ItemLancamento
+                    <ItemMovimento
                       descricao={m.descricao}
                       detalhe={`${formatarDiaMes(m.data)} · ${m.entreContas ? "entre contas" : ROTULO_TIPO[m.tipo]} · ${listaContas.find((c) => c.id === m.contaId)?.nome ?? ""}`}
                       valor={m.valor}
-                      sinal="sempre"
-                      corValor={m.valor > 0 ? semantica.receita.texto : undefined}
                       onAbrir={acaoDoMovimento(m) ? () => setDialogo(acaoDoMovimento(m)) : undefined}
                     />
                   </Box>
@@ -204,26 +205,27 @@ export function TelaContas() {
           </Stack>
 
           <Stack spacing={4} sx={{ flex: "1 1 300px", minWidth: 0 }}>
-            <SecaoCard titulo="Minhas contas" gap={1}>
-              {listaContas.map((c, n) => (
-                <Box key={c.id}>
-                  {n > 0 && <Divider />}
-                  <ButtonBase
-                    onClick={() => setDialogo({ tipo: "ajustar", conta: c })}
-                    sx={{ width: "100%", gap: 3, minHeight: 64, borderRadius: `${raio.card}px`, justifyContent: "flex-start", textAlign: "left" }}
-                  >
-                    <Box aria-hidden sx={{ width: 36, height: 36, borderRadius: `${raio.circulo}px`, bgcolor: paleta.interativo, color: paleta.texto, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <AccountBalanceRounded fontSize="small" />
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="subtitle1">{c.nome}</Typography>
-                      <Typography variant="caption">{diasDesde(c.conferidaEm, hoje)}</Typography>
-                    </Box>
-                    <Valor valor={c.saldo} sx={{ fontSize: 15 }} />
-                  </ButtonBase>
-                </Box>
-              ))}
-              <Typography variant="caption" component="p" sx={{ pt: 2 }}>
+            <SecaoCard titulo="Minhas contas" gap={3}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 2 }}>
+                {listaContas.map((c) => {
+                  const hojeConferida = c.conferidaEm === hoje;
+                  return (
+                    <ButtonBase
+                      key={c.id}
+                      onClick={() => setDialogo({ tipo: "ajustar", conta: c })}
+                      sx={{ border: `1px solid ${paleta.divisor}`, borderRadius: "10px", bgcolor: paleta.fundo, p: 3.5, flexDirection: "column", alignItems: "flex-start", gap: 1.5, textAlign: "left", "&:hover": { borderColor: paleta.bordaControle } }}
+                    >
+                      <Typography sx={{ fontSize: 15 }}>{c.nome}</Typography>
+                      <Valor valor={c.saldo} sx={{ fontSize: 18, fontWeight: 500 }} />
+                      <Box component="span" sx={{ fontFamily: tipografia.familiaMono, fontSize: 10, textTransform: "uppercase", color: hojeConferida ? semantica.receita.texto : "text.secondary" }}>
+                        {hojeConferida ? "✓ " : ""}
+                        {diasDesde(c.conferidaEm, hoje)}
+                      </Box>
+                    </ButtonBase>
+                  );
+                })}
+              </Box>
+              <Typography variant="caption" component="p">
                 Toque numa conta para conferir com o saldo do banco.
               </Typography>
             </SecaoCard>
@@ -231,7 +233,7 @@ export function TelaContas() {
             <SecaoCard
               titulo="Recorrentes"
               acao={
-                <Button size="small" startIcon={<AddRounded />} onClick={() => setDialogo({ tipo: "recorrente" })} sx={{ minHeight: 36 }}>
+                <Button size="small" startIcon={<AddRounded />} onClick={() => setDialogo({ tipo: "recorrente" })}>
                   Recorrente
                 </Button>
               }
@@ -249,9 +251,14 @@ export function TelaContas() {
                       onClick={() => setDialogo({ tipo: "recorrente", recorrente: r })}
                       sx={{ width: "100%", justifyContent: "space-between", minHeight: 48, borderRadius: `${raio.card}px` }}
                     >
-                      <Typography variant="body2">
-                        {r.descricao} · dia {r.dia}
-                      </Typography>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 3, minWidth: 0 }}>
+                        <Box component="span" sx={{ fontFamily: tipografia.familiaMono, fontSize: 11, textTransform: "uppercase", color: "text.secondary", minWidth: 44, textAlign: "left" }}>
+                          Dia {r.dia}
+                        </Box>
+                        <Typography variant="body2" sx={{ fontSize: 14 }}>
+                          {r.descricao}
+                        </Typography>
+                      </Box>
                       <Valor
                         valor={r.tipo === "entrada" ? r.valor : -r.valor}
                         sinal="sempre"

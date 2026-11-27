@@ -58,7 +58,7 @@ describe("TelaCaixinhas", () => {
 
   it("mostra patrimônio, rendimento e a caixinha", () => {
     render(<TelaCaixinhas />);
-    const t = normalizar(screen.getByRole("region", { name: "Patrimônio guardado" }).textContent);
+    const t = normalizar(screen.getByRole("region", { name: "Patrimônio investido" }).textContent);
     expect(t).toContain("R$ 12.152,30");
     expect(t).toContain("Rendeu no mês+ R$ 152,30");
     expect(normalizar(screen.getByRole("article", { name: "Reserva" }).textContent)).toContain("102% do CDI");
@@ -88,7 +88,7 @@ describe("TelaCaixinhas", () => {
   it("cria caixinha com saldo inicial e % do CDI opcional", async () => {
     const user = userEvent.setup();
     render(<TelaCaixinhas />);
-    await user.click(screen.getByRole("button", { name: "Caixinha" }));
+    await user.click(screen.getByRole("button", { name: "Nova caixinha" }));
     const dialogo = screen.getByRole("dialog");
     await user.type(within(dialogo).getByLabelText("Nome"), "Viagem");
     await user.type(within(dialogo).getByLabelText("Quanto já tem guardado"), "1000");
@@ -113,7 +113,7 @@ describe("TelaCaixinhas", () => {
   it("ligar a reserva troca meta, data e cartão pelo contador de meses", async () => {
     const user = userEvent.setup();
     render(<TelaCaixinhas />);
-    await user.click(screen.getByRole("button", { name: "Caixinha" }));
+    await user.click(screen.getByRole("button", { name: "Nova caixinha" }));
     const dialogo = screen.getByRole("dialog");
     await user.type(within(dialogo).getByLabelText("Nome"), "Reserva nova");
     await user.type(within(dialogo).getByLabelText("Meta (opcional)"), "500");
@@ -133,5 +133,13 @@ describe("TelaCaixinhas", () => {
       percentualCdi: null,
       reservaMeses: 7,
     });
+  });
+
+  it("as caixinhas ficam num módulo próprio, com as ações e o patrimônio por tipo", () => {
+    render(<TelaCaixinhas />);
+    const modulo = screen.getByRole("region", { name: "Caixinhas" });
+    expect(within(modulo).getByRole("button", { name: "Guardar" })).toBeInTheDocument();
+    expect(within(modulo).getByRole("button", { name: "Nova caixinha" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Caixinhas: 100% do patrimônio" })).toBeInTheDocument();
   });
 });
