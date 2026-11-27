@@ -34,6 +34,18 @@ describe("Valor", () => {
     expect(screen.getByLabelText("Valor oculto")).toBeInTheDocument();
     expect(screen.queryByText(/1\.842/)).not.toBeInTheDocument();
   });
+
+  it("sem símbolo para tabelas, mantendo o sinal e o ocultar", () => {
+    const { unmount } = render(<Valor valor={-62000} semSimbolo />);
+    expect(normalizar(screen.getByText(/620,00/).textContent)).toBe("− 620,00");
+    unmount();
+    render(
+      <ProvedorOcultarValores oculto>
+        <Valor valor={62000} semSimbolo />
+      </ProvedorOcultarValores>,
+    );
+    expect(screen.getByLabelText("Valor oculto")).toHaveTextContent("••••");
+  });
 });
 
 describe("SeloStatus", () => {

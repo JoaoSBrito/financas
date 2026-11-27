@@ -6,16 +6,16 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Snackbar from "@mui/material/Snackbar";
-import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { cartaoFormSchema, type CartaoForm } from "@financas/core";
-import { CampoMoeda, ControleSegmentado, SecaoCard } from "@financas/ui";
+import { CampoMoeda, CartaoFisico, ControleSegmentado, estiloPainel, Rotulo, SecaoCard, Valor } from "@financas/ui";
+import { corDoCartao, fundoDoCartao, paleta, tipografia } from "@financas/ui/tokens";
 import { useSalvarCartao } from "@/hooks/useCartoes";
 import type { Fatura } from "@/services/cartoes-mapeamento";
 import { PreviaFechamentos } from "./PreviaFechamentos";
@@ -29,9 +29,36 @@ export interface FormularioCartaoProps {
   faturas: Fatura[];
   /** Sem callback, um cartão novo leva à lista de cartões depois de salvo. */
   onSalvo?: (cartaoId: string) => void;
+  /** Posição na lista de cartões: define a cor da prévia (cartão novo = o próximo). */
+  indiceCor?: number;
 }
 
-export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo }: FormularioCartaoProps) {
+/** Cartão físico com os dados que estão sendo digitados. */
+function PreviaCartao({ indiceCor }: { indiceCor: number }) {
+  const { control } = useFormContext<CartaoForm>();
+  const [nome, final, limite, diaVencimento] = useWatch({ control, name: ["nome", "final", "limite", "diaVencimento"] });
+  const diaOk = Number.isInteger(diaVencimento) && diaVencimento >= 1 && diaVencimento <= 31;
+  return (
+    <Box sx={{ width: "100%", maxWidth: 340, alignSelf: "center" }}>
+      <CartaoFisico
+        nome={nome?.trim() || "Novo cartão"}
+        final={final && /^\d{4}$/.test(final) ? final : null}
+        cor={corDoCartao(indiceCor)}
+        fundo={fundoDoCartao(indiceCor)}
+        rodape={
+          <>
+            <span>
+              Limite <Valor valor={limite || 0} semSimbolo sx={{ font: "inherit" }} />
+            </span>
+            {diaOk && <span>Vence dia {diaVencimento}</span>}
+          </>
+        }
+      />
+    </Box>
+  );
+}
+
+export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo, indiceCor = 0 }: FormularioCartaoProps) {
   const router = useRouter();
   const salvar = useSalvarCartao(cartaoId);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -63,13 +90,29 @@ export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo }: Formul
     });
   }
 
+  // Celular: uma coluna na ordem do design (prévia, dados, vencimento, regra, fechamentos, avisos).
+  // Desktop: campos à esquerda e a prévia fixa à direita. As colunas viram "display: contents"
+  // no celular para que a ordem (order) valha entre todos os blocos.
+  const coluna = { display: { xs: "contents", md: "flex" }, flexDirection: "column", gap: 3, minWidth: 0 } as const;
+
   return (
     <FormProvider {...form}>
-      <Box component="form" onSubmit={handleSubmit(enviar)} noValidate>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "flex-start" }}>
-          <Stack spacing={4} sx={{ flex: "1 1 420px", minWidth: 0 }}>
-            <SecaoCard titulo="Dados do cartão">
-              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 3 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(enviar)}
+        noValidate
+        sx={{
+          display: { xs: "flex", md: "grid" },
+          flexDirection: "column",
+          gridTemplateColumns: "minmax(0, 3fr) minmax(0, 2fr)",
+          gap: { xs: 3, md: 4 },
+          alignItems: "start",
+        }}
+      >
+        <Box sx={coluna}>
+          <Box sx={{ order: 1 }}>
+            <SecaoCard titulo="Dados" gap={3}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: 2.5 }}>
                 <TextField
                   label="Apelido"
                   placeholder="Ex.: XP"
@@ -80,7 +123,7 @@ export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo }: Formul
                 <TextField
                   label="Final"
                   placeholder="4821"
-                  slotProps={{ htmlInput: { inputMode: "numeric", pattern: "[0-9]*", maxLength: 4 } }}
+                  slotProps={{ htmlInput: { inputMode: "numeric", pattern: "[0-9]*", maxLength: 4, style: { fontFamily: tipografia.familiaMono } } }}
                   error={Boolean(errors.final)}
                   helperText={errors.final?.message}
                   {...register("final")}
@@ -101,22 +144,37 @@ export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo }: Formul
                 )}
               />
             </SecaoCard>
+          </Box>
 
-            <SecaoCard titulo="Vencimento">
+          <Box sx={{ order: 2 }}>
+            <SecaoCard titulo="Vencimento" gap={3}>
               <Controller
                 control={control}
                 name="diaVencimento"
                 render={({ field, fieldState }) => (
-                  <TextField
-                    label="Dia de vencimento"
-                    value={Number.isNaN(field.value) ? "" : field.value}
-                    onChange={(e) => field.onChange(e.target.value === "" ? Number.NaN : Number(e.target.value))}
-                    onBlur={field.onBlur}
-                    slotProps={{ htmlInput: { inputMode: "numeric", pattern: "[0-9]*", maxLength: 2 } }}
-                    error={Boolean(fieldState.error)}
-                    helperText={fieldState.error?.message}
-                    sx={{ maxWidth: 200 }}
-                  />
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 3 }}>
+                      <Box component="label" htmlFor="dia-vencimento" sx={{ fontSize: 15 }}>
+                        Dia de vencimento
+                      </Box>
+                      <TextField
+                        id="dia-vencimento"
+                        value={Number.isNaN(field.value) ? "" : field.value}
+                        onChange={(e) => field.onChange(e.target.value === "" ? Number.NaN : Number(e.target.value))}
+                        onBlur={field.onBlur}
+                        slotProps={{
+                          htmlInput: { inputMode: "numeric", pattern: "[0-9]*", maxLength: 2, style: { textAlign: "center", fontFamily: tipografia.familiaMono, fontWeight: 500, fontSize: 16 } },
+                        }}
+                        error={Boolean(fieldState.error)}
+                        sx={{ width: 72, flexShrink: 0 }}
+                      />
+                    </Box>
+                    {fieldState.error && (
+                      <Typography variant="caption" sx={{ color: "error.main", textAlign: "right" }}>
+                        {fieldState.error.message}
+                      </Typography>
+                    )}
+                  </Box>
                 )}
               />
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -140,49 +198,71 @@ export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo }: Formul
                 />
               </Box>
             </SecaoCard>
+          </Box>
 
+          <Box sx={{ order: 3 }}>
             <SecaoRegraFechamento />
-          </Stack>
+          </Box>
 
-          <Stack spacing={4} sx={{ flex: "1 1 320px", minWidth: 0, position: { md: "sticky" }, top: { md: 24 } }}>
+          <Box component="section" aria-label="Avisos" sx={{ order: 5, ...estiloPainel, px: 4, py: 1 }}>
+            <Controller
+              control={control}
+              name="avisarAntesDoFechamento"
+              render={({ field }) => (
+                <FormControlLabel
+                  labelPlacement="start"
+                  control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                  label="Avisar 1 dia antes do fechamento"
+                  sx={{ m: 0, minHeight: 48, width: "100%", justifyContent: "space-between", gap: 3 }}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="pedirConfirmacaoMensal"
+              render={({ field }) => (
+                <FormControlLabel
+                  labelPlacement="start"
+                  control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                  label="Pedir confirmação da data todo mês"
+                  sx={{ m: 0, minHeight: 48, width: "100%", justifyContent: "space-between", gap: 3, borderTop: `1px solid ${paleta.divisor}` }}
+                />
+              )}
+            />
+          </Box>
+        </Box>
+
+        <Box component="aside" aria-label="Prévia" sx={{ ...coluna, position: { md: "sticky" }, top: { md: 16 } }}>
+          <Rotulo sx={{ display: { xs: "none", md: "block" }, order: 0 }}>Prévia ao vivo</Rotulo>
+          <Box sx={{ order: 0, display: "flex", justifyContent: "center" }}>
+            <PreviaCartao indiceCor={indiceCor} />
+          </Box>
+          <Box sx={{ order: 4 }}>
             <PreviaFechamentos cartaoId={cartaoId} faturas={faturas} />
+          </Box>
 
-            <SecaoCard titulo="Avisos" gap={1}>
-              <Controller
-                control={control}
-                name="avisarAntesDoFechamento"
-                render={({ field }) => (
-                  <FormControlLabel
-                    labelPlacement="start"
-                    control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                    label="Avisar 1 dia antes do fechamento"
-                    sx={{ m: 0, minHeight: 48, justifyContent: "space-between" }}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="pedirConfirmacaoMensal"
-                render={({ field }) => (
-                  <FormControlLabel
-                    labelPlacement="start"
-                    control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                    label="Pedir confirmação da data todo mês"
-                    sx={{ m: 0, minHeight: 48, justifyContent: "space-between" }}
-                  />
-                )}
-              />
-            </SecaoCard>
+          {(salvar.error || Object.keys(errors).length > 0) && (
+            <Box sx={{ order: 6, display: "flex", flexDirection: "column", gap: 2 }}>
+              {salvar.error && <Alert severity="error">{salvar.error.message}</Alert>}
+              {Object.keys(errors).length > 0 && <Alert severity="warning">Confira os campos destacados antes de salvar.</Alert>}
+            </Box>
+          )}
 
-            {salvar.error && <Alert severity="error">{salvar.error.message}</Alert>}
-            {Object.keys(errors).length > 0 && (
-              <Alert severity="warning">Confira os campos destacados antes de salvar.</Alert>
-            )}
-
-            <Button type="submit" variant="contained" size="large" disabled={salvar.isPending}>
+          {/* No celular, o botão fica preso ao rodapé (logo acima da barra inferior). */}
+          <Box
+            sx={{
+              order: 7,
+              position: { xs: "sticky", md: "static" },
+              bottom: "var(--altura-barra-inferior, 0px)",
+              bgcolor: { xs: paleta.fundo, md: "transparent" },
+              py: { xs: 2, md: 0 },
+              zIndex: 1,
+            }}
+          >
+            <Button type="submit" variant="contained" size="large" fullWidth disabled={salvar.isPending}>
               {salvar.isPending ? "Salvando…" : "Salvar cartão"}
             </Button>
-          </Stack>
+          </Box>
         </Box>
       </Box>
 

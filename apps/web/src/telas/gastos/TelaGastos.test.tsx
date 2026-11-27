@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Lancamento } from "@/services/faturas";
 import type { MovimentoConta } from "@/services/contas";
 import { usePreferencias } from "@/stores/preferencias";
@@ -27,7 +27,12 @@ const cartao = [
   lanc({ descricao: "Mercado", valor: 45000, dataCompra: "2026-11-02", mes: "2026-11", categoriaId: MERCADO }),
   lanc({ descricao: "Saldo inicial da fatura", valor: 64000, origem: "saldo_inicial", dataCompra: null }),
 ];
-const conta = [saida({ descricao: "Pix feira", valor: -5000, categoriaId: MERCADO }), saida({ descricao: "Pix Ana", valor: -8000 })];
+const conta = [
+  saida({ descricao: "Pix feira", valor: -5000, categoriaId: MERCADO }),
+  saida({ descricao: "Pix Ana", valor: -8000 }),
+  // Outubro, para a comparação com o mês anterior.
+  saida({ descricao: "Feira de outubro", data: "2026-10-10", valor: -40000, categoriaId: MERCADO }),
+];
 
 vi.mock("@/services/faturas", () => ({ listarLancamentosEntre: async () => cartao }));
 vi.mock("@/services/contas", () => ({ listarSaidasEntre: async () => conta }));
@@ -55,17 +60,41 @@ async function renderizar() {
   );
 }
 
+/** Desktop (a partir de 900 px): o detalhe da categoria vai para o painel lateral. */
+function simularDesktop(ativo: boolean) {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: ativo
+      ? (query: string) => ({ matches: /min-width:\s*900/.test(query), media: query, onchange: null, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() })
+      : undefined,
+  });
+}
+afterEach(() => simularDesktop(false));
+
+const linha = (nome: RegExp) => normalizar(screen.getByRole("button", { name: nome }).textContent);
+
 describe("TelaGastos", () => {
   it("pela data da compra: parcela do notebook conta em novembro (parcela 5 = jul + 4)", async () => {
     usePreferencias.setState({ baseGastos: "compra" });
     await renderizar();
-    const lista = await screen.findByRole("region", { name: "Por categoria" });
-    const t = normalizar(lista.textContent);
-    expect(t).toContain("MercadoR$ 500,00");
-    expect(t).toContain("EletrônicosR$ 120,00");
-    expect(t).toContain("Sem categoriaR$ 80,00");
+    await screen.findByRole("region", { name: "Por categoria" });
+    // Tabela: percentual, variação e valor (sem o "R$", que fica no total).
+    expect(linha(/^Mercado/)).toBe("Mercado71%+25%500,00");
+    expect(linha(/^Eletrônicos/)).toBe("Eletrônicos17%—120,00");
+    expect(linha(/^Sem categoria/)).toBe("Sem categoriaCategorizar →80,00");
     // Saldo inicial da fatura fica de fora: 500 + 120 + 80.
-    expect(normalizar(document.body.textContent)).toContain("R$ 700,00");
+    const total = screen.getByRole("region", { name: "Gasto em novembro" });
+    expect(normalizar(total.textContent)).toContain("R$ 700,00");
+  });
+
+  it("compara o total com o mês anterior em barras e por escrito", async () => {
+    usePreferencias.setState({ baseGastos: "compra" });
+    await renderizar();
+    const total = await screen.findByRole("region", { name: "Gasto em novembro" });
+    expect(within(total).getByRole("img")).toHaveAccessibleName(/^novembro R\$\s700,00 contra outubro R\$\s400,00: aumento de 75%$/);
+    expect(within(total).getByText("+75% em relação a outubro")).toBeInTheDocument();
+    expect(screen.getByLabelText("Aumentou 25% em relação a outubro")).toBeInTheDocument();
   });
 
   it("pela data da fatura: a parcela de dezembro sai de novembro", async () => {
@@ -75,7 +104,7 @@ describe("TelaGastos", () => {
     expect(normalizar(lista.textContent)).not.toContain("Eletrônicos");
   });
 
-  it("tocar numa categoria lista cartão e conta juntos", async () => {
+  it("no celular, tocar numa categoria abre a folha com cartão e conta juntos", async () => {
     usePreferencias.setState({ baseGastos: "compra" });
     const user = userEvent.setup();
     await renderizar();
@@ -84,5 +113,21 @@ describe("TelaGastos", () => {
     const dialogo = screen.getByRole("dialog", { name: "Mercado · novembro" });
     expect(within(dialogo).getByText("Cartão · 02/11 · XP · à vista")).toBeInTheDocument();
     expect(within(dialogo).getByText("Conta · 05/11 · Conta XP")).toBeInTheDocument();
+  });
+
+  it("no desktop, o detalhe fica no painel lateral e acompanha a linha escolhida", async () => {
+    simularDesktop(true);
+    usePreferencias.setState({ baseGastos: "compra" });
+    const user = userEvent.setup();
+    await renderizar();
+    // Sem escolha, o painel mostra a maior categoria.
+    const painel = await screen.findByRole("complementary", { name: "Mercado · novembro" });
+    expect(within(painel).getByText("Cartão · 02/11 · XP · à vista")).toBeInTheDocument();
+    const tabela = screen.getByRole("region", { name: "Por categoria" });
+    expect(within(tabela).getByRole("button", { name: /^Mercado/ })).toHaveAttribute("aria-current", "true");
+
+    await user.click(within(tabela).getByRole("button", { name: /^Eletrônicos/ }));
+    expect(screen.getByRole("complementary", { name: "Eletrônicos · novembro" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

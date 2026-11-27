@@ -46,20 +46,27 @@ beforeEach(() => {
 const normalizar = (t: string | null | undefined) => (t ?? "").replace(/\u00a0/g, " ");
 
 describe("TelaCategorias", () => {
-  it("mostra orçamento, gasto e alerta de cada categoria", () => {
+  it("resume o orçamento e separa as categorias com e sem orçamento", () => {
     render(<TelaCategorias />);
-    const lista = screen.getByRole("region", { name: "Categorias" });
-    const t = normalizar(lista.textContent);
-    expect(t).toContain("92% · R$ 368,00 de R$ 400,00");
-    expect(t).toContain("MercadoSem orçamentoGasto: R$ 216,40");
+    const resumo = screen.getByRole("region", { name: "Resumo do orçamento" });
+    expect(normalizar(resumo.textContent)).toBe("Orçado400Gasto com orçamento36892% usado1 em atenção");
+    expect(within(resumo).getByRole("img", { name: "92% do orçamento usado" })).toBeInTheDocument();
+
+    const com = screen.getByRole("region", { name: "Com orçamento" });
+    expect(normalizar(within(com).getByRole("button", { name: /^Lazer/ }).textContent)).toBe("Lazer368 / 40092%");
+    const sem = screen.getByRole("region", { name: "Sem orçamento" });
+    expect(normalizar(within(sem).getByRole("button", { name: /^Mercado/ }).textContent)).toBe("MercadoSem orçamento · definir216");
   });
 
-  it("define um orçamento para uma categoria", async () => {
+  it("define um orçamento e mostra os valores exatos dos alertas", async () => {
     const user = userEvent.setup();
     render(<TelaCategorias />);
     await user.click(screen.getByRole("button", { name: /^Mercado/ }));
-    const dialogo = screen.getByRole("dialog");
-    await user.type(within(dialogo).getByLabelText("Orçamento mensal (opcional)"), "1200");
+    const dialogo = screen.getByRole("dialog", { name: "Editar categoria" });
+    expect(within(dialogo).queryByRole("region", { name: "Alertas" })).not.toBeInTheDocument();
+    await user.type(within(dialogo).getByLabelText("Orçamento mensal"), "1200");
+    const alertas = within(dialogo).getByRole("region", { name: "Alertas" });
+    expect(normalizar(alertas.textContent)).toBe("AlertasAtenção em 80%960,00Estouro em 100%1.200,00");
     await user.click(within(dialogo).getByRole("button", { name: "Salvar" }));
     expect(salvar.mock.calls[0]![0]).toEqual({
       id: MERCADO,
@@ -73,16 +80,16 @@ describe("TelaCategorias", () => {
     render(<TelaCategorias />);
     await user.click(screen.getByRole("button", { name: /^Lazer/ }));
     const dialogo = screen.getByRole("dialog");
-    await user.clear(within(dialogo).getByLabelText("Orçamento mensal (opcional)"));
+    await user.clear(within(dialogo).getByLabelText("Orçamento mensal"));
     await user.click(within(dialogo).getByRole("button", { name: "Salvar" }));
     expect(salvar.mock.calls[0]![0]).toMatchObject({ form: { nome: "Lazer", orcamentoMensal: null }, orcamentoAtual: 40000 });
   });
 
-  it("cria categoria nova e pede confirmação para arquivar", async () => {
+  it("cria categoria nova e pede confirmação para arquivar (não existe excluir)", async () => {
     const user = userEvent.setup();
     render(<TelaCategorias />);
-    await user.click(screen.getByRole("button", { name: "Categoria" }));
-    let dialogo = screen.getByRole("dialog");
+    await user.click(screen.getByRole("button", { name: "Nova" }));
+    let dialogo = screen.getByRole("dialog", { name: "Nova categoria" });
     await user.type(within(dialogo).getByLabelText("Nome"), "Pets");
     await user.click(within(dialogo).getByRole("button", { name: "Salvar" }));
     expect(salvar.mock.calls[0]![0]).toEqual({ id: undefined, form: { nome: "Pets", orcamentoMensal: null }, orcamentoAtual: null });
@@ -90,8 +97,9 @@ describe("TelaCategorias", () => {
     await user.click(within(dialogo).getByRole("button", { name: "Cancelar" }));
     await user.click(screen.getByRole("button", { name: /^Lazer/ }));
     dialogo = screen.getByRole("dialog");
+    expect(within(dialogo).queryByRole("button", { name: /Excluir/ })).not.toBeInTheDocument();
     await user.click(within(dialogo).getByRole("button", { name: "Arquivar" }));
-    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Arquivar" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Arquivar categoria?" })).getByRole("button", { name: "Arquivar" }));
     expect(arquivar).toHaveBeenCalledWith(LAZER, expect.anything());
   });
 });

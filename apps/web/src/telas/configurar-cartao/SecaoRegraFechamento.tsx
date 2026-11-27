@@ -19,7 +19,7 @@ const OPCOES: { tipo: RegraFechamento["tipo"]; titulo: string; descricao: string
   {
     tipo: "manual",
     titulo: "Informar mês a mês",
-    descricao: "Estimamos 7 dias antes e você confirma cada fatura",
+    descricao: "Estimamos 7 dias antes; você confirma cada fatura",
   },
 ];
 
@@ -33,11 +33,12 @@ function OpcaoRegra({ selecionada, titulo, descricao, valor, children }: {
   return (
     <Box
       sx={{
-        border: `1px solid ${selecionada ? paleta.bordaSelecionada : paleta.bordaCampo}`,
-        bgcolor: selecionada ? paleta.interativo : "transparent",
-        borderRadius: `${raio.card}px`,
+        // Selecionada: borda lima sobre o tom elevado (é a regra que gera as datas).
+        border: `1px solid ${selecionada ? paleta.acao : paleta.divisor}`,
+        bgcolor: selecionada ? paleta.elevado : "transparent",
+        borderRadius: `${raio.controle}px`,
         px: 3.5,
-        py: 2.5,
+        py: 3,
       }}
     >
       <FormControlLabel
@@ -46,12 +47,12 @@ function OpcaoRegra({ selecionada, titulo, descricao, valor, children }: {
         sx={{ m: 0, width: "100%", alignItems: "flex-start", "& .MuiRadio-root": { mt: -1 } }}
         label={
           <Box sx={{ display: "flex", flexDirection: "column", pt: 1 }}>
-            <Typography variant="subtitle1">{titulo}</Typography>
+            <Typography sx={{ fontSize: 15 }}>{titulo}</Typography>
             <Typography variant="caption">{descricao}</Typography>
           </Box>
         }
       />
-      {selecionada && children && <Box sx={{ pl: { xs: 0, sm: 10 }, pt: 3, pb: 1 }}>{children}</Box>}
+      {selecionada && children && <Box sx={{ pl: 8, pt: 3, pb: 1 }}>{children}</Box>}
     </Box>
   );
 }
@@ -71,12 +72,12 @@ export function SecaoRegraFechamento() {
   const erroDia = (formState.errors.fechamento as { dia?: { message?: string } } | undefined)?.dia?.message;
 
   return (
-    <SecaoCard titulo="Regra de fechamento">
+    <SecaoCard titulo="Regra de fechamento" gap={3}>
       <RadioGroup
         aria-label="Regra de fechamento"
         value={regra.tipo}
         onChange={(e) => trocarTipo(e.target.value as RegraFechamento["tipo"])}
-        sx={{ gap: 2.5 }}
+        sx={{ gap: 2 }}
       >
         {OPCOES.map((o) => (
           <OpcaoRegra key={o.tipo} valor={o.tipo} titulo={o.titulo} descricao={o.descricao} selecionada={regra.tipo === o.tipo}>
@@ -92,7 +93,7 @@ export function SecaoRegraFechamento() {
                     slotProps={{ htmlInput: { inputMode: "numeric", pattern: "[0-9]*", maxLength: 2 } }}
                     error={Boolean(erroDia)}
                     helperText={erroDia}
-                    sx={{ maxWidth: 200, bgcolor: "background.paper" }}
+                    sx={{ maxWidth: 200 }}
                   />
                 )}
               />

@@ -1,16 +1,15 @@
 "use client";
 
 import AddRounded from "@mui/icons-material/AddRounded";
-import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { hojeEmSaoPaulo } from "@financas/core";
-import { EstadoErro, EstadoVazio } from "@financas/ui";
+import { CabecalhoTela, EstadoErro, EstadoVazio } from "@financas/ui";
+import { BotaoVoltar } from "@/componentes/BotaoVoltar";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { FormularioParcelamento } from "./FormularioParcelamento";
@@ -23,17 +22,12 @@ export function TelaParcelamento() {
   const faturas = useFaturasResumo();
 
   const cabecalho = (
-    <Box sx={{ mb: 5 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, ml: -2 }}>
-        <IconButton aria-label="Voltar" onClick={() => router.back()}>
-          <ArrowBackRounded />
-        </IconButton>
-        <Typography variant="h1">Parcelamento em andamento</Typography>
-      </Box>
-      <Typography variant="body2" sx={{ color: "text.secondary", mt: 1 }}>
+    <>
+      <CabecalhoTela titulo="Parcelamento em andamento" voltar={<BotaoVoltar rotulo="Voltar" onClick={() => router.back()} />} />
+      <Typography variant="body2" sx={{ color: "text.secondary", mb: { xs: 3, md: 4 }, mt: { sm: -3 } }}>
         Para compras parceladas antes de usar o app. Só as parcelas que faltam entram nas faturas.
       </Typography>
-    </Box>
+    </>
   );
 
   if (cartoes.isPending || categorias.isPending || faturas.isPending) {

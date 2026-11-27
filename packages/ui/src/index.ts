@@ -34,3 +34,4 @@ export * from "./componentes/ItemMovimento";
 export * from "./componentes/CabecalhoTela";
 export * from "./componentes/FolhaInferior";
 export * from "./componentes/SeletorCategoria";
+export * from "./componentes/estilos";

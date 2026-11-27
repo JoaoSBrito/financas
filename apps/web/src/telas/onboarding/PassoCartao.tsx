@@ -24,6 +24,7 @@ export function PassoCartao({ cartoes, onContinuar }: { cartoes: CartaoCompleto[
         <FormularioCartao
           inicial={CARTAO_NOVO}
           faturas={[]}
+          indiceCor={cartoes.length}
           onSalvo={() => {
             mostrarAviso("Cartão salvo e faturas geradas");
             setNovo(false);

@@ -12,7 +12,15 @@ import { MenuPrincipal } from "./MenuPrincipal";
  */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100dvh" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100dvh",
+        // Altura da barra inferior (só no celular): botões presos ao rodapé ficam logo acima dela.
+        "--altura-barra-inferior": { xs: "calc(80px + env(safe-area-inset-bottom))", sm: "0px" },
+      }}
+    >
       <MenuPrincipal />
       <Box
         component="main"

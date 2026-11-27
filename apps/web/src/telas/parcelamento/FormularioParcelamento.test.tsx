@@ -44,7 +44,9 @@ describe("FormularioParcelamento", () => {
     expect(resumo).toContain("Parcelas a lançar5 · nov a mar");
     expect(resumo).toContain("Já pagas (só histórico)5");
     expect(resumo).toContain("Limite comprometidoR$ 500,00");
-    expect(resumo).toContain("Fatura de novembro passa aR$ 1.942,50");
+    // Antes → depois: a fatura de novembro do XP e o limite livre (8.000 − 1.842,50 já comprometidos).
+    expect(resumo).toContain("Fatura de novembro · XPR$ 1.842,50 → R$ 1.942,50");
+    expect(resumo).toContain("Limite livreR$ 6.157,50 → R$ 5.657,50");
     expect(resumo).toContain("Valor total da compraR$ 1.000,00");
   });
 
@@ -71,5 +73,17 @@ describe("FormularioParcelamento", () => {
     expect(within(grupo).getByRole("button", { name: "dezembro · aberta" })).toHaveAttribute("aria-pressed", "true");
     await user.click(within(grupo).getByRole("button", { name: "novembro · fechada" }));
     expect(screen.getByText("Qual parcela vem na fatura de novembro?")).toBeInTheDocument();
+  });
+
+  it("com mais de um cartão, escolhe numa lista com filete e troca a fatura de referência", async () => {
+    const user = userEvent.setup();
+    const viagens: CartaoCompleto = { ...xp, id: "5c1d4b63-8a1a-4a64-8b6f-3a6c3d7eaf21", nome: "Viagens", diaVencimento: 20 };
+    render(<FormularioParcelamento cartoes={[xp, viagens]} categorias={[]} faturas={faturas} hoje="2026-11-01" />);
+    const grupo = screen.getByRole("radiogroup", { name: "Cartão" });
+    expect(within(grupo).getByRole("radio", { name: "XP" })).toBeChecked();
+    await user.click(within(grupo).getByRole("radio", { name: "Viagens" }));
+    await preencher(user);
+    await user.click(screen.getByRole("button", { name: "Adicionar parcelamento" }));
+    expect(mutate.mock.calls[0]![0]).toMatchObject({ cartaoId: viagens.id });
   });
 });

@@ -71,7 +71,10 @@ export function LinhaDoTempoParcelas({ total, atual, meses, mesesAcessiveis }: L
       </Box>
       <Box aria-hidden sx={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {LEGENDA.map((l) => (
-          <Box key={l.texto} sx={{ display: "flex", alignItems: "center", gap: 1.5, fontSize: 12, color: paleta.textoSecundario }}>
+          <Box
+            key={l.texto}
+            sx={{ display: "flex", alignItems: "center", gap: 1.5, fontFamily: tipografia.familiaMono, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.04em", color: paleta.textoSecundario }}
+          >
             <Box sx={{ width: 10, height: 10, boxSizing: "border-box", bgcolor: l.cor, border: l.borda ? `1px solid ${l.borda}` : "none" }} />
             {l.texto}
           </Box>

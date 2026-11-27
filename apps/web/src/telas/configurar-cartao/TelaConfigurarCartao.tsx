@@ -1,27 +1,18 @@
 "use client";
 
-import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import Skeleton from "@mui/material/Skeleton";
-import Typography from "@mui/material/Typography";
 import Link from "next/link";
-import { EstadoErro, EstadoVazio } from "@financas/ui";
-import { useCartao, useFaturasDoCartao } from "@/hooks/useCartoes";
+import { CabecalhoTela, EstadoErro, EstadoVazio } from "@financas/ui";
+import { BotaoVoltar } from "@/componentes/BotaoVoltar";
+import { useCartao, useCartoes, useFaturasDoCartao } from "@/hooks/useCartoes";
 import { cartaoParaFormulario } from "@/services/cartoes-mapeamento";
 import { FormularioCartao } from "./FormularioCartao";
 import { CARTAO_NOVO } from "./valores";
 
 function Cabecalho({ titulo }: { titulo: string }) {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 5, ml: -2 }}>
-      <IconButton component={Link} href="/cartoes" aria-label="Voltar para cartões">
-        <ArrowBackRounded />
-      </IconButton>
-      <Typography variant="h1">{titulo}</Typography>
-    </Box>
-  );
+  return <CabecalhoTela titulo={titulo} voltar={<BotaoVoltar href="/cartoes" rotulo="Voltar para cartões" />} />;
 }
 
 function Carregando() {
@@ -37,12 +28,16 @@ function Carregando() {
 export function TelaConfigurarCartao({ cartaoId }: { cartaoId?: string }) {
   const cartao = useCartao(cartaoId);
   const faturas = useFaturasDoCartao(cartaoId);
+  // A cor segue a ordem de cadastro (a mesma de Cartões); um cartão novo pega a próxima.
+  const lista = useCartoes();
+  const posicao = lista.data?.findIndex((c) => c.id === cartaoId) ?? -1;
+  const indiceCor = posicao >= 0 ? posicao : (lista.data?.length ?? 0);
 
   if (!cartaoId) {
     return (
       <>
         <Cabecalho titulo="Novo cartão" />
-        <FormularioCartao inicial={CARTAO_NOVO} faturas={[]} />
+        <FormularioCartao inicial={CARTAO_NOVO} faturas={[]} indiceCor={indiceCor} />
       </>
     );
   }
@@ -96,6 +91,7 @@ export function TelaConfigurarCartao({ cartaoId }: { cartaoId?: string }) {
         cartaoId={cartao.data.id}
         inicial={cartaoParaFormulario(cartao.data)}
         faturas={faturas.data}
+        indiceCor={indiceCor}
       />
     </>
   );
