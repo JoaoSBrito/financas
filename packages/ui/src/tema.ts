@@ -155,7 +155,7 @@ export const tema = createTheme({
         root: { color: paleta.textoSecundario, "&.Mui-focused": { color: paleta.texto }, "&.Mui-error": { color: semantica.estouro.texto } },
       },
     },
-    MuiFormHelperText: { styleOverrides: { root: { color: paleta.textoSecundario, marginInline: 2 } } },
+    MuiFormHelperText: { styleOverrides: { root: { color: paleta.textoSecundario, marginInline: 2, "&.Mui-error": { color: semantica.estouro.texto } } } },
     MuiFormLabel: { styleOverrides: { root: { color: paleta.textoSecundario } } },
     MuiSelect: { styleOverrides: { icon: { color: paleta.textoSecundario } } },
 
@@ -250,7 +250,8 @@ export const tema = createTheme({
         },
       },
     },
-    MuiSkeleton: { styleOverrides: { root: { backgroundColor: paleta.divisor, borderRadius: raio.selo } } },
+    // Esqueletos retos, como as barras.
+    MuiSkeleton: { styleOverrides: { root: { backgroundColor: paleta.divisor, borderRadius: raio.barra } } },
 
     MuiSnackbarContent: {
       styleOverrides: { root: { backgroundColor: paleta.texto, color: paleta.sobreAcao, borderRadius: raio.controle, boxShadow: "none" } },

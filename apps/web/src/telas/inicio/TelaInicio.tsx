@@ -173,7 +173,7 @@ export function TelaInicio() {
               </SecaoCard>
             ) : doMes.isError || orcamentos.isError || categorias.isError ? (
               <SecaoCard titulo="Orçamento">
-                <EstadoErro mensagem="Não foi possível carregar o orçamento." onTentarNovamente={() => void doMes.refetch()} />
+                <EstadoErro embutido mensagem="Não foi possível carregar o orçamento." onTentarNovamente={() => void doMes.refetch()} />
               </SecaoCard>
             ) : (
               <OrcamentoDoMes
@@ -234,7 +234,7 @@ export function TelaInicio() {
           </SecaoCard>
         ) : recentes.isError ? (
           <SecaoCard titulo="Últimos gastos">
-            <EstadoErro mensagem="Não foi possível carregar os últimos gastos." onTentarNovamente={() => void recentes.refetch()} />
+            <EstadoErro embutido mensagem="Não foi possível carregar os últimos gastos." onTentarNovamente={() => void recentes.refetch()} />
           </SecaoCard>
         ) : (
           <UltimosGastos compras={recentes.data} cartoes={cartoes.data} categorias={categorias.data ?? []} />

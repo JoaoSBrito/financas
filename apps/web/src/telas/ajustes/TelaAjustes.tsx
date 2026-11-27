@@ -1,40 +1,62 @@
 "use client";
 
 import ChevronRightRounded from "@mui/icons-material/ChevronRightRounded";
-import CreditCardRounded from "@mui/icons-material/CreditCardRounded";
 import LogoutRounded from "@mui/icons-material/LogoutRounded";
-import PlaylistAddCheckRounded from "@mui/icons-material/PlaylistAddCheckRounded";
-import SellRounded from "@mui/icons-material/SellRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
-import Divider from "@mui/material/Divider";
+import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
-import { SecaoCard } from "@financas/ui";
-import { paleta, raio } from "@financas/ui/tokens";
+import { useId, useState, type ReactNode } from "react";
+import { CabecalhoTela, estiloPainel, Rotulo } from "@financas/ui";
+import { paleta } from "@financas/ui/tokens";
+import { BotaoVoltar } from "@/componentes/BotaoVoltar";
 import { supabaseNavegador } from "@/lib/supabase/client";
+import { usePreferencias } from "@/stores/preferencias";
 
-function ItemMenu({ href, icone, titulo, descricao }: { href: string; icone: ReactNode; titulo: string; descricao: string }) {
+/** Painel com rótulo de seção (Conta, Preferências, Organização). */
+function Secao({ rotulo, children }: { rotulo: string; children: ReactNode }) {
   return (
-    <ButtonBase component={Link} href={href} sx={{ width: "100%", justifyContent: "flex-start", gap: 3.5, minHeight: 68, borderRadius: `${raio.card}px`, textAlign: "left" }}>
-      <Box aria-hidden sx={{ width: 36, height: 36, borderRadius: `${raio.circulo}px`, bgcolor: paleta.interativo, color: paleta.texto, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {icone}
+    <Box component="section" aria-label={rotulo} sx={{ ...estiloPainel, px: 4, pt: 2.5, display: "flex", flexDirection: "column" }}>
+      <Rotulo>{rotulo}</Rotulo>
+      {children}
+    </Box>
+  );
+}
+
+function Textos({ titulo, descricao }: { titulo: string; descricao: string }) {
+  return (
+    <Box component="span" sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
+      <Box component="span" sx={{ fontSize: 15 }}>
+        {titulo}
       </Box>
-      <Box sx={{ flex: 1 }}>
-        <Typography variant="subtitle1">{titulo}</Typography>
-        <Typography variant="caption">{descricao}</Typography>
+      <Box component="span" sx={{ fontSize: 13, color: "text.secondary" }}>
+        {descricao}
       </Box>
+    </Box>
+  );
+}
+
+function ItemLink({ href, titulo, descricao, primeiro = false }: { href: string; titulo: string; descricao: string; primeiro?: boolean }) {
+  return (
+    <ButtonBase
+      component={Link}
+      href={href}
+      sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 64, textAlign: "left", borderTop: primeiro ? "none" : `1px solid ${paleta.divisor}`, mt: primeiro ? 1 : 0 }}
+    >
+      <Textos titulo={titulo} descricao={descricao} />
       <ChevronRightRounded aria-hidden sx={{ color: "text.secondary" }} />
     </ButtonBase>
   );
 }
 
-export function TelaAjustes() {
+export function TelaAjustes({ email }: { email: string | null }) {
   const router = useRouter();
   const [saindo, setSaindo] = useState(false);
+  const { ocultarValores, alternarOcultarValores } = usePreferencias();
+  const idOcultar = useId();
 
   async function sair() {
     setSaindo(true);
@@ -44,31 +66,44 @@ export function TelaAjustes() {
   }
 
   return (
-    <Box sx={{ maxWidth: 640 }}>
-      <Typography variant="h1" sx={{ mb: 5 }}>
-        Ajustes
-      </Typography>
-      <SecaoCard gap={1}>
-        <ItemMenu href="/ajustes/categorias" icone={<SellRounded />} titulo="Categorias e orçamento" descricao="Nomes das categorias e quanto gastar em cada uma" />
-        <Divider />
-        <ItemMenu href="/cartoes" icone={<CreditCardRounded />} titulo="Cartões" descricao="Limites, vencimentos e regras de fechamento" />
-        <Divider />
-        <ItemMenu
-          href="/primeiros-passos/parcelamentos"
-          icone={<PlaylistAddCheckRounded />}
-          titulo="Primeiros passos"
-          descricao="Parcelamentos em andamento e saldo inicial das faturas"
-        />
-      </SecaoCard>
-      <Button
-        onClick={sair}
-        disabled={saindo}
-        startIcon={<LogoutRounded />}
-        color="error"
-        sx={{ mt: 5 }}
-      >
-        {saindo ? "Saindo…" : "Sair"}
-      </Button>
+    <Box sx={{ maxWidth: { sm: 720 }, mx: { sm: "auto" } }}>
+      <CabecalhoTela titulo="Ajustes" voltar={<BotaoVoltar href="/" rotulo="Voltar para o início" soNoCelular />} />
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <Secao rotulo="Conta">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, pt: 1, pb: 3.5 }}>
+            <Typography sx={{ fontSize: 15, overflowWrap: "anywhere" }}>{email ?? "E-mail não disponível"}</Typography>
+            <Typography sx={{ fontSize: 13, color: "text.secondary" }}>Entrada com e-mail e senha</Typography>
+          </Box>
+        </Secao>
+
+        <Secao rotulo="Preferências">
+          <Box component="label" htmlFor={idOcultar} sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 64, cursor: "pointer" }}>
+            <Textos titulo="Ocultar valores" descricao="Mostra R$ •••• em todas as telas" />
+            <Switch id={idOcultar} checked={ocultarValores} onChange={alternarOcultarValores} />
+          </Box>
+        </Secao>
+
+        <Secao rotulo="Organização">
+          <ItemLink primeiro href="/ajustes/categorias" titulo="Categorias e orçamento" descricao="Nomes e quanto gastar em cada uma" />
+          <ItemLink href="/cartoes" titulo="Cartões" descricao="Limites, vencimentos e regras de fechamento" />
+          <ItemLink href="/primeiros-passos/parcelamentos" titulo="Primeiros passos" descricao="Parcelamentos em andamento e saldo inicial das faturas" />
+        </Secao>
+
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={sair}
+          disabled={saindo}
+          startIcon={<LogoutRounded />}
+          sx={{ alignSelf: "flex-start", minHeight: 48, px: 4.5 }}
+        >
+          {saindo ? "Saindo…" : "Sair"}
+        </Button>
+        <Rotulo component="p" sx={{ m: 0 }}>
+          Lastro · v1
+        </Rotulo>
+      </Box>
     </Box>
   );
 }

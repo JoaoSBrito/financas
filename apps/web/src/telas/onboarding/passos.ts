@@ -1,18 +1,23 @@
 export const PASSOS = [
-  { slug: "cartao", nome: "Cartão", titulo: "Cadastre seu cartão", descricao: "Com a regra de fechamento, o app sabe em qual fatura cada gasto cai." },
+  {
+    slug: "cartao",
+    nome: "Cartão",
+    titulo: "Cadastre seu primeiro cartão",
+    descricao: "Com a regra de fechamento, o app calcula em que fatura cada compra cai.",
+  },
   {
     slug: "parcelamentos",
-    nome: "Parcelamentos",
+    nome: "Parcelas",
     titulo: "O que você já tem parcelado?",
-    descricao: "Lance as compras que ainda têm parcelas a cobrar. Só as que faltam entram nas próximas faturas.",
+    descricao: "Lance as compras que ainda têm parcelas a cobrar. Só as que faltam entram nas faturas.",
   },
   {
     slug: "fatura",
-    nome: "Fatura aberta",
-    titulo: "Quanto já tem na fatura?",
-    descricao: "Informe o que já gastou à vista neste ciclo, como um valor único ou lançando um a um.",
+    nome: "Fatura",
+    titulo: "Quanto já está na fatura aberta?",
+    descricao: "Gastos feitos antes de usar o app que ainda vão cair nesta fatura.",
   },
-  { slug: "pronto", nome: "Pronto", titulo: "Tudo pronto", descricao: "Agora é só lançar os gastos do dia a dia." },
+  { slug: "pronto", nome: "Pronto", titulo: "Tudo pronto", descricao: "Confira o que foi configurado. Dá para ajustar depois em Ajustes." },
 ] as const;
 
 export type SlugPasso = (typeof PASSOS)[number]["slug"];

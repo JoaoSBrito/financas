@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import { paleta, semantica } from "../tokens";
+import { estiloPainel } from "./estilos";
 import { Rotulo } from "./Rotulo";
 import type { ReactNode } from "react";
 
@@ -37,23 +38,29 @@ export function EstadoVazio({ titulo, descricao, acao }: EstadoVazioProps) {
 
 export interface EstadoErroProps {
   mensagem: string;
+  /** O que fazer a seguir. */
+  descricao?: string;
   onTentarNovamente?: () => void;
+  /** Dentro de um painel que já existe (sem borda própria). */
+  embutido?: boolean;
 }
 
-export function EstadoErro({ mensagem, onTentarNovamente }: EstadoErroProps) {
+/** Erro ao carregar: painel com rótulo em coral, a mensagem e como resolver. */
+export function EstadoErro({ mensagem, descricao = "Verifique a conexão e tente de novo.", onTentarNovamente, embutido = false }: EstadoErroProps) {
   return (
     <Box
       role="alert"
-      sx={{ textAlign: "center", py: 8, px: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}
+      sx={{ ...(embutido ? {} : estiloPainel), textAlign: "center", py: embutido ? 4 : 8, px: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}
     >
-      <Rotulo sx={{ color: semantica.estouro.texto }} aria-hidden>
-        Erro
-      </Rotulo>
+      <Rotulo sx={{ color: semantica.estouro.texto }}>Erro ao carregar</Rotulo>
       <Typography variant="h3" component="p">
         {mensagem}
       </Typography>
+      <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 320 }}>
+        {descricao}
+      </Typography>
       {onTentarNovamente && (
-        <Button variant="outlined" onClick={onTentarNovamente}>
+        <Button variant="outlined" onClick={onTentarNovamente} sx={{ mt: 2 }}>
           Tentar de novo
         </Button>
       )}

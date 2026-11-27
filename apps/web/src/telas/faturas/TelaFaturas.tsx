@@ -266,7 +266,7 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
                 </SecaoCard>
               ) : lancamentos.isError ? (
                 <SecaoCard titulo="Lançamentos">
-                  <EstadoErro mensagem="Não foi possível carregar os lançamentos." onTentarNovamente={() => void lancamentos.refetch()} />
+                  <EstadoErro embutido mensagem="Não foi possível carregar os lançamentos." onTentarNovamente={() => void lancamentos.refetch()} />
                 </SecaoCard>
               ) : (
                 <ListaLancamentos lancamentos={daFatura} onEditar={setEditando} />

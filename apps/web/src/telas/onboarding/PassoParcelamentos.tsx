@@ -4,19 +4,20 @@ import AddRounded from "@mui/icons-material/AddRounded";
 import DeleteOutlineRounded from "@mui/icons-material/DeleteOutlineRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import type { Data } from "@financas/core";
-import { CarregandoLista, EstadoErro, SecaoCard, Valor } from "@financas/ui";
+import { CarregandoLista, EstadoErro, estiloMono, estiloPainel, SecaoCard, Valor } from "@financas/ui";
+import { corDoCartao, paleta } from "@financas/ui/tokens";
 import { useExcluirCompra } from "@/hooks/useFaturas";
 import { useComprasDoInicio } from "@/hooks/useGastos";
 import type { Categoria } from "@/services/categorias";
 import type { CartaoCompleto, FaturaResumo } from "@/services/cartoes-mapeamento";
 import { useAvisos } from "@/stores/avisos";
 import { FormularioParcelamento } from "@/telas/parcelamento/FormularioParcelamento";
+import { RodapePasso } from "./RodapePasso";
 
 export interface PassoParcelamentosProps {
   cartoes: CartaoCompleto[];
@@ -53,6 +54,8 @@ export function PassoParcelamentos({ cartoes, categorias, faturas, hoje, onConti
   const itens = lista.data ?? [];
   const comprometido = itens.reduce((s, c) => s + c.restante, 0);
 
+  const indiceCartao = new Map(cartoes.map((c, i) => [c.id, i]));
+
   return (
     <Stack spacing={4}>
       {lista.isPending ? (
@@ -63,54 +66,64 @@ export function PassoParcelamentos({ cartoes, categorias, faturas, hoje, onConti
         <EstadoErro mensagem="Não foi possível carregar os parcelamentos." onTentarNovamente={() => void lista.refetch()} />
       ) : (
         itens.length > 0 && (
-          <SecaoCard titulo="Parcelamentos lançados" gap={1}>
+          <Box component="section" aria-label="Parcelamentos lançados" sx={{ ...estiloPainel, px: 4, display: "flex", flexDirection: "column" }}>
             {itens.map((c, i) => (
-              <Box key={c.id}>
-                {i > 0 && <Divider />}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2, minHeight: 64 }}>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="subtitle1" noWrap>
+              <Box key={c.id} sx={{ display: "flex", flexDirection: "column", gap: 2, py: 3, borderTop: i > 0 ? `1px solid ${paleta.divisor}` : "none" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
+                  <Box aria-hidden sx={{ width: 4, height: 28, borderRadius: "2px", bgcolor: corDoCartao(indiceCartao.get(c.cartaoId) ?? 0), flexShrink: 0 }} />
+                  <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+                    <Typography noWrap sx={{ fontSize: 15 }}>
                       {c.descricao}
                     </Typography>
-                    <Typography variant="caption">
-                      {nomeCartao.get(c.cartaoId)} · {c.parcelaAtual ? `parcela ${c.parcelaAtual} de ${c.totalParcelas}` : "só histórico"}
-                    </Typography>
+                    <Box component="span" sx={{ ...estiloMono, fontSize: 11, color: "text.secondary" }}>
+                      {nomeCartao.get(c.cartaoId)} ·{" "}
+                      {c.parcelaAtual ? `${String(c.parcelaAtual).padStart(2, "0")}/${String(c.totalParcelas).padStart(2, "0")}` : "só histórico"}
+                    </Box>
                   </Box>
-                  <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
-                    faltam <Valor valor={c.restante} sx={{ font: "inherit" }} />
-                  </Typography>
+                  <Box component="span" sx={{ ...estiloMono, fontSize: 12, textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                    Faltam <Valor valor={c.restante} semSimbolo sx={{ font: "inherit" }} />
+                  </Box>
                   <IconButton
                     aria-label={`Excluir ${c.descricao}`}
                     disabled={excluir.isPending}
                     onClick={() => excluir.mutate(c.id, { onSuccess: () => mostrarAviso("Parcelamento excluído") })}
+                    sx={{ mr: -2 }}
                   >
                     <DeleteOutlineRounded fontSize="small" />
                   </IconButton>
                 </Box>
+                {c.parcelaAtual && (
+                  // Pagas no trilho, as que faltam (a partir da atual) em claro.
+                  <Box
+                    role="img"
+                    aria-label={`Parcela ${c.parcelaAtual} de ${c.totalParcelas}`}
+                    sx={{ display: "grid", gridTemplateColumns: `repeat(${c.totalParcelas}, minmax(0, 1fr))`, gap: "2px" }}
+                  >
+                    {Array.from({ length: c.totalParcelas }, (_, n) => (
+                      <Box key={n} sx={{ height: 6, bgcolor: n + 1 < c.parcelaAtual! ? paleta.divisor : paleta.texto }} />
+                    ))}
+                  </Box>
+                )}
               </Box>
             ))}
-            <Divider />
-            <Box sx={{ display: "flex", justifyContent: "space-between", pt: 3 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 3, borderTop: `1px solid ${paleta.divisor}` }}>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 Comprometido nas próximas faturas
               </Typography>
-              <Valor valor={comprometido} sx={{ fontWeight: 500 }} />
+              <Valor valor={comprometido} semSimbolo sx={{ fontWeight: 500 }} />
             </Box>
-          </SecaoCard>
+          </Box>
         )
       )}
 
-      <Button
-        variant="outlined"
-        startIcon={<AddRounded />}
-        onClick={() => setAdicionando(true)}
-        sx={{ minHeight: 52, borderStyle: "dashed" }}
-      >
+      <Button variant="outlined" startIcon={<AddRounded />} onClick={() => setAdicionando(true)} sx={{ minHeight: 52, borderStyle: "dashed" }}>
         Adicionar parcelamento
       </Button>
-      <Button variant="contained" size="large" onClick={onContinuar}>
-        {itens.length === 0 ? "Não tenho parcelamentos" : "Continuar"}
-      </Button>
+      <RodapePasso>
+        <Button variant="contained" size="large" onClick={onContinuar}>
+          {itens.length === 0 ? "Não tenho parcelamentos" : "Continuar"}
+        </Button>
+      </RodapePasso>
     </Stack>
   );
 }
