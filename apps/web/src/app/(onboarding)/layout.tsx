@@ -11,7 +11,7 @@ export default async function LayoutOnboarding({ children }: { children: ReactNo
   if (!data?.claims) redirect("/entrar");
 
   return (
-    <Box component="main" sx={{ px: { xs: 5, md: 10 }, pt: { xs: 6, md: 10 }, pb: 12 }}>
+    <Box component="main" sx={{ px: { xs: 4, md: 10 }, pt: { xs: 3, md: 10 }, pb: { xs: 0, md: 12 } }}>
       <Box sx={{ maxWidth: 880, mx: "auto" }}>{children}</Box>
       <AvisoGlobal />
     </Box>

@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import type { ReactNode } from "react";
-import { paleta, toqueMinimo } from "../tokens";
+import { paleta, tipografia, toqueMinimo } from "../tokens";
 
 export interface OpcaoPilula<T extends string> {
   valor: T;
@@ -50,8 +50,8 @@ export function PilulasSelecao<T extends string>({
             px: tamanho === "pequeno" ? 3.5 : 4,
             fontSize: tamanho === "pequeno" ? 13 : 14,
             color: paleta.textoSecundario,
-            // Meses (pequeno) sem borda; cartões e filtros (médio) com contorno.
-            ...(tamanho === "pequeno" ? { border: "none !important" } : {}),
+            // Meses (pequeno) com contorno discreto; cartões e filtros (médio) com o de controle.
+            ...(tamanho === "pequeno" ? { borderColor: `${paleta.divisor} !important`, fontFamily: tipografia.familiaMono, fontSize: 12 } : {}),
           },
         }}
       >

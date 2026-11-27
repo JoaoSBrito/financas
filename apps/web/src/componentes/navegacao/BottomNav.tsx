@@ -16,23 +16,13 @@ function ItemBarra({ item, ativo }: { item: ItemNavegacao; ativo: boolean }) {
       component={Link}
       href={item.href}
       aria-current={ativo ? "page" : undefined}
-      sx={{
-        flexDirection: "column",
-        gap: 1,
-        minHeight: 56,
-        borderRadius: `${raio.card}px`,
-        fontSize: 11,
-        color: ativo ? paleta.texto : paleta.textoSecundario,
-      }}
+      sx={{ flexDirection: "column", gap: 1, minHeight: 56, borderRadius: `${raio.controle}px`, fontSize: 11, color: ativo ? paleta.texto : paleta.textoSecundario }}
     >
-      {/* Item ativo: pílula no tom interativo atrás do ícone (além da cor e do aria-current). */}
-      <Box
-        component="span"
-        sx={{ display: "flex", px: 3.5, py: 1, borderRadius: `${raio.chip}px`, bgcolor: ativo ? paleta.interativo : "transparent" }}
-      >
-        {item.icone}
+      {item.icone}
+      {/* Item ativo: sublinhado lima no rótulo (além da cor e do aria-current). */}
+      <Box component="span" sx={{ borderBottom: `2px solid ${ativo ? paleta.acao : "transparent"}`, lineHeight: 1.4 }}>
+        {item.rotulo}
       </Box>
-      {item.rotulo}
     </ButtonBase>
   );
 }
@@ -54,7 +44,7 @@ export function BottomNav() {
         insetInline: 0,
         bottom: 0,
         zIndex: (t) => t.zIndex.appBar,
-        bgcolor: paleta.card,
+        bgcolor: paleta.painel,
         borderTop: `1px solid ${paleta.divisor}`,
         pt: 1,
         pb: "calc(8px + env(safe-area-inset-bottom))",

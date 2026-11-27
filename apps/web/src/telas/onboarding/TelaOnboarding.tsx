@@ -1,6 +1,6 @@
 "use client";
 
-import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
+import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { hojeEmSaoPaulo } from "@financas/core";
-import { EstadoErro, PassosOnboarding } from "@financas/ui";
+import { EstadoErro, LogoLastro, PassosOnboarding } from "@financas/ui";
 import { useCartoes } from "@/hooks/useCartoes";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { PassoCartao } from "./PassoCartao";
@@ -65,19 +65,20 @@ export function TelaOnboarding({ passo }: { passo: SlugPasso }) {
   } else if (passo === "fatura") {
     conteudo = <PassoFatura cartoes={cartoes.data} faturas={faturas.data} hoje={hoje} onContinuar={continuar} />;
   } else {
-    conteudo = <PassoPronto />;
+    conteudo = <PassoPronto cartoes={cartoes.data} faturas={faturas.data} hoje={hoje} />;
   }
 
   return (
-    <Box>
-      <Stack spacing={4} sx={{ mb: 6 }}>
+    // O passo do cartão usa as duas colunas do formulário; os outros ficam numa coluna estreita.
+    <Box sx={{ maxWidth: passo === "cartao" ? 880 : 600, mx: "auto" }}>
+      <Stack spacing={4} sx={{ mb: 4 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 44 }}>
           {anterior ? (
-            <Button component={Link} href={`/primeiros-passos/${anterior.slug}`} startIcon={<ArrowBackRounded />} sx={{ ml: -2 }}>
+            <Button component={Link} href={`/primeiros-passos/${anterior.slug}`} startIcon={<ChevronLeftRounded />} sx={{ ml: -2, color: "text.primary" }}>
               Voltar
             </Button>
           ) : (
-            <span />
+            <LogoLastro tamanho={20} />
           )}
           {passo !== "pronto" && (
             <Button component={Link} href="/" sx={{ color: "text.secondary" }}>
@@ -86,9 +87,11 @@ export function TelaOnboarding({ passo }: { passo: SlugPasso }) {
           )}
         </Box>
         <PassosOnboarding atual={indice + 1} passos={PASSOS.map((p) => p.nome)} />
-        <Box>
-          <Typography variant="h1">{info.titulo}</Typography>
-          <Typography variant="body1" sx={{ color: "text.secondary", mt: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Typography variant="h1" sx={{ fontSize: { xs: 26, md: 28 }, letterSpacing: "-0.01em", lineHeight: 1.2 }}>
+            {info.titulo}
+          </Typography>
+          <Typography variant="body1" sx={{ color: "text.secondary" }}>
             {info.descricao}
           </Typography>
         </Box>

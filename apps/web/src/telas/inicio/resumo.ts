@@ -22,6 +22,8 @@ export interface ResumoInicio {
   /** Parcelas e assinaturas em faturas depois da aberta. */
   comprometidoFuturo: number;
   ultimoMesComprometido: Mes | null;
+  /** Fatura aberta de cada cartão, do fechamento mais próximo ao mais distante. */
+  porCartao: { cartaoId: string; nome: string; indice: number; total: number; fechamento: Data; dias: number }[];
   /** Fechamento mais próximo entre as faturas abertas. */
   proximoFechamento: { cartao: string; data: Data; dias: number } | null;
   /** Mês de referência do orçamento: fatura aberta do primeiro cartão. */
@@ -56,9 +58,10 @@ export function resumirInicio(cartoes: CartaoCompleto[], faturas: FaturaResumo[]
   let proximoFechamento: ResumoInicio["proximoFechamento"] = null;
   const abertos: Mes[] = [];
   const agenda: ResumoInicio["agenda"] = [];
+  const porCartao: ResumoInicio["porCartao"] = [];
   const mesHoje = mesDe(hoje);
 
-  for (const c of cartoes) {
+  for (const [indice, c] of cartoes.entries()) {
     const doCartao = faturas.filter((f) => f.cartaoId === c.id);
     const aberta = faturaDaCompra(c, hoje, confirmadasDe(doCartao));
     abertos.push(aberta.mes);
@@ -88,6 +91,14 @@ export function resumirInicio(cartoes: CartaoCompleto[], faturas: FaturaResumo[]
     }
 
     const dias = diasEntre(hoje, aberta.fechamento);
+    porCartao.push({
+      cartaoId: c.id,
+      nome: c.nome,
+      indice,
+      total: doCartao.filter((f) => f.mes === aberta.mes).reduce((soma, f) => soma + f.total, 0),
+      fechamento: aberta.fechamento,
+      dias,
+    });
     if (!proximoFechamento || aberta.fechamento < proximoFechamento.data) {
       proximoFechamento = { cartao: c.nome, data: aberta.fechamento, dias };
     }
@@ -104,6 +115,7 @@ export function resumirInicio(cartoes: CartaoCompleto[], faturas: FaturaResumo[]
   });
 
   agenda.sort((a, b) => a.data.localeCompare(b.data) || a.tipo.localeCompare(b.tipo));
+  porCartao.sort((a, b) => a.fechamento.localeCompare(b.fechamento) || a.indice - b.indice);
 
   return {
     faturaAtual,
@@ -112,6 +124,7 @@ export function resumirInicio(cartoes: CartaoCompleto[], faturas: FaturaResumo[]
     limiteDisponivel: limiteTotal - comprometido,
     comprometidoFuturo,
     ultimoMesComprometido,
+    porCartao,
     proximoFechamento,
     mesOrcamento: abertos[0] ?? mesHoje,
     proximasFaturas,

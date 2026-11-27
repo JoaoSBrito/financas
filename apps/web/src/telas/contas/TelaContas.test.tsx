@@ -124,7 +124,7 @@ describe("TelaContas", () => {
     const dialogo = screen.getByRole("dialog");
     await user.type(within(dialogo).getByLabelText("Valor"), "120");
     await user.type(within(dialogo).getByLabelText("Descrição"), "Pix feira");
-    await user.click(within(dialogo).getByRole("button", { name: "Mercado" }));
+    await user.selectOptions(within(dialogo).getByLabelText("Categoria (opcional)"), "Mercado");
     await user.click(within(dialogo).getByRole("button", { name: "Lançar" }));
     expect(registrar.mock.calls[0]![0]).toEqual({
       form: { contaId: CONTA, tipo: "saida", valor: 12000, descricao: "Pix feira", data: "2026-11-01", categoriaId: MERCADO },

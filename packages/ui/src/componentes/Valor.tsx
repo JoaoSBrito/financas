@@ -1,5 +1,6 @@
 "use client";
 
+import { estiloMono } from "./estilos";
 import Typography, { type TypographyProps } from "@mui/material/Typography";
 import { createContext, useContext, type ReactNode } from "react";
 import { formatar, type Centavos } from "@financas/core";
@@ -21,27 +22,32 @@ export interface ValorProps extends Omit<TypographyProps, "children"> {
   sinal?: "padrao" | "sempre";
   /** Força mostrar mesmo com "ocultar valores" ligado. */
   ignorarOcultar?: boolean;
+  /** Sem o "R$" (tabelas com a moeda no cabeçalho ou no total). */
+  semSimbolo?: boolean;
 }
 
-export function formatarComSinal(valor: Centavos, sinal: "padrao" | "sempre"): string {
-  const texto = formatar(Math.abs(valor));
+export function formatarComSinal(valor: Centavos, sinal: "padrao" | "sempre", semSimbolo = false): string {
+  const completo = formatar(Math.abs(valor));
+  const texto = semSimbolo ? completo.replace(/^R\$\s*/, "") : completo;
   if (valor < 0) return `− ${texto}`;
   if (sinal === "sempre" && valor > 0) return `+ ${texto}`;
   return texto;
 }
 
-export function Valor({ valor, sinal = "padrao", ignorarOcultar = false, ...props }: ValorProps) {
+/** Valores em mono com algarismos de largura fixa (pode ser sobrescrito por sx, ex.: font: "inherit"). */
+export function Valor({ valor, sinal = "padrao", ignorarOcultar = false, semSimbolo = false, sx, ...props }: ValorProps) {
   const oculto = useValoresOcultos() && !ignorarOcultar;
+  const estilo = [estiloMono, ...(Array.isArray(sx) ? sx : [sx])];
   if (oculto) {
     return (
-      <Typography component="span" aria-label="Valor oculto" {...props}>
-        R$ ••••
+      <Typography component="span" aria-label="Valor oculto" {...props} sx={estilo}>
+        {semSimbolo ? "••••" : "R$ ••••"}
       </Typography>
     );
   }
   return (
-    <Typography component="span" {...props}>
-      {formatarComSinal(valor, sinal)}
+    <Typography component="span" {...props} sx={estilo}>
+      {formatarComSinal(valor, sinal, semSimbolo)}
     </Typography>
   );
 }

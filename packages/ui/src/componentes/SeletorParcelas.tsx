@@ -4,7 +4,8 @@ import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useState } from "react";
-import { toqueMinimo } from "../tokens";
+import { tipografia, toqueMinimo } from "../tokens";
+import { estiloSegmentado } from "./estilos";
 import { ContadorNumerico } from "./ContadorNumerico";
 
 const RAPIDAS = [1, 3, 6, 10, 12];
@@ -37,10 +38,16 @@ export function SeletorParcelas({ valor, onChange, max = 48 }: SeletorParcelasPr
           }
         }}
         sx={{
+          ...estiloSegmentado,
           display: "grid",
           gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-          gap: 1.5,
-          "& .MuiToggleButtonGroup-grouped": { minHeight: toqueMinimo, px: 0, fontSize: 13 },
+          "& .MuiToggleButtonGroup-grouped": {
+            ...estiloSegmentado["& .MuiToggleButtonGroup-grouped"],
+            minHeight: toqueMinimo,
+            px: 0,
+            fontSize: 12,
+            fontFamily: tipografia.familiaMono,
+          },
         }}
       >
         {RAPIDAS.map((n) => (

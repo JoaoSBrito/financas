@@ -6,7 +6,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import type { Centavos } from "@financas/core";
-import { paleta, raio, toqueMinimo } from "../tokens";
+import { paleta, raio, tipografia, toqueMinimo } from "../tokens";
 import { Valor } from "./Valor";
 
 export interface ItemLancamentoProps {
@@ -23,6 +23,8 @@ export interface ItemLancamentoProps {
   extra?: ReactNode;
   /** Torna a linha tocável (ex.: abrir edição). A caixa de conferido continua separada. */
   onAbrir?: () => void;
+  /** Filete na cor do cartão, no lugar do ícone (padrão Lastro). */
+  corFilete?: string;
 }
 
 /** Linha de lista usada em gastos, lançamentos da fatura e movimentos da conta. */
@@ -37,6 +39,7 @@ export function ItemLancamento({
   corValor,
   extra,
   onAbrir,
+  corFilete,
 }: ItemLancamentoProps) {
   const conteudo = (
     <>
@@ -45,7 +48,7 @@ export function ItemLancamento({
           {descricao}
         </Typography>
         {detalhe && (
-          <Typography variant="caption" component="div">
+          <Typography variant="caption" component="div" sx={{ fontFamily: tipografia.familiaMono, fontSize: 11, letterSpacing: "0.02em" }}>
             {detalhe}
           </Typography>
         )}
@@ -66,14 +69,16 @@ export function ItemLancamento({
           sx={{ ml: -2.5, width: toqueMinimo, height: toqueMinimo }}
         />
       )}
-      {icone && (
+      {corFilete && <Box aria-hidden sx={{ width: 4, height: 28, borderRadius: "2px", bgcolor: corFilete, flexShrink: 0 }} />}
+      {icone && !corFilete && (
         <Box
           aria-hidden
           sx={{
             width: 36,
             height: 36,
-            borderRadius: `${raio.circulo}px`,
-            bgcolor: paleta.interativo,
+            borderRadius: `${raio.controle}px`,
+            border: `1px solid ${paleta.divisor}`,
+            bgcolor: paleta.elevado,
             color: paleta.texto,
             display: "flex",
             alignItems: "center",
@@ -87,7 +92,7 @@ export function ItemLancamento({
       {onAbrir ? (
         <ButtonBase
           onClick={onAbrir}
-          sx={{ flex: 1, minWidth: 0, gap: 3, minHeight: 60, borderRadius: `${raio.card}px`, justifyContent: "space-between" }}
+          sx={{ flex: 1, minWidth: 0, gap: 3, minHeight: 60, borderRadius: `${raio.controle}px`, justifyContent: "space-between" }}
         >
           {conteudo}
         </ButtonBase>

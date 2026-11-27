@@ -3,10 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -19,7 +15,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { useWatch } from "react-hook-form";
 import { caixinhaFormSchema, dataSchema, hojeEmSaoPaulo, situacaoDaReserva, type CaixinhaForm } from "@financas/core";
-import { CampoMoeda, ContadorNumerico, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
+import { CampoMoeda, ContadorNumerico, ControleSegmentado, FolhaInferior, PilulasSelecao, Valor } from "@financas/ui";
 import { paleta, raio } from "@financas/ui/tokens";
 import { useCustoDeVida } from "@/hooks/useReserva";
 import { textoCustoDeVida } from "./resumo";
@@ -29,8 +25,18 @@ import type { Caixinha } from "@/services/caixinhas";
 import type { Conta } from "@/services/contas";
 import { useAvisos } from "@/stores/avisos";
 
-function Janela({ titulo, ocupado, onFechar, onEnviar, acoes, children }: {
+/** Diálogos desta tela: folha inferior no celular, diálogo centralizado a partir de 600 px. */
+function Janela({
+  titulo,
+  aberto = true,
+  ocupado,
+  onFechar,
+  onEnviar,
+  acoes,
+  children,
+}: {
   titulo: string;
+  aberto?: boolean;
   ocupado: boolean;
   onFechar: () => void;
   onEnviar?: () => void;
@@ -38,23 +44,9 @@ function Janela({ titulo, ocupado, onFechar, onEnviar, acoes, children }: {
   children: ReactNode;
 }) {
   return (
-    <Dialog open onClose={ocupado ? undefined : onFechar} fullWidth maxWidth="xs">
-      <form
-        noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          onEnviar?.();
-        }}
-      >
-        <DialogTitle>{titulo}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={4} sx={{ pt: 1 }}>
-            {children}
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 6, pb: 5, gap: 2, flexWrap: "wrap" }}>{acoes}</DialogActions>
-      </form>
-    </Dialog>
+    <FolhaInferior aberta={aberto} titulo={titulo} ocupado={ocupado} onFechar={onFechar} onEnviar={onEnviar ?? (() => {})} acoes={acoes} largura={480}>
+      {children}
+    </FolhaInferior>
   );
 }
 
@@ -465,7 +457,7 @@ function PainelReserva({ meses, saldo, outra, contador }: { meses: number; saldo
   const custo = useCustoDeVida();
   const s = custo.data ? situacaoDaReserva(saldo, meses, custo.data.valor) : null;
   return (
-    <Stack spacing={3} sx={{ bgcolor: paleta.interativo, borderRadius: `${raio.card}px`, p: 4 }}>
+    <Stack spacing={3} sx={{ bgcolor: paleta.elevado, borderRadius: `${raio.painel}px`, p: 4 }}>
       {contador}
       {custo.isPending ? (
         <Typography variant="caption">Calculando o custo de vida…</Typography>

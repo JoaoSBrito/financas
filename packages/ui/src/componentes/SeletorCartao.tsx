@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 import { useRef, type KeyboardEvent } from "react";
-import { paleta, raio } from "../tokens";
+import { paleta, raio, tipografia } from "../tokens";
 
 export interface OpcaoCartao {
   id: string;
@@ -61,9 +61,10 @@ export function SeletorCartao({ opcoes, valor, onChange, rotulo }: SeletorCartao
             onKeyDown={(e) => aoTeclar(e, i)}
             sx={{
               minHeight: 64,
-              borderRadius: `${raio.card}px`,
-              border: `1px solid ${selecionado ? paleta.bordaSelecionada : paleta.bordaCampo}`,
-              bgcolor: selecionado ? paleta.interativo : "transparent",
+              borderRadius: `${raio.controle}px`,
+              // Selecionado: borda lima (é a escolha que define a fatura do gasto).
+              border: `1px solid ${selecionado ? paleta.acao : paleta.bordaControle}`,
+              bgcolor: selecionado ? paleta.elevado : "transparent",
               px: 3,
               py: 2.5,
               display: "flex",
@@ -74,10 +75,10 @@ export function SeletorCartao({ opcoes, valor, onChange, rotulo }: SeletorCartao
             }}
           >
             <Typography sx={{ fontSize: 14, fontWeight: 500, display: "flex", alignItems: "center", gap: 2 }}>
-              {o.cor && <Box component="span" aria-hidden sx={{ width: 8, height: 8, borderRadius: "4px", bgcolor: o.cor }} />}
+              {o.cor && <Box component="span" aria-hidden sx={{ width: 4, height: 14, borderRadius: "2px", bgcolor: o.cor }} />}
               {o.nome}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: o.recomendado ? "text.primary" : "text.secondary" }}>
+            <Typography sx={{ fontFamily: tipografia.familiaMono, fontSize: 11, color: o.recomendado ? paleta.acao : "text.secondary" }}>
               {o.recomendado ? `Melhor hoje · ${o.detalhe}` : o.detalhe}
             </Typography>
           </ButtonBase>

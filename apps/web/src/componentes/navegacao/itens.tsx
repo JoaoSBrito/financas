@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 export interface ItemNavegacao {
   href: string;
   rotulo: string;
-  /** Rótulo mais longo no menu lateral do desktop. */
+  /** Rótulo nas abas da barra superior (tablet e desktop). */
   rotuloLongo: string;
   icone: ReactNode;
   /** Aparece na barra inferior do celular. */
@@ -20,8 +20,8 @@ export interface ItemNavegacao {
 
 export const ITENS_NAVEGACAO: ItemNavegacao[] = [
   { href: "/", rotulo: "Início", rotuloLongo: "Início", icone: <HomeRounded />, noCelular: true },
-  { href: "/contas", rotulo: "Contas", rotuloLongo: "Contas e saldo", icone: <AccountBalanceWalletRounded />, noCelular: true },
-  { href: "/cartoes", rotulo: "Cartões", rotuloLongo: "Cartões e faturas", icone: <CreditCardRounded />, noCelular: true },
+  { href: "/contas", rotulo: "Contas", rotuloLongo: "Contas", icone: <AccountBalanceWalletRounded />, noCelular: true },
+  { href: "/cartoes", rotulo: "Cartões", rotuloLongo: "Cartões", icone: <CreditCardRounded />, noCelular: true },
   { href: "/gastos", rotulo: "Gastos", rotuloLongo: "Gastos", icone: <PieChartRounded />, noCelular: false, exato: true },
   { href: "/caixinhas", rotulo: "Investir", rotuloLongo: "Investimentos", icone: <TrendingUpRounded />, noCelular: true },
   { href: "/ajustes", rotulo: "Ajustes", rotuloLongo: "Ajustes", icone: <SettingsRounded />, noCelular: false },

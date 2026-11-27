@@ -3,8 +3,9 @@ import { paleta } from "@financas/ui/tokens";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Finanças",
-    short_name: "Finanças",
+    name: "Lastro",
+    short_name: "Lastro",
+    description: "Cada centavo com base: faturas, parcelas, contas e caixinhas num só painel.",
     start_url: "/",
     display: "standalone",
     background_color: paleta.fundo,

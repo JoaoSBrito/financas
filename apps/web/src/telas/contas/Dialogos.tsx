@@ -3,10 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -24,7 +20,7 @@ import {
   type RecorrenteForm,
   type TransferenciaEntreContas,
 } from "@financas/core";
-import { CampoMoeda, ChipsCategoria, ControleSegmentado, PilulasSelecao, Valor } from "@financas/ui";
+import { CampoMoeda, ControleSegmentado, FolhaInferior, PilulasSelecao, SeletorCategoria, Valor } from "@financas/ui";
 import { useCategorias } from "@/hooks/useGastos";
 import {
   useAjustarSaldo,
@@ -40,6 +36,7 @@ import {
 import type { Conta, MovimentoConta, Recorrente } from "@/services/contas";
 import { useAvisos } from "@/stores/avisos";
 
+/** Diálogos desta tela: folha inferior no celular, diálogo centralizado a partir de 600 px. */
 function Janela({
   titulo,
   aberto = true,
@@ -58,23 +55,9 @@ function Janela({
   children: ReactNode;
 }) {
   return (
-    <Dialog open={aberto} onClose={ocupado ? undefined : onFechar} fullWidth maxWidth="xs">
-      <form
-        noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          onEnviar?.();
-        }}
-      >
-        <DialogTitle>{titulo}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={4} sx={{ pt: 1 }}>
-            {children}
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 6, pb: 5, gap: 2, flexWrap: "wrap" }}>{acoes}</DialogActions>
-      </form>
-    </Dialog>
+    <FolhaInferior aberta={aberto} titulo={titulo} ocupado={ocupado} onFechar={onFechar} onEnviar={onEnviar ?? (() => {})} acoes={acoes} largura={480}>
+      {children}
+    </FolhaInferior>
   );
 }
 
@@ -94,14 +77,7 @@ function SeletorConta({ contas, valor, onChange }: { contas: Conta[]; valor: str
 function CampoCategoria({ valor, onChange }: { valor: string | null; onChange: (id: string | null) => void }) {
   const categorias = useCategorias();
   if (!categorias.data || categorias.data.length === 0) return null;
-  return (
-    <Stack spacing={2}>
-      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-        Categoria
-      </Typography>
-      <ChipsCategoria rotulo="Categoria" opcoes={categorias.data} valor={valor} onChange={onChange} />
-    </Stack>
-  );
+  return <SeletorCategoria rotulo="Categoria (opcional)" opcoes={categorias.data} valor={valor} onChange={onChange} />;
 }
 
 // ───────────── Nova conta ─────────────

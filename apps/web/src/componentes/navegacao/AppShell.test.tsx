@@ -36,28 +36,38 @@ function renderizar() {
     </ThemeProvider>,
   );
   const [menu, barra] = screen.getAllByRole("navigation", { name: "Navegação principal" });
-  return { menu: menu!, barra: barra! };
+  // A barra superior é o cabeçalho da página (landmark "banner").
+  return { topo: screen.getByRole("banner"), menu: menu!, barra: barra! };
 }
 
 describe("navegação responsiva", () => {
-  it("390px: só a barra inferior (o menu fica oculto)", () => {
-    const { menu, barra } = renderizar();
+  it("390px: só a barra inferior (a barra superior fica oculta)", () => {
+    const { topo, barra } = renderizar();
     // Valores de xs viram regra base ou @media (min-width:0px), conforme o MUI.
-    expect(regra(menu, "display") ?? regra(menu, "display", 0)).toBe("none");
+    expect(regra(topo, "display") ?? regra(topo, "display", 0)).toBe("none");
     expect(regra(barra, "display") ?? regra(barra, "display", 0)).toBe("block");
   });
 
-  it("600 a 899px: menu no topo e a barra inferior some", () => {
-    const { menu, barra } = renderizar();
-    expect(regra(menu, "display", 600)).toBe("flex");
-    expect(regra(menu, "flex-direction", 600)).toBe("row");
+  it("600px em diante: barra superior com abas em linha e a barra inferior some", () => {
+    const { topo, menu, barra } = renderizar();
+    expect(regra(topo, "display", 600)).toBe("block");
+    expect(regra(menu, "flex-direction")).toBe("row");
     expect(regra(barra, "display", 600)).toBe("none");
   });
 
-  it("900px em diante (inclui 1440px): menu lateral em coluna com largura fixa", () => {
-    const { menu } = renderizar();
-    expect(regra(menu, "flex-direction", 900)).toBe("column");
-    expect(regra(menu, "width", 900)).toBe("264px");
+  it("900px em diante (inclui 1440px): continua a barra superior, sem menu lateral", () => {
+    const { topo, menu } = renderizar();
+    expect(regra(menu, "flex-direction", 900)).toBeNull();
+    expect(regra(topo, "width", 900)).toBeNull();
+    expect(regra(topo, "position")).toBe("sticky");
+  });
+
+  it("aba ativa marcada e Ajustes no ícone da barra superior", () => {
+    const { topo, menu } = renderizar();
+    expect(within(menu).getByRole("link", { name: "Cartões" })).toHaveAttribute("aria-current", "page");
+    expect(within(menu).queryByRole("link", { name: "Ajustes" })).not.toBeInTheDocument();
+    expect(within(topo).getByRole("link", { name: "Ajustes" })).toHaveAttribute("href", "/ajustes");
+    expect(within(topo).getByRole("link", { name: "Novo gasto" })).toHaveAttribute("href", "/gastos/novo");
   });
 
   it("item ativo marcado e botão central de novo gasto acessível", () => {

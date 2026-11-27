@@ -24,19 +24,20 @@ describe("tema Mercury", () => {
   it("é escuro e usa os tokens", () => {
     expect(tema.palette.mode).toBe("dark");
     expect(tema.palette.background.default).toBe(paleta.fundo);
-    expect(tema.palette.background.paper).toBe(paleta.card);
-    expect(tema.palette.primary.main).toBe(paleta.cobalto);
-    expect(tema.palette.primary.contrastText).toBe(paleta.sobreCobalto);
-    expect(tema.shape.borderRadius).toBe(raio.card);
+    expect(tema.palette.background.paper).toBe(paleta.painel);
+    expect(tema.palette.primary.main).toBe(paleta.acao);
+    expect(tema.palette.primary.contrastText).toBe(paleta.sobreAcao);
+    expect(tema.shape.borderRadius).toBe(raio.painel);
   });
 
-  it("títulos nunca passam do peso 500", () => {
-    for (const v of ["h1", "h2", "h3", "subtitle1", "subtitle2", "button"] as const) {
+  it("títulos até peso 500; só o botão usa 600", () => {
+    for (const v of ["h1", "h2", "h3", "subtitle1", "subtitle2"] as const) {
       expect(Number(tema.typography[v].fontWeight)).toBeLessThanOrEqual(500);
     }
+    expect(Number(tema.typography.button.fontWeight)).toBe(600);
   });
 
-  it("botão em pílula com área de toque mínima; cobalto só no contained", () => {
+  it("botão com raio de controle e área de toque mínima; lima só no contained", () => {
     comTema(
       <>
         <Button variant="contained">Salvar</Button>
@@ -45,30 +46,34 @@ describe("tema Mercury", () => {
     );
     const salvar = getComputedStyle(screen.getByRole("button", { name: "Salvar" }));
     const cancelar = getComputedStyle(screen.getByRole("button", { name: "Cancelar" }));
-    expect(salvar.borderRadius).toBe(`${raio.pilula}px`);
+    expect(salvar.borderRadius).toBe(`${raio.controle}px`);
     expect(salvar.minHeight).toBe(`${toqueMinimo}px`);
-    expect([rgb(paleta.cobalto), paleta.cobalto]).toContain(resolver(salvar, salvar.backgroundColor));
+    expect([rgb(paleta.acao), paleta.acao]).toContain(resolver(salvar, salvar.backgroundColor));
     expect([rgb(paleta.texto), paleta.texto]).toContain(resolver(cancelar, cancelar.color));
   });
 
-  it("card sem sombra, raio 12 e tom do card", () => {
+  it("painel sem sombra, raio 10, borda de 1 px e tom do painel", () => {
     comTema(<Card data-testid="card">x</Card>);
     const card = getComputedStyle(screen.getByTestId("card"));
-    expect(card.borderRadius).toBe("12px");
-    expect(card.backgroundColor).toBe(rgb(paleta.card));
+    expect(card.borderRadius).toBe(`${raio.painel}px`);
+    expect(card.backgroundColor).toBe(rgb(paleta.painel));
+    expect(card.borderTopWidth).toBe("1px");
+    expect(card.borderTopColor).toBe(rgb(paleta.divisor));
     expect(card.backgroundImage).toBe("none");
   });
 
-  it("chip selecionado (primary) não usa cobalto", () => {
+  it("filtro selecionado (chip primary) é pílula clara com texto escuro, sem lima", () => {
     comTema(<Chip color="primary" label="Mercado" />);
     const chip = getComputedStyle(screen.getByText("Mercado").parentElement!);
-    expect(chip.backgroundColor).toBe(rgb(paleta.interativo));
+    expect(chip.backgroundColor).toBe(rgb(paleta.texto));
+    expect(chip.color).toBe(rgb(paleta.sobreAcao));
   });
 
-  it("barra de progresso fina com trilho interativo", () => {
+  it("barra de progresso reta de 4 px sobre o trilho do divisor", () => {
     comTema(<LinearProgress variant="determinate" value={50} aria-label="x" />);
     const barra = getComputedStyle(screen.getByRole("progressbar"));
     expect(barra.height).toBe("4px");
-    expect(barra.backgroundColor).toBe(rgb(paleta.interativo));
+    expect(barra.backgroundColor).toBe(rgb(paleta.divisor));
+    expect(barra.borderRadius).toBe("0px");
   });
 });

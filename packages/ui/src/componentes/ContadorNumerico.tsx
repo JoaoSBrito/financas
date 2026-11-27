@@ -6,7 +6,8 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { useId, type ReactNode } from "react";
-import { paleta, raio, toqueMinimo } from "../tokens";
+import { paleta, raio, tipografia } from "../tokens";
+import { estiloSomenteLeitor } from "./estilos";
 
 export interface ContadorNumericoProps {
   valor: number;
@@ -23,21 +24,21 @@ export interface ContadorNumericoProps {
 export function ContadorNumerico({ valor, onChange, min = 0, max = Infinity, rotulo, sufixo }: ContadorNumericoProps) {
   const id = useId();
   const estiloBotao = {
-    width: 48,
-    height: 48,
-    borderRadius: `${raio.pilula}px`,
-    border: `1px solid ${paleta.bordaCampo}`,
+    width: 44,
+    height: 44,
+    borderRadius: `${raio.controle}px`,
+    border: `1px solid ${paleta.bordaControle}`,
     color: paleta.texto,
   };
   return (
     <Box role="group" aria-labelledby={id} sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-      <Box component="span" id={id} sx={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
+      <Box component="span" id={id} sx={estiloSomenteLeitor}>
         {rotulo}
       </Box>
       <IconButton aria-label={`Diminuir ${rotulo.toLowerCase()}`} disabled={valor <= min} onClick={() => onChange(valor - 1)} sx={estiloBotao}>
         <RemoveRounded />
       </IconButton>
-      <Typography aria-live="polite" sx={{ fontSize: 22, fontWeight: 500, minWidth: 32, textAlign: "center" }}>
+      <Typography aria-live="polite" sx={{ fontFamily: tipografia.familiaMono, fontSize: 22, fontWeight: 500, minWidth: 32, textAlign: "center" }}>
         {valor}
       </Typography>
       <IconButton aria-label={`Aumentar ${rotulo.toLowerCase()}`} disabled={valor >= max} onClick={() => onChange(valor + 1)} sx={estiloBotao}>

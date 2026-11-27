@@ -2,18 +2,16 @@
 
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Radio from "@mui/material/Radio";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import { useState } from "react";
 import { dataSchema, hojeEmSaoPaulo, nomeDoMes } from "@financas/core";
-import { PilulasSelecao, Valor } from "@financas/ui";
+import { FolhaInferior, Rotulo, Valor } from "@financas/ui";
+import { paleta, tipografia } from "@financas/ui/tokens";
 import { useContas, usePagamentoFatura } from "@/hooks/useContas";
 import type { FaturaResumo } from "@/services/cartoes-mapeamento";
 import { useAvisos } from "@/stores/avisos";
@@ -47,61 +45,77 @@ export function DialogoPagarFatura({ fatura, total, onFechar }: { fatura: Fatura
   }
 
   return (
-    <Dialog open onClose={pagar.isPending ? undefined : onFechar} fullWidth maxWidth="xs">
-      <DialogTitle>Pagar fatura de {nomeDoMes(fatura.mes, false)}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={4} sx={{ pt: 1 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Valor
-            </Typography>
-            <Valor valor={total} sx={{ fontWeight: 500 }} />
-          </Box>
-          {contas.isPending ? null : lista.length === 0 ? (
-            <Alert severity="info">
-              Sem contas cadastradas: a fatura só será marcada como paga, sem mexer em saldo.{" "}
-              <Link href="/contas" style={{ color: "inherit" }}>
-                Cadastrar conta
-              </Link>
-            </Alert>
-          ) : (
-            <Stack spacing={2}>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Pago com
-              </Typography>
-              <PilulasSelecao
-                rotulo="Conta de pagamento"
-                tamanho="pequeno"
-                valor={conta ?? ""}
-                onChange={setContaId}
-                opcoes={lista.map((c) => ({ valor: c.id, rotulo: c.nome }))}
-              />
-              <Typography variant="caption">Sai da conta como transferência: o gasto já foi contado nas compras.</Typography>
-            </Stack>
-          )}
-          <TextField
-            label="Data do pagamento"
-            type="date"
-            value={data}
-            onChange={(e) => {
-              setData(e.target.value);
-              setErroData(null);
-            }}
-            slotProps={{ inputLabel: { shrink: true } }}
-            error={Boolean(erroData)}
-            helperText={erroData}
-          />
-          {pagar.error && <Alert severity="error">{pagar.error.message}</Alert>}
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ px: 6, pb: 5, gap: 2 }}>
-        <Button onClick={onFechar} disabled={pagar.isPending}>
-          Cancelar
-        </Button>
-        <Button variant="contained" onClick={confirmar} disabled={pagar.isPending || contas.isPending}>
-          {pagar.isPending ? "Salvando…" : "Confirmar pagamento"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <FolhaInferior
+      aberta
+      onFechar={onFechar}
+      ocupado={pagar.isPending}
+      contexto={`Fatura de ${nomeDoMes(fatura.mes, false)}`}
+      titulo="Pagar fatura"
+      onEnviar={confirmar}
+      acoes={
+        <>
+          <Button variant="outlined" onClick={onFechar} disabled={pagar.isPending}>
+            Cancelar
+          </Button>
+          <Button type="submit" variant="contained" disabled={pagar.isPending || contas.isPending}>
+            {pagar.isPending ? "Salvando…" : "Confirmar pagamento"}
+          </Button>
+        </>
+      }
+    >
+      <Box sx={{ border: `1px solid ${paleta.divisor}`, borderRadius: "10px", p: 3.5, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <Rotulo>Valor</Rotulo>
+        <Valor valor={total} sx={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.02em" }} />
+      </Box>
+      {contas.isPending ? null : lista.length === 0 ? (
+        <Alert severity="info">
+          Sem contas cadastradas: a fatura só será marcada como paga, sem mexer em saldo.{" "}
+          <Link href="/contas" style={{ color: "inherit" }}>
+            Cadastrar conta
+          </Link>
+        </Alert>
+      ) : (
+        <Box component="fieldset" sx={{ m: 0, p: 0, border: "none", display: "flex", flexDirection: "column" }}>
+          <Rotulo component="legend" sx={{ mb: 1 }}>
+            Sai da conta
+          </Rotulo>
+          {lista.map((c, i) => (
+            <Box
+              key={c.id}
+              component="label"
+              sx={{ display: "grid", gridTemplateColumns: "24px minmax(0, 1fr) auto", alignItems: "center", columnGap: 2.5, minHeight: 52, cursor: "pointer", borderBottom: i < lista.length - 1 ? `1px solid ${paleta.divisor}` : "none" }}
+            >
+              <Radio checked={conta === c.id} onChange={() => setContaId(c.id)} name="conta-pagamento" sx={{ p: 0 }} slotProps={{ input: { "aria-label": c.nome } }} />
+              <Typography sx={{ fontSize: 15 }}>{c.nome}</Typography>
+              <Box sx={{ fontFamily: tipografia.familiaMono, fontSize: 13, color: "text.secondary" }}>
+                <Valor valor={c.saldo} sx={{ font: "inherit" }} />
+                {conta === c.id && (
+                  <>
+                    <span aria-label="passa para"> → </span>
+                    <Valor valor={c.saldo - total} sx={{ font: "inherit", color: "text.primary" }} />
+                  </>
+                )}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      )}
+      <TextField
+        label="Data do pagamento"
+        type="date"
+        value={data}
+        onChange={(e) => {
+          setData(e.target.value);
+          setErroData(null);
+        }}
+        slotProps={{ inputLabel: { shrink: true } }}
+        error={Boolean(erroData)}
+        helperText={erroData}
+      />
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+        É uma transferência da conta para o cartão: não conta como gasto de novo.
+      </Typography>
+      {pagar.error && <Alert severity="error">{pagar.error.message}</Alert>}
+    </FolhaInferior>
   );
 }

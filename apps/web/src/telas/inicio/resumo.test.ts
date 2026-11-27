@@ -95,3 +95,14 @@ describe("próximas datas (agenda)", () => {
     expect(linhas(r)).toContain("2026-11-10 vencimento XP vencida");
   });
 });
+
+describe("fatura atual por cartão", () => {
+  it("lista o total da fatura aberta de cada cartão, do fechamento mais próximo ao mais distante", () => {
+    const r = resumirInicio([viagens, xp], faturas, "2026-11-01");
+    expect(r.porCartao.map((c) => [c.nome, c.fechamento, c.dias, c.indice])).toEqual([
+      ["XP", "2026-11-03", 2, 1],
+      ["Viagens", "2026-11-20", 19, 0],
+    ]);
+    expect(r.porCartao.reduce((s, c) => s + c.total, 0)).toBe(r.faturaAtual);
+  });
+});

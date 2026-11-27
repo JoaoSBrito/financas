@@ -15,7 +15,7 @@ import TableRow from "@mui/material/TableRow";
 import Link from "next/link";
 import { useState } from "react";
 import { formatarDiaMes } from "@financas/core";
-import { EstadoVazio, ItemLancamento, PilulasSelecao, SecaoCard, Valor } from "@financas/ui";
+import { EstadoVazio, estiloSomenteLeitor, ItemLancamento, PilulasSelecao, SecaoCard, Valor } from "@financas/ui";
 import { useMarcarConferida } from "@/hooks/useFaturas";
 import type { Lancamento } from "@/services/faturas";
 
@@ -101,7 +101,7 @@ export function ListaLancamentos({ lancamentos, onEditar }: ListaLancamentosProp
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ width: 48 }}>
-                    <Box component="span" sx={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
+                    <Box component="span" sx={estiloSomenteLeitor}>
                       Conferido
                     </Box>
                   </TableCell>

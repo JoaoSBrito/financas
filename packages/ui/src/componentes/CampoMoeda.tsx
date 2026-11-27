@@ -1,5 +1,6 @@
 "use client";
 
+import { paleta, tipografia } from "../tokens";
 import TextField, { type TextFieldProps } from "@mui/material/TextField";
 import { NumericFormat } from "react-number-format";
 import type { Centavos } from "@financas/core";
@@ -29,9 +30,14 @@ export function CampoMoeda({ valor, onChange, destaque = false, sx, ...props }: 
       onValueChange={(v) => onChange(v.value === "" ? null : Math.round(Number(v.value) * 100))}
       {...(props as Record<string, unknown>)}
       sx={[
+        // Todos os valores em mono.
+        { "& input": { fontFamily: tipografia.familiaMono, fontVariantNumeric: "tabular-nums" } },
+        // Destaque (valor do gasto): sem caixa, só a linha lima embaixo.
         destaque && {
-          "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-          "& input": { textAlign: "center", fontSize: 44, fontWeight: 500, letterSpacing: "-0.02em", py: 1, fontVariantNumeric: "tabular-nums" },
+          "& .MuiOutlinedInput-root": { bgcolor: "transparent", borderRadius: 0 },
+          "& .MuiOutlinedInput-notchedOutline": { border: "none", borderBottom: `1px solid ${paleta.acao}`, borderRadius: 0 },
+          "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": { borderWidth: 0, borderBottomWidth: 2 },
+          "& input": { fontSize: 38, fontWeight: 500, letterSpacing: "-0.03em", py: 1, px: 0 },
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

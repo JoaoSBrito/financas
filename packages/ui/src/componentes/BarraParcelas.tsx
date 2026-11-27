@@ -1,7 +1,7 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import { paleta, raio } from "../tokens";
+import { paleta } from "../tokens";
 
 export interface BarraParcelasProps {
   total: number;
@@ -16,7 +16,17 @@ export function BarraParcelas({ total, atual }: BarraParcelasProps) {
       {Array.from({ length: total }, (_, i) => (
         <Box
           key={i + 1}
-          sx={{ flex: 1, height: 4, borderRadius: `${raio.barraFina}px`, bgcolor: i + 1 <= atual ? paleta.texto : paleta.interativo }}
+          sx={{
+            flex: 1,
+            height: 6,
+            boxSizing: "border-box",
+            // Pagas em claro, a atual em lima, as futuras só com contorno.
+            ...(i + 1 < atual
+              ? { bgcolor: paleta.texto }
+              : i + 1 === atual
+                ? { bgcolor: paleta.acao }
+                : { border: `1px solid ${paleta.bordaControle}` }),
+          }}
         />
       ))}
     </Box>
