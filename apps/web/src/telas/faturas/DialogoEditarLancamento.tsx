@@ -3,17 +3,14 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { z } from "zod";
 import { textoCurto } from "@financas/core";
-import { ChipsCategoria, Valor } from "@financas/ui";
+import { FolhaInferior, Rotulo, SeletorCategoria, Valor } from "@financas/ui";
+import { paleta } from "@financas/ui/tokens";
 import { useEditarCompra, useExcluirCompra } from "@/hooks/useFaturas";
 import type { Categoria } from "@/services/categorias";
 import type { Lancamento } from "@/services/faturas";
@@ -68,74 +65,67 @@ export function DialogoEditarLancamento({ lancamento, categorias, onFechar }: Di
   const erro = editar.error?.message ?? excluir.error?.message;
 
   return (
-    <Dialog open onClose={ocupado ? undefined : onFechar} fullWidth maxWidth="xs">
-      <DialogTitle>{confirmandoExclusao ? "Excluir gasto?" : "Editar gasto"}</DialogTitle>
-      <DialogContent>
-        {confirmandoExclusao ? (
-          <Typography variant="body2">
-            {parcelado
-              ? `"${lancamento.descricao}" será excluído com todas as ${lancamento.totalParcelas} parcelas, em todas as faturas.`
-              : `"${lancamento.descricao}" será excluído desta fatura.`}
-          </Typography>
-        ) : (
-          <Stack spacing={4} sx={{ pt: 1 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {parcelado ? `Parcela ${lancamento.numero} de ${lancamento.totalParcelas}` : "Valor"}
-              </Typography>
-              <Valor valor={lancamento.valor} sx={{ fontWeight: 500 }} />
-            </Box>
-            <TextField
-              label="Descrição"
-              value={descricao}
-              onChange={(e) => {
-                setDescricao(e.target.value);
-                setErroDescricao(null);
-              }}
-              error={Boolean(erroDescricao)}
-              helperText={erroDescricao}
-            />
-            <Stack spacing={2}>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Categoria
-              </Typography>
-              <ChipsCategoria rotulo="Categoria" opcoes={categorias} valor={categoriaId} onChange={setCategoriaId} />
-            </Stack>
-            <Typography variant="caption" component="p">
-              Para mudar valor, cartão ou parcelas, exclua e lance de novo.
-            </Typography>
-          </Stack>
-        )}
-        {erro && (
-          <Alert severity="error" sx={{ mt: 3 }}>
-            {erro}
-          </Alert>
-        )}
-      </DialogContent>
-      <DialogActions sx={{ px: 6, pb: 5, gap: 2, flexWrap: "wrap" }}>
-        {confirmandoExclusao ? (
+    <FolhaInferior
+      aberta
+      onFechar={onFechar}
+      ocupado={ocupado}
+      contexto={parcelado ? `Parcela ${lancamento.numero} de ${lancamento.totalParcelas}` : "Lançamento"}
+      titulo={confirmandoExclusao ? "Excluir gasto?" : "Editar gasto"}
+      onEnviar={confirmandoExclusao ? confirmarExclusao : salvar}
+      acoes={
+        confirmandoExclusao ? (
           <>
-            <Button onClick={() => setConfirmandoExclusao(false)} disabled={ocupado}>
+            <Button variant="outlined" onClick={() => setConfirmandoExclusao(false)} disabled={ocupado}>
               Voltar
             </Button>
-            <Button variant="contained" color="error" onClick={confirmarExclusao} disabled={ocupado}>
+            <Button type="submit" variant="outlined" color="error" disabled={ocupado}>
               {excluir.isPending ? "Excluindo…" : "Excluir"}
             </Button>
           </>
         ) : (
           <>
-            <Button color="error" onClick={() => setConfirmandoExclusao(true)} disabled={ocupado} sx={{ mr: "auto" }}>
+            <Button variant="outlined" color="error" onClick={() => setConfirmandoExclusao(true)} disabled={ocupado}>
               Excluir
             </Button>
-            <Button onClick={onFechar} disabled={ocupado}>
+            <Button variant="outlined" onClick={onFechar} disabled={ocupado}>
               Cancelar
             </Button>
-            <Button variant="contained" onClick={salvar} disabled={ocupado}>
+            <Button type="submit" variant="contained" disabled={ocupado}>
               {editar.isPending ? "Salvando…" : "Salvar"}
             </Button>
           </>
-        )}
-      </DialogActions>
-    </Dialog>
+        )
+      }
+    >
+      {confirmandoExclusao ? (
+        <Typography variant="body2">
+          {parcelado
+            ? `"${lancamento.descricao}" será excluído com todas as ${lancamento.totalParcelas} parcelas, em todas as faturas.`
+            : `"${lancamento.descricao}" será excluído desta fatura.`}
+        </Typography>
+      ) : (
+        <>
+          <Box sx={{ border: `1px solid ${paleta.divisor}`, borderRadius: "10px", p: 3.5, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <Rotulo>{parcelado ? "Valor da parcela" : "Valor"}</Rotulo>
+            <Valor valor={lancamento.valor} sx={{ fontSize: 22, fontWeight: 500 }} />
+          </Box>
+          <TextField
+            label="Descrição"
+            value={descricao}
+            onChange={(e) => {
+              setDescricao(e.target.value);
+              setErroDescricao(null);
+            }}
+            error={Boolean(erroDescricao)}
+            helperText={erroDescricao}
+          />
+          <SeletorCategoria opcoes={categorias} valor={categoriaId} onChange={setCategoriaId} />
+          <Typography variant="caption" component="p">
+            Para mudar valor, cartão ou parcelas, exclua e lance de novo.
+          </Typography>
+        </>
+      )}
+      {erro && <Alert severity="error">{erro}</Alert>}
+    </FolhaInferior>
   );
 }

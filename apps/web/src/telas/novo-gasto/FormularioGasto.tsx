@@ -22,8 +22,8 @@ import {
   type NovoGasto,
   type SimulacaoDeCompra,
 } from "@financas/core";
-import { corDoCartao, paleta } from "@financas/ui/tokens";
-import { CampoMoeda, ChipsCategoria, ResumoImpacto, SeletorCartao, SeletorParcelas, Valor } from "@financas/ui";
+import { corDoCartao, paleta, tipografia } from "@financas/ui/tokens";
+import { CampoMoeda, ResumoImpacto, Rotulo, SeletorCartao, SeletorCategoria, SeletorParcelas, Valor } from "@financas/ui";
 import { useRegistrarGasto } from "@/hooks/useGastos";
 import type { Categoria } from "@/services/categorias";
 import { confirmadasDe, resumirFaturas, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
@@ -41,13 +41,8 @@ export interface FormularioGastoProps {
 
 const abreviar = (mes: string) => nomeDoMes(mes, false).slice(0, 3);
 
-function Rotulo({ children, id }: { children: string; id?: string }) {
-  return (
-    <Typography id={id} variant="body2" sx={{ color: "text.secondary" }}>
-      {children}
-    </Typography>
-  );
-}
+/** Bloco de campos: painel com borda (padrão Lastro). */
+const bloco = { bgcolor: paleta.painel, border: `1px solid ${paleta.divisor}`, borderRadius: "10px", p: { xs: "12px 14px", md: "14px 16px" } } as const;
 
 export function FormularioGasto({ cartoes, categorias, faturas, hoje, onConcluir }: FormularioGastoProps) {
   const registrar = useRegistrarGasto();
@@ -130,99 +125,119 @@ export function FormularioGasto({ cartoes, categorias, faturas, hoje, onConcluir
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit(salvar)} noValidate sx={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      <Controller
-        control={control}
-        name="valor"
-        render={({ field, fieldState }) => (
-          <CampoMoeda
-            label="Valor total"
-            destaque
-            autoFocus
-            valor={field.value ? field.value : null}
-            onChange={(v) => field.onChange(v ?? 0)}
-            error={Boolean(fieldState.error)}
-            helperText={fieldState.error?.message}
-            slotProps={{ inputLabel: { shrink: true, sx: { position: "static", transform: "none", textAlign: "center", width: "100%" } } }}
+    <Box
+      component="form"
+      onSubmit={handleSubmit(salvar)}
+      noValidate
+      sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 3fr) minmax(0, 2fr)" }, gap: { xs: 3, md: 6 }, alignItems: "start" }}
+    >
+      {/* Campos */}
+      <Stack spacing={3} sx={{ minWidth: 0 }}>
+        <Box sx={bloco}>
+          <Controller
+            control={control}
+            name="valor"
+            render={({ field, fieldState }) => (
+              <CampoMoeda
+                label="Valor total"
+                destaque
+                autoFocus
+                valor={field.value ? field.value : null}
+                onChange={(v) => field.onChange(v ?? 0)}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                    sx: {
+                      position: "static",
+                      transform: "none",
+                      fontFamily: tipografia.familiaMono,
+                      fontSize: 11,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                    },
+                  },
+                }}
+              />
+            )}
           />
-        )}
-      />
+        </Box>
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "2fr 1fr" }, gap: 3 }}>
-        <TextField
-          label="Descrição"
-          placeholder="Ex.: Mercado"
-          error={Boolean(errors.descricao)}
-          helperText={errors.descricao?.message}
-          {...register("descricao")}
-        />
-        <TextField
-          label="Data da compra"
-          type="date"
-          slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: hoje } }}
-          error={Boolean(errors.dataCompra)}
-          helperText={errors.dataCompra?.message}
-          {...register("dataCompra")}
-        />
-      </Box>
+        <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: 3 }}>
+          <TextField
+            label="Descrição"
+            placeholder="Ex.: Mercado"
+            error={Boolean(errors.descricao)}
+            helperText={errors.descricao?.message}
+            {...register("descricao")}
+          />
+          <TextField
+            label="Data da compra"
+            type="date"
+            slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: hoje } }}
+            error={Boolean(errors.dataCompra)}
+            helperText={errors.dataCompra?.message}
+            {...register("dataCompra")}
+          />
+        </Box>
 
-      <Stack spacing={2}>
-        <Rotulo>Cartão</Rotulo>
-        <Controller
-          control={control}
-          name="cartaoId"
-          render={({ field }) => (
-            <SeletorCartao rotulo="Cartão" opcoes={opcoesCartao} valor={field.value} onChange={field.onChange} />
-          )}
-        />
-      </Stack>
+        <Box sx={bloco}>
+          <Rotulo component="div" sx={{ mb: 2 }}>
+            Cartão
+          </Rotulo>
+          <Controller
+            control={control}
+            name="cartaoId"
+            render={({ field }) => <SeletorCartao rotulo="Cartão" opcoes={opcoesCartao} valor={field.value} onChange={field.onChange} />}
+          />
+        </Box>
 
-      <Stack spacing={2}>
-        <Rotulo>Categoria</Rotulo>
         <Controller
           control={control}
           name="categoriaId"
-          render={({ field }) => (
-            <ChipsCategoria
-              rotulo="Categoria"
-              opcoes={categorias}
-              valor={field.value ?? null}
-              onChange={field.onChange}
-            />
-          )}
+          render={({ field }) => <SeletorCategoria opcoes={categorias} valor={field.value ?? null} onChange={field.onChange} />}
         />
+
+        <Box sx={bloco}>
+          <Rotulo component="div" sx={{ mb: 2 }}>
+            Parcelas
+          </Rotulo>
+          <Controller control={control} name="parcelas" render={({ field }) => <SeletorParcelas valor={field.value} onChange={field.onChange} />} />
+        </Box>
       </Stack>
 
-      <Stack spacing={2}>
-        <Rotulo>Parcelas</Rotulo>
-        <Controller
-          control={control}
-          name="parcelas"
-          render={({ field }) => <SeletorParcelas valor={field.value} onChange={field.onChange} />}
-        />
+      {/* Efeito ao vivo: ao lado no desktop, abaixo dos campos no celular */}
+      <Stack spacing={3} sx={{ minWidth: 0, position: { md: "sticky" }, top: { md: 0 } }}>
+        {simulacao ? (
+          <Impacto simulacao={simulacao} />
+        ) : (
+          <Box sx={{ border: `1px dashed ${paleta.bordaControle}`, borderRadius: "10px", p: 3.5 }}>
+            <Rotulo component="div">Impacto</Rotulo>
+            <Typography variant="body2" sx={{ color: "text.secondary", mt: 1 }}>
+              Informe o valor para ver em que faturas o gasto cai.
+            </Typography>
+          </Box>
+        )}
+
+        {simulacao && simulacao.limiteDisponivelDepois < 0 && (
+          <Alert severity="warning">Este gasto passa do limite disponível do cartão.</Alert>
+        )}
+        {registrar.error && <Alert severity="error">{registrar.error.message}</Alert>}
+
+        {/* No celular, o botão fica preso ao rodapé enquanto a tela rola. */}
+        <Box sx={{ position: { xs: "sticky", md: "static" }, bottom: 0, bgcolor: { xs: paleta.painel, md: "transparent" }, pt: { xs: 2, md: 0 }, pb: { xs: 1, md: 0 }, zIndex: 1 }}>
+          <Button type="submit" variant="contained" size="large" fullWidth disabled={registrar.isPending}>
+            {registrar.isPending ? "Salvando…" : "Salvar gasto"}
+          </Button>
+        </Box>
+        <Typography variant="body2" sx={{ textAlign: "center", color: "text.secondary" }}>
+          Já começou a pagar e sabe só a parcela atual?{" "}
+          <Link href="/parcelamentos/em-andamento" style={{ color: paleta.texto }}>
+            Lançar parcelamento em andamento
+          </Link>
+        </Typography>
       </Stack>
-
-      {simulacao && <Impacto simulacao={simulacao} />}
-
-      {simulacao && simulacao.limiteDisponivelDepois < 0 && (
-        <Alert severity="warning">Este gasto passa do limite disponível do cartão.</Alert>
-      )}
-      {registrar.error && <Alert severity="error">{registrar.error.message}</Alert>}
-
-      <Button
-        type="submit"
-        variant="contained"
-        size="large"
-        disabled={registrar.isPending}
-      >
-        {registrar.isPending ? "Salvando…" : "Salvar gasto"}
-      </Button>
-      <Typography variant="body2" sx={{ textAlign: "center", color: "text.secondary" }}>
-        Já começou a pagar e sabe só a parcela atual?{" "}
-        <Link href="/parcelamentos/em-andamento" style={{ color: paleta.texto }}>
-          Lançar parcelamento em andamento
-        </Link>
-      </Typography>
     </Box>
   );
 }
@@ -264,14 +279,40 @@ function Impacto({ simulacao }: { simulacao: SimulacaoDeCompra }) {
       valor: `parcela ${primeiraAtiva.numero} em ${nomeDoMes(primeiraAtiva.mes, false)}`,
     });
   }
-  linhas.push({
-    rotulo: `Fatura de ${nomeDoMes(primeiraAtiva.mes, false)} passa a`,
-    valor: <Valor valor={simulacao.primeiraFaturaDepois ?? 0} sx={{ font: "inherit" }} />,
-  });
-  linhas.push({
-    rotulo: "Limite disponível depois",
-    valor: <Valor valor={simulacao.limiteDisponivelDepois} sx={{ font: "inherit" }} />,
-  });
+  // Antes → depois: a fatura sem esta parcela e o limite antes de lançar.
+  const depoisFatura = simulacao.primeiraFaturaDepois ?? 0;
+  const antesFatura = depoisFatura - primeiraAtiva.valor;
+  const ativas = parcelas.filter((p) => !p.historico).reduce((s, p) => s + p.valor, 0);
+  const antesLimite = simulacao.limiteDisponivelDepois + ativas;
+  const antesDepois = (antes: number, depois: number) => (
+    <>
+      <Valor valor={antes} sx={{ font: "inherit", color: "text.secondary" }} />
+      <span aria-label="passa para"> → </span>
+      <Valor valor={depois} sx={{ font: "inherit" }} />
+    </>
+  );
+  linhas.push({ rotulo: `Fatura de ${nomeDoMes(primeiraAtiva.mes, false)}`, valor: antesDepois(antesFatura, depoisFatura) });
+  linhas.push({ rotulo: "Limite livre", valor: antesDepois(antesLimite, simulacao.limiteDisponivelDepois) });
 
-  return <ResumoImpacto titulo="Impacto nas faturas" linhas={linhas} />;
+  return (
+    <Stack spacing={2.5}>
+      <ResumoImpacto titulo="Impacto nas faturas" linhas={linhas} />
+      {total > 1 && (
+        <Box
+          role="img"
+          aria-label={`Parcelas de ${nomeDoMes(parcelas[0]!.mes)} a ${nomeDoMes(simulacao.ultimoMes)}`}
+          sx={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(total, 12)}, minmax(0, 1fr))`, gap: "3px" }}
+        >
+          {parcelas.slice(0, 12).map((p) => (
+            <Box key={p.numero} sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "center" }}>
+              <Box sx={{ width: "100%", height: 6, bgcolor: p.historico ? paleta.divisor : p.numero === primeiraAtiva.numero ? paleta.acao : paleta.bordaControle }} />
+              <Box component="span" sx={{ fontFamily: tipografia.familiaMono, fontSize: 9, textTransform: "uppercase", color: "text.secondary" }}>
+                {abreviar(p.mes)}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      )}
+    </Stack>
+  );
 }

@@ -153,12 +153,22 @@ describe("TelaFaturas", () => {
     const campo = within(dialogo).getByLabelText("Descrição");
     await user.clear(campo);
     await user.type(campo, "Supermercado");
-    await user.click(within(dialogo).getByRole("button", { name: "Eletrônicos" }));
+    await user.selectOptions(within(dialogo).getByLabelText("Categoria"), "Eletrônicos");
     await user.click(within(dialogo).getByRole("button", { name: "Salvar" }));
     expect(editar.mock.calls[0]![0]).toEqual({
       compraId: "m",
       descricao: "Supermercado",
       categoriaId: "1c9e2b6a-1111-4c2d-9e3f-0a1b2c3d4e5f",
     });
+  });
+
+  it("mostra o cartão como cartão físico e cada mês com valor e situação", () => {
+    render(<TelaFaturas />);
+    expect(screen.getByRole("radio", { name: "XP" })).toHaveAttribute("aria-checked", "true");
+    const meses = screen.getByRole("group", { name: "Mês da fatura" });
+    const novembro = within(meses).getByRole("button", { name: "Fatura de novembro de 2026, aberta" });
+    expect(normalizar(novembro.textContent)).toMatch(/R\$ [\d.,]+Aberta$/);
+    const dezembro = within(meses).getByRole("button", { name: "Fatura de dezembro de 2026" });
+    expect(normalizar(dezembro.textContent)).toMatch(/Estimada$/);
   });
 });

@@ -74,8 +74,8 @@ describe("FormularioGasto", () => {
     await user.click(screen.getByRole("button", { name: "6x" }));
     const impacto = screen.getByRole("region", { name: "Impacto nas faturas" });
     expect(normalizar(impacto.textContent)).toContain("R$ 200,00 · nov a abr");
-    expect(normalizar(impacto.textContent)).toContain("Fatura de novembro passa aR$ 2.042,50");
-    expect(normalizar(impacto.textContent)).toContain("Limite disponível depoisR$ 4.957,50");
+    expect(normalizar(impacto.textContent)).toContain("Fatura de novembroR$ 1.842,50 → R$ 2.042,50");
+    expect(normalizar(impacto.textContent)).toContain("Limite livreR$ 6.157,50 → R$ 4.957,50");
   });
 
   it("salva com centavos e parcelas", async () => {
@@ -84,7 +84,7 @@ describe("FormularioGasto", () => {
     await user.type(screen.getByLabelText("Valor total"), "1200");
     await user.type(screen.getByLabelText("Descrição"), "Fone de ouvido");
     await user.click(screen.getByRole("radio", { name: /XP/ }));
-    await user.click(screen.getByRole("button", { name: "Eletrônicos" }));
+    await user.selectOptions(screen.getByLabelText("Categoria"), "Eletrônicos");
     await user.click(screen.getByRole("button", { name: "6x" }));
     await user.click(screen.getByRole("button", { name: "Salvar gasto" }));
     expect(mutate).toHaveBeenCalledTimes(1);
@@ -121,6 +121,6 @@ describe("FormularioGasto com compra antiga", () => {
     const impacto = screen.getByRole("region", { name: "Impacto nas faturas" });
     expect(normalizar(impacto.textContent)).toContain("Já pagas (só histórico)4 de 10");
     expect(normalizar(impacto.textContent)).toContain("Primeira no appparcela 5 em novembro");
-    expect(normalizar(impacto.textContent)).toContain("Fatura de novembro passa aR$ 1.942,50");
+    expect(normalizar(impacto.textContent)).toContain("Fatura de novembroR$ 1.842,50 → R$ 1.942,50");
   });
 });

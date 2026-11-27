@@ -2,13 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import { FolhaInferior, SeloStatus } from "@financas/ui";
 import Typography from "@mui/material/Typography";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -58,43 +56,53 @@ export function DialogoCorrigirData({
   }, [aberto, fechamento, vencimento, reset]);
 
   return (
-    <Dialog open={aberto} onClose={salvando ? undefined : onFechar} fullWidth maxWidth="xs">
-      <form onSubmit={handleSubmit(onConfirmar)} noValidate>
-        <DialogTitle>Fatura de {nomeMes}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={4} sx={{ pt: 1 }}>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Use as datas que aparecem no app do banco. Só esta fatura muda; as compras afetadas vão para a fatura
-              certa.
-            </Typography>
-            {erro && <Alert severity="error">{erro}</Alert>}
-            <TextField
-              label="Fechamento"
-              type="date"
-              slotProps={{ inputLabel: { shrink: true } }}
-              error={Boolean(errors.fechamento)}
-              helperText={errors.fechamento?.message}
-              {...register("fechamento")}
-            />
-            <TextField
-              label="Vencimento"
-              type="date"
-              slotProps={{ inputLabel: { shrink: true } }}
-              error={Boolean(errors.vencimento)}
-              helperText={errors.vencimento?.message}
-              {...register("vencimento")}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 6, pb: 5, gap: 2 }}>
-          <Button onClick={onFechar} disabled={salvando}>
+    <FolhaInferior
+      aberta={aberto}
+      onFechar={onFechar}
+      ocupado={salvando}
+      contexto={`Fatura de ${nomeMes}`}
+      titulo="Corrigir datas"
+      onEnviar={handleSubmit(onConfirmar)}
+      acoes={
+        <>
+          <Button variant="outlined" onClick={onFechar} disabled={salvando}>
             Cancelar
           </Button>
           <Button type="submit" variant="contained" disabled={salvando}>
             {salvando ? "Salvando…" : "Confirmar datas"}
           </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+        </>
+      }
+    >
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+        Use as datas que aparecem no app do banco. Só esta fatura muda; as compras afetadas vão para a fatura certa.
+      </Typography>
+      {erro && <Alert severity="error">{erro}</Alert>}
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 2.5 }}>
+        <TextField
+          label="Fechamento"
+          type="date"
+          slotProps={{ inputLabel: { shrink: true } }}
+          error={Boolean(errors.fechamento)}
+          helperText={errors.fechamento?.message}
+          {...register("fechamento")}
+        />
+        <TextField
+          label="Vencimento"
+          type="date"
+          slotProps={{ inputLabel: { shrink: true } }}
+          error={Boolean(errors.vencimento)}
+          helperText={errors.vencimento?.message}
+          {...register("vencimento")}
+        />
+      </Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <SeloStatus status="estimado" />
+        <Typography component="span" aria-hidden sx={{ color: "text.secondary" }}>
+          →
+        </Typography>
+        <SeloStatus status="confirmado" />
+      </Box>
+    </FolhaInferior>
   );
 }

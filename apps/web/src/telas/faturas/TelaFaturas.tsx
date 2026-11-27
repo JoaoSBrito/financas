@@ -4,6 +4,7 @@ import AddRounded from "@mui/icons-material/AddRounded";
 import SettingsRounded from "@mui/icons-material/SettingsRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
@@ -21,8 +22,8 @@ import {
   somarMeses,
   type Mes,
 } from "@financas/core";
-import { corDoCartao, raio } from "@financas/ui/tokens";
-import { CarregandoLista, EstadoErro, EstadoVazio, PilulasSelecao, SecaoCard } from "@financas/ui";
+import { corDoCartao, fundoDoCartao, paleta, raio, semantica, tipografia } from "@financas/ui/tokens";
+import { CarregandoLista, CartaoFisico, EstadoErro, EstadoVazio, SecaoCard, Valor } from "@financas/ui";
 import { DialogoCorrigirData } from "@/componentes/DialogoCorrigirData";
 import { useCartoes, useCorrigirFatura } from "@/hooks/useCartoes";
 import { usePagamentoFatura } from "@/hooks/useContas";
@@ -30,12 +31,12 @@ import { useLancamentos } from "@/hooks/useFaturas";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
 import { confirmadasDe, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
 import type { Lancamento } from "@/services/faturas";
-import { ParcelamentosAtivos, ProximasFaturas } from "./ColunaLateral";
+import { ParcelamentosAtivos } from "./ColunaLateral";
 import { DialogoEditarLancamento } from "./DialogoEditarLancamento";
 import { DialogoPagarFatura } from "./DialogoPagarFatura";
 import { ListaLancamentos } from "./ListaLancamentos";
 import { ResumoFatura } from "./ResumoFatura";
-import { mesCurto } from "./textos";
+import { mesCurto, SITUACAO } from "./textos";
 
 function Cabecalho({ cartaoId }: { cartaoId?: string }) {
   return (
@@ -43,7 +44,7 @@ function Cabecalho({ cartaoId }: { cartaoId?: string }) {
       <Typography variant="h1">Cartões</Typography>
       <Box sx={{ display: "flex", gap: 1.5 }}>
         {cartaoId && (
-          <IconButton component={Link} href={`/cartoes/${cartaoId}/configurar`} aria-label="Configurar este cartão">
+          <IconButton component={Link} href={`/cartoes/${cartaoId}/configurar`} aria-label="Configurar este cartão" sx={{ border: `1px solid ${paleta.divisor}` }}>
             <SettingsRounded />
           </IconButton>
         )}
@@ -149,35 +150,90 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
     <>
       <Cabecalho cartaoId={cartao.id} />
 
-      <Stack spacing={3} sx={{ mb: 4 }}>
-        {cartoes.length > 1 && (
-          <PilulasSelecao
-            rotulo="Cartão"
-            valor={cartao.id}
-            onChange={(id) => navegar({ cartao: id })}
-            opcoes={cartoes.map((c, indice) => ({
-              valor: c.id,
-              rotulo: (
-                <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
-                  <Box component="span" aria-hidden sx={{ width: 8, height: 8, borderRadius: "4px", bgcolor: corDoCartao(indice) }} />
-                  {c.final ? `${c.nome} •••• ${c.final}` : c.nome}
-                </Box>
-              ),
-            }))}
-          />
-        )}
-        <PilulasSelecao
-          rotulo="Mês da fatura"
-          tamanho="pequeno"
-          valor={mes}
-          onChange={(m) => navegar({ mes: m })}
-          opcoes={visiveis.map((f) => ({
-            valor: f.mes,
-            rotulo: f.mes === mesAberto ? `${mesCurto(f.mes, anoAtual)} · aberta` : mesCurto(f.mes, anoAtual),
-            rotuloAcessivel: `Fatura de ${nomeDoMes(f.mes)}${f.mes === mesAberto ? ", aberta" : ""}`,
-          }))}
-        />
-      </Stack>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(220px, 260px) minmax(0, 1fr)" }, gap: { xs: 3, md: 5 }, alignItems: "start" }}>
+        {/* Cartões: carrossel no celular, coluna no desktop. */}
+        <Box
+          role="radiogroup"
+          aria-label="Cartão"
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "row", md: "column" },
+            gap: 3,
+            overflowX: { xs: "auto", md: "visible" },
+            mx: { xs: -4, md: 0 },
+            px: { xs: 4, md: 0 },
+            pb: { xs: 1, md: 0 },
+            scrollSnapType: { xs: "x mandatory", md: "none" },
+            "& > *": { scrollSnapAlign: "start", flexShrink: 0 },
+          }}
+        >
+          {cartoes.map((c, indice) => {
+            const emAberto = faturas.filter((f) => f.cartaoId === c.id && !f.pagaEm).reduce((soma, f) => soma + f.total, 0);
+            const uso = c.limite > 0 ? Math.round((emAberto / c.limite) * 100) : 0;
+            return (
+              <CartaoFisico
+                key={c.id}
+                nome={c.nome}
+                final={c.final}
+                cor={corDoCartao(indice)}
+                fundo={fundoDoCartao(indice)}
+                percentualUso={uso}
+                largura={cartoes.length > 1 ? "min(272px, 78vw)" : "100%"}
+                selecionado={c.id === cartao.id}
+                onSelecionar={() => navegar({ cartao: c.id })}
+                rodape={
+                  <>
+                    <span>
+                      Livre <Valor valor={c.limite - emAberto} sx={{ font: "inherit" }} />
+                    </span>
+                    <span>Vence dia {c.diaVencimento}</span>
+                  </>
+                }
+              />
+            );
+          })}
+        </Box>
+
+        <Stack spacing={3} sx={{ minWidth: 0 }}>
+          {/* Meses: cada um com valor e situação (substitui a lista de próximas faturas). */}
+          <Box role="group" aria-label="Mês da fatura" sx={{ display: "flex", gap: 1.5, overflowX: "auto", mx: { xs: -4, md: 0 }, px: { xs: 4, md: 0 }, pb: 0.5 }}>
+            {visiveis.map((f) => {
+              const ativo = f.mes === mes;
+              const sit = situacaoDaFatura(f, hoje, mesAberto);
+              const rotuloSit = sit === "futura" ? (f.status === "confirmado" ? "Confirmada" : "Estimada") : SITUACAO[sit].rotulo;
+              return (
+                <ButtonBase
+                  key={f.mes}
+                  aria-pressed={ativo}
+                  aria-label={`Fatura de ${nomeDoMes(f.mes)}${f.mes === mesAberto ? ", aberta" : ""}`}
+                  onClick={() => navegar({ mes: f.mes })}
+                  sx={{
+                    flex: "0 0 auto",
+                    minWidth: 88,
+                    minHeight: 64,
+                    p: "8px 10px",
+                    borderRadius: `${raio.controle}px`,
+                    border: `1px solid ${ativo ? paleta.texto : paleta.divisor}`,
+                    bgcolor: ativo ? paleta.texto : "transparent",
+                    color: ativo ? paleta.sobreAcao : paleta.textoSecundario,
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: 0.25,
+                    fontFamily: tipografia.familiaMono,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  <Box component="span" sx={{ fontSize: 11, fontWeight: ativo ? 500 : 400 }}>
+                    {mesCurto(f.mes, anoAtual)}
+                  </Box>
+                  <Valor valor={f.total} sx={{ fontSize: 13, color: ativo ? paleta.sobreAcao : paleta.texto, fontWeight: ativo ? 500 : 400 }} />
+                  <Box component="span" sx={{ fontSize: 10, color: ativo ? paleta.sobreAcao : sit === "paga" ? semantica.receita.texto : undefined }}>
+                    {sit === "paga" ? `✓ ${rotuloSit}` : rotuloSit}
+                  </Box>
+                </ButtonBase>
+              );
+            })}
+          </Box>
 
       {!fatura ? (
         <SecaoCard>
@@ -216,17 +272,15 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
                 <ListaLancamentos lancamentos={daFatura} onEditar={setEditando} />
               )}
             </Box>
-            <Stack spacing={4} sx={{ flex: "1 1 300px", minWidth: 0 }}>
-              <ProximasFaturas
-                cartaoId={cartao.id}
-                faturas={doCartao.filter((f) => f.mes > mesAberto).slice(0, 3)}
-                onCorrigir={setCorrigindo}
-              />
+            <Stack spacing={4} sx={{ flex: "1 1 280px", minWidth: 0 }}>
               <ParcelamentosAtivos cartaoId={cartao.id} itens={parcelamentosAtivos(lancamentos.data ?? [], mesAberto)} />
             </Stack>
           </Box>
         </Stack>
       )}
+
+        </Stack>
+      </Box>
 
       {corrigindo && (
         <DialogoCorrigirData
