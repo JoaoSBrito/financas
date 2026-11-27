@@ -66,7 +66,7 @@ export function TelaFaturas() {
       <>
         <Cabecalho />
         <Stack spacing={4} aria-busy="true" aria-label="Carregando faturas">
-          <Skeleton variant="rounded" height={44} sx={{ borderRadius: `${raio.pilula}px`, maxWidth: 360 }} />
+          <Skeleton variant="rounded" height={44} sx={{ borderRadius: `${raio.controle}px`, maxWidth: 360 }} />
           <Skeleton variant="rounded" height={220} />
           <Skeleton variant="rounded" height={320} />
         </Stack>

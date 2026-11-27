@@ -11,7 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import Link from "next/link";
 import { useMemo } from "react";
 import { formatarDiaMes, hojeEmSaoPaulo, mesDe, nomeDoMes } from "@financas/core";
-import { CarregandoLista, EstadoErro, EstadoVazio, LogoLastro, Rotulo, SecaoCard } from "@financas/ui";
+import { CarregandoLista, EstadoErro, EstadoVazio, estiloSomenteLeitor, LogoLastro, Rotulo, SecaoCard } from "@financas/ui";
 import { BotaoOcultarValores } from "@/componentes/navegacao/BotaoOcultarValores";
 import { corDoCartao, paleta } from "@financas/ui/tokens";
 import { useCartoes } from "@/hooks/useCartoes";
@@ -37,7 +37,7 @@ import {
   UltimosGastos,
 } from "./Secoes";
 
-const somenteLeitor = { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" } as const;
+const somenteLeitor = estiloSomenteLeitor;
 
 function Cabecalho() {
   const hoje = hojeEmSaoPaulo();

@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { useId, type ReactNode } from "react";
 import { paleta, raio, tipografia } from "../tokens";
+import { estiloSomenteLeitor } from "./estilos";
 
 export interface ContadorNumericoProps {
   valor: number;
@@ -31,7 +32,7 @@ export function ContadorNumerico({ valor, onChange, min = 0, max = Infinity, rot
   };
   return (
     <Box role="group" aria-labelledby={id} sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-      <Box component="span" id={id} sx={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
+      <Box component="span" id={id} sx={estiloSomenteLeitor}>
         {rotulo}
       </Box>
       <IconButton aria-label={`Diminuir ${rotulo.toLowerCase()}`} disabled={valor <= min} onClick={() => onChange(valor - 1)} sx={estiloBotao}>

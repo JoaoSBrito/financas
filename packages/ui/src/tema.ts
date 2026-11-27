@@ -238,14 +238,14 @@ export const tema = createTheme({
       styleOverrides: {
         root: {
           height: 4,
-          borderRadius: raio.barraFina,
+          borderRadius: raio.barra,
           variants: (["primary", "success", "warning", "error"] as const).map((color) => ({
             props: { color },
             style: { backgroundColor: paleta.divisor },
           })),
         },
         bar: {
-          borderRadius: raio.barraFina,
+          borderRadius: raio.barra,
           variants: [{ props: { color: "primary" }, style: { backgroundColor: paleta.texto } }],
         },
       },

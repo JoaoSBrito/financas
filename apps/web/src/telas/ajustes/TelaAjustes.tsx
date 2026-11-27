@@ -19,7 +19,7 @@ import { usePreferencias } from "@/stores/preferencias";
 /** Painel com rótulo de seção (Conta, Preferências, Organização). */
 function Secao({ rotulo, children }: { rotulo: string; children: ReactNode }) {
   return (
-    <Box component="section" aria-label={rotulo} sx={{ ...estiloPainel, px: 4, pt: 2.5, display: "flex", flexDirection: "column" }}>
+    <Box component="section" aria-label={rotulo} sx={{ ...estiloPainel, px: 4, pt: 2.5, pb: 1, display: "flex", flexDirection: "column" }}>
       <Rotulo>{rotulo}</Rotulo>
       {children}
     </Box>
@@ -44,7 +44,7 @@ function ItemLink({ href, titulo, descricao, primeiro = false }: { href: string;
     <ButtonBase
       component={Link}
       href={href}
-      sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 64, textAlign: "left", borderTop: primeiro ? "none" : `1px solid ${paleta.divisor}`, mt: primeiro ? 1 : 0 }}
+      sx={{ display: "flex", alignItems: "center", gap: 3, minHeight: 64, py: 2, textAlign: "left", borderTop: primeiro ? "none" : `1px solid ${paleta.divisor}`, mt: primeiro ? 1 : 0 }}
     >
       <Textos titulo={titulo} descricao={descricao} />
       <ChevronRightRounded aria-hidden sx={{ color: "text.secondary" }} />
@@ -71,7 +71,7 @@ export function TelaAjustes({ email }: { email: string | null }) {
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <Secao rotulo="Conta">
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, pt: 1, pb: 3.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, pt: 1, pb: 2.5 }}>
             <Typography sx={{ fontSize: 15, overflowWrap: "anywhere" }}>{email ?? "E-mail não disponível"}</Typography>
             <Typography sx={{ fontSize: 13, color: "text.secondary" }}>Entrada com e-mail e senha</Typography>
           </Box>

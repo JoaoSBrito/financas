@@ -4,54 +4,9 @@ import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import { LinkDiscreto } from "@/componentes/LinkDiscreto";
-import { nomeDoMes, type ParcelamentoAtivo } from "@financas/core";
-import { BarraParcelas, ItemFaturaFutura, SecaoCard, Valor } from "@financas/ui";
-import type { FaturaResumo } from "@/services/cartoes-mapeamento";
-import { maiuscula, mesCurto } from "./textos";
-
-export function ProximasFaturas({
-  faturas,
-  cartaoId,
-  onCorrigir,
-}: {
-  faturas: FaturaResumo[];
-  cartaoId: string;
-  onCorrigir: (f: FaturaResumo) => void;
-}) {
-  return (
-    <SecaoCard
-      titulo="Próximas faturas"
-      gap={1}
-      acao={
-        <LinkDiscreto href={`/cartoes/${cartaoId}/configurar`}>Ajustar regra</LinkDiscreto>
-      }
-    >
-      {faturas.length === 0 ? (
-        <Typography variant="body2" sx={{ color: "text.secondary", py: 2 }}>
-          Nenhuma fatura futura gerada.
-        </Typography>
-      ) : (
-        faturas.map((f, i) => (
-          <Box key={f.id}>
-            {i > 0 && <Divider />}
-            <ItemFaturaFutura
-              titulo={maiuscula(nomeDoMes(f.mes, false))}
-              fechamento={f.fechamento}
-              vencimento={f.vencimento}
-              status={f.status}
-              valor={f.total}
-              nomeMes={nomeDoMes(f.mes)}
-              onCorrigir={() => onCorrigir(f)}
-            />
-          </Box>
-        ))
-      )}
-      <Typography variant="caption" component="p" sx={{ pt: 2 }}>
-        Valores futuros são parcelas já lançadas.
-      </Typography>
-    </SecaoCard>
-  );
-}
+import type { ParcelamentoAtivo } from "@financas/core";
+import { BarraParcelas, SecaoCard, Valor } from "@financas/ui";
+import { mesCurto } from "./textos";
 
 export function ParcelamentosAtivos({ itens, cartaoId }: { itens: ParcelamentoAtivo[]; cartaoId: string }) {
   return (

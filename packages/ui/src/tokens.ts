@@ -38,27 +38,8 @@ const base = {
   veu: "rgba(5, 6, 8, 0.72)",
 } as const;
 
-export const paleta = {
-  ...base,
-  // Nomes usados pelos componentes atuais (mantidos para não quebrar a API).
-  // Migram para os nomes do Design System nas próximas etapas.
-  /** @deprecated Use `painel`. */
-  card: base.painel,
-  /** @deprecated Use `elevado` (superfície) ou `divisor` (trilho). */
-  interativo: base.elevado,
-  /** @deprecated Use `bordaControle`. */
-  bordaCampo: base.bordaControle,
-  /** Borda de item selecionado: a cor do texto. */
-  bordaSelecionada: base.texto,
-  /** @deprecated Use `acao`. */
-  cobalto: base.acao,
-  /** @deprecated Use `acaoPressionada`. */
-  cobaltoPressionado: base.acaoPressionada,
-  /** @deprecated Use `sobreAcao`. */
-  sobreCobalto: base.sobreAcao,
-  /** Texto escuro sobre pílula clara selecionada. */
-  sobreClaro: base.sobreAcao,
-} as const;
+/** Paleta da Lastro, com os nomes do Design System. */
+export const paleta = base;
 
 /** Estados de interação: o texto principal em baixa opacidade. */
 export const estados = {
@@ -173,8 +154,6 @@ export const layout = {
   gapCardsDesktop: 16,
   larguraConteudo: 1180,
   alturaBarraTopo: 64,
-  /** @deprecated O menu lateral dá lugar à barra superior na etapa de navegação. */
-  larguraMenuLateral: 264,
 } as const;
 
 /** raio.* */
@@ -191,14 +170,7 @@ export const raio = {
   icone: 12,
   /** Barras são retas. */
   barra: 0,
-  barraFina: 0,
   circulo: 999,
-  /** @deprecated Use `painel`. */
-  card: 10,
-  /** @deprecated Use `controle`. */
-  pilula: 8,
-  /** @deprecated Use `controle` (filtros) ou `selo`. */
-  chip: 8,
 } as const;
 
 /** toque.minimo: área mínima de toque, sem exceção. */

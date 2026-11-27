@@ -95,29 +95,7 @@ describe("CampoMoeda", () => {
   });
 });
 
-import { ItemFaturaFutura } from "../src";
-
-describe("ItemFaturaFutura", () => {
-  it("mostra datas, selo e botão de correção acessível", async () => {
-    const onCorrigir = vi.fn();
-    render(
-      <ItemFaturaFutura
-        fechamento="2027-01-04"
-        vencimento="2027-01-11"
-        status="estimado"
-        observacao="dia 10 é domingo"
-        nomeMes="janeiro"
-        onCorrigir={onCorrigir}
-      />,
-    );
-    expect(screen.getByText("Fecha 04/01")).toBeInTheDocument();
-    expect(screen.getByText("Vence 11/01 · dia 10 é domingo")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Corrigir datas da fatura de janeiro" }));
-    expect(onCorrigir).toHaveBeenCalled();
-  });
-});
-
-import { ChipsCategoria, SeletorCartao, SeletorParcelas } from "../src";
+import { SeletorCartao, SeletorParcelas } from "../src";
 
 describe("SeletorCartao", () => {
   const opcoes = [
@@ -134,15 +112,6 @@ describe("SeletorCartao", () => {
     xp.focus();
     await userEvent.keyboard("{ArrowRight}");
     expect(onChange).toHaveBeenCalledWith("viagens");
-  });
-});
-
-describe("ChipsCategoria", () => {
-  it("tocar de novo desmarca", async () => {
-    const onChange = vi.fn();
-    render(<ChipsCategoria opcoes={[{ id: "a", nome: "Lazer" }]} valor="a" onChange={onChange} rotulo="Categoria" />);
-    await userEvent.click(screen.getByRole("button", { name: "Lazer" }));
-    expect(onChange).toHaveBeenCalledWith(null);
   });
 });
 

@@ -54,7 +54,7 @@ export function LinhaDoTempoParcelas({ total, atual, meses, mesesAcessiveis }: L
                   fontSize: 12,
                   fontWeight: tipo === "atual" ? 500 : 400,
                   bgcolor: tipo === "paga" ? paleta.divisor : tipo === "atual" ? paleta.texto : "transparent",
-                  color: tipo === "paga" ? paleta.textoSecundario : tipo === "atual" ? paleta.sobreClaro : paleta.texto,
+                  color: tipo === "paga" ? paleta.textoSecundario : tipo === "atual" ? paleta.sobreAcao : paleta.texto,
                 }}
               >
                 {String(n).padStart(2, "0")}

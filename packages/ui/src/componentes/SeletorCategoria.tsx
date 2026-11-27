@@ -2,7 +2,11 @@
 
 import TextField from "@mui/material/TextField";
 
-import type { OpcaoCategoria } from "./ChipsCategoria";
+/** Categoria que pode ser escolhida. */
+export interface OpcaoCategoria {
+  id: string;
+  nome: string;
+}
 
 export interface SeletorCategoriaProps {
   rotulo?: string;

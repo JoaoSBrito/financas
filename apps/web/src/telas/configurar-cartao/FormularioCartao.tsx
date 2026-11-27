@@ -106,7 +106,8 @@ export function FormularioCartao({ cartaoId, inicial, faturas, onSalvo, indiceCo
           flexDirection: "column",
           gridTemplateColumns: "minmax(0, 3fr) minmax(0, 2fr)",
           gap: { xs: 3, md: 4 },
-          alignItems: "start",
+          // Celular: blocos de ponta a ponta. Desktop: colunas alinhadas no topo (a prévia fica fixa).
+          alignItems: { xs: "stretch", md: "start" },
         }}
       >
         <Box sx={coluna}>

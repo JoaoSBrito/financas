@@ -457,7 +457,7 @@ function PainelReserva({ meses, saldo, outra, contador }: { meses: number; saldo
   const custo = useCustoDeVida();
   const s = custo.data ? situacaoDaReserva(saldo, meses, custo.data.valor) : null;
   return (
-    <Stack spacing={3} sx={{ bgcolor: paleta.interativo, borderRadius: `${raio.card}px`, p: 4 }}>
+    <Stack spacing={3} sx={{ bgcolor: paleta.elevado, borderRadius: `${raio.painel}px`, p: 4 }}>
       {contador}
       {custo.isPending ? (
         <Typography variant="caption">Calculando o custo de vida…</Typography>

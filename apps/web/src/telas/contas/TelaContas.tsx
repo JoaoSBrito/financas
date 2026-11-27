@@ -249,7 +249,7 @@ export function TelaContas() {
                     {n > 0 && <Divider />}
                     <ButtonBase
                       onClick={() => setDialogo({ tipo: "recorrente", recorrente: r })}
-                      sx={{ width: "100%", justifyContent: "space-between", minHeight: 48, borderRadius: `${raio.card}px` }}
+                      sx={{ width: "100%", justifyContent: "space-between", minHeight: 48, borderRadius: `${raio.controle}px` }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: 3, minWidth: 0 }}>
                         <Box component="span" sx={{ fontFamily: tipografia.familiaMono, fontSize: 11, textTransform: "uppercase", color: "text.secondary", minWidth: 44, textAlign: "left" }}>

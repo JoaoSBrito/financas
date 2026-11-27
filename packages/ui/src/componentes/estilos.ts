@@ -44,3 +44,19 @@ export const estiloSegmentado = {
   },
   "& .MuiToggleButtonGroup-grouped:last-of-type": { borderRight: "none !important" },
 } as const satisfies SxProps<Theme>;
+
+/**
+ * Texto só para leitores de tela. Valores em px de propósito: no sx do MUI,
+ * width: 1 significa 100%, o que fazia o rótulo escondido alargar a página.
+ */
+export const estiloSomenteLeitor = {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  margin: "-1px",
+  padding: 0,
+  border: 0,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
+} as const satisfies SxProps<Theme>;

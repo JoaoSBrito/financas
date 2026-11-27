@@ -67,7 +67,7 @@ describe("contraste de componentes (AA 3:1)", () => {
   it("borda de controle e borda selecionada sobre painel e elevado", () => {
     for (const fundo of [paleta.painel, paleta.elevado]) {
       expect(contraste(paleta.bordaControle, fundo)).toBeGreaterThanOrEqual(INTERFACE);
-      expect(contraste(paleta.bordaSelecionada, fundo)).toBeGreaterThanOrEqual(INTERFACE);
+      expect(contraste(paleta.texto, fundo)).toBeGreaterThanOrEqual(INTERFACE);
     }
   });
 
