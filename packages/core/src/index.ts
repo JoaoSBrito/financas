@@ -13,4 +13,5 @@ export * from "./patrimonio";
 export * from "./reserva";
 export * from "./gastos";
 export * from "./caixinha";
+export * from "./importacao";
 export * from "./schemas";

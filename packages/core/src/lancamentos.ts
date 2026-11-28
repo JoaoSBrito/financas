@@ -1,7 +1,8 @@
 import type { Data, Mes } from "./datas";
 import type { Centavos } from "./dinheiro";
 
-export type OrigemCompra = "app" | "anterior_ao_app" | "saldo_inicial" | "importada" | "recorrente";
+/** "credito": estorno ou crédito importado da fatura (valor negativo). */
+export type OrigemCompra = "app" | "anterior_ao_app" | "saldo_inicial" | "importada" | "recorrente" | "credito";
 
 export interface LancamentoResumo {
   compraId: string;
