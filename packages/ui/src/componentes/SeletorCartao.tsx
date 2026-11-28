@@ -44,7 +44,7 @@ export function SeletorCartao({ opcoes, valor, onChange, rotulo }: SeletorCartao
     <Box
       role="radiogroup"
       aria-label={rotulo}
-      sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 2.5 }}
+      sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 2.5 }}
     >
       {opcoes.map((o, i) => {
         const selecionado = o.id === valor;

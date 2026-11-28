@@ -211,7 +211,8 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
                   aria-label={`Fatura de ${nomeDoMes(f.mes)}${f.mes === mesAberto ? ", aberta" : ""}`}
                   onClick={() => navegar({ mes: f.mes })}
                   sx={{
-                    flex: "0 0 auto",
+                    // Celular: rola na horizontal. A partir de 600 px: os meses dividem a largura toda.
+                    flex: { xs: "0 0 auto", sm: "1 1 0" },
                     minWidth: 88,
                     minHeight: 64,
                     p: "8px 10px",

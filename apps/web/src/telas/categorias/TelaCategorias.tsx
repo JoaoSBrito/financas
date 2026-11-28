@@ -47,7 +47,7 @@ export function TelaCategorias() {
   const erro = cartoes.isError || faturas.isError || categorias.isError || orcamentos.isError || doMes.isError;
 
   return (
-    <Box sx={{ maxWidth: { sm: 720 } }}>
+    <Box>
       <CabecalhoTela
         titulo="Categorias e orçamento"
         voltar={<BotaoVoltar href="/ajustes" rotulo="Voltar para ajustes" />}
@@ -136,14 +136,28 @@ function Conteudo({
 
   const linhaTopo = { borderTop: `1px solid ${paleta.divisor}` };
 
+  // Desktop: resumo e "Com orçamento" à esquerda, "Sem orçamento" à direita.
+  // Se uma das listas não existe, a outra ocupa a largura toda.
+  const duasColunas = comOrcamento.length > 0 && semOrcamento.length > 0;
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <Rotulo>
+    <Box
+      sx={{
+        display: "grid",
+        gap: 3,
+        alignItems: "start",
+        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: duasColunas ? "minmax(0, 3fr) minmax(0, 2fr)" : "minmax(0, 1fr)" },
+        gridTemplateAreas: { md: duasColunas ? '"rotulo rotulo" "resumo sem" "com sem" "nota nota"' : '"rotulo" "resumo" "com" "sem" "nota"' },
+        // A coluna da direita não deve esticar as linhas da esquerda.
+        gridTemplateRows: { md: duasColunas ? "auto auto 1fr auto" : "auto" },
+      }}
+    >
+      <Rotulo sx={{ gridArea: { md: "rotulo" } }}>
         Orçamento · fatura de {mes} + saídas de {mes}
       </Rotulo>
 
       {comOrcamento.length > 0 ? (
-        <Box component="section" aria-label="Resumo do orçamento" sx={{ ...estiloPainel, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+        <Box component="section" aria-label="Resumo do orçamento" sx={{ ...estiloPainel, gridArea: { md: "resumo" }, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           {[
             { rotulo: "Orçado", valor: orcado },
             { rotulo: "Gasto com orçamento", valor: gastoComOrcamento },
@@ -166,14 +180,17 @@ function Conteudo({
           </Box>
         </Box>
       ) : (
+        <Box sx={{ gridArea: { md: "resumo" } }}>
         <SecaoCard>
           <Typography variant="body2" sx={{ color: "text.secondary" }}>
             Defina um orçamento numa categoria para acompanhar os alertas de 80% e 100%.
           </Typography>
         </SecaoCard>
+        </Box>
       )}
 
       {comOrcamento.length > 0 && (
+        <Box sx={{ gridArea: { md: "com" }, minWidth: 0 }}>
         <SecaoCard titulo="Com orçamento" gap={1}>
           {comOrcamento.map((l) => {
             const { percentual, nivel } = l.situacao!;
@@ -202,9 +219,11 @@ function Conteudo({
             );
           })}
         </SecaoCard>
+        </Box>
       )}
 
       {semOrcamento.length > 0 && (
+        <Box sx={{ gridArea: { md: "sem" }, minWidth: 0 }}>
         <SecaoCard titulo="Sem orçamento" gap={1}>
           {semOrcamento.map((l) => (
             <ButtonBase
@@ -224,9 +243,10 @@ function Conteudo({
             </ButtonBase>
           ))}
         </SecaoCard>
+        </Box>
       )}
 
-      <Typography variant="caption" component="p">
+      <Typography variant="caption" component="p" sx={{ gridArea: { md: "nota" } }}>
         Âmbar a partir de 80% e coral a partir de 100%, sempre com o percentual escrito. Mudanças valem a partir deste mês.
       </Typography>
     </Box>

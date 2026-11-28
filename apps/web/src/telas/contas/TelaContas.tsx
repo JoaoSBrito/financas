@@ -111,7 +111,18 @@ export function TelaContas() {
     const daConta = (recorrentes.data ?? []).filter((r) => r.contaId);
 
     corpo = (
-      <Stack spacing={4}>
+      // Celular: uma coluna (Sobra, Lançar, Minhas contas, Próximos, Recorrentes).
+      // Desktop: Lançar em cima; Sobra e Minhas contas lado a lado, na mesma altura;
+      // Próximos movimentos e Recorrentes lado a lado, cada um com a sua altura.
+      <Box
+        sx={{
+          display: "grid",
+          gap: { xs: 3, md: 4 },
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 2fr) minmax(0, 1fr)" },
+          gridTemplateAreas: { md: '"lancar lancar" "sobra contas" "proximos recorrentes"' },
+        }}
+      >
+        <Box sx={{ gridArea: { md: "sobra" }, minWidth: 0, display: "flex", "& > *": { flex: 1 } }}>
         <CardSaldoProjetado
           ate={p.ate}
           saldoFinal={p.saldoFinal}
@@ -122,11 +133,12 @@ export function TelaContas() {
           outros={p.outros}
           grafico={<GraficoDegraus hoje={hoje} ate={p.ate} saldoHoje={p.saldoHoje} pontos={p.itens.map((i) => ({ data: i.data, saldo: i.saldoApos }))} />}
         />
+        </Box>
         {/* Lançar: controle segmentado, cada opção com o sinal na frente. */}
         <Box
           role="group"
           aria-label="Lançar"
-          sx={{ display: "grid", gridTemplateColumns: `repeat(${listaContas.length > 1 ? 3 : 2}, minmax(0, 1fr))`, border: `1px solid ${paleta.bordaControle}`, borderRadius: "8px", overflow: "hidden" }}
+          sx={{ gridArea: { md: "lancar" }, display: "grid", gridTemplateColumns: `repeat(${listaContas.length > 1 ? 3 : 2}, minmax(0, 1fr))`, border: `1px solid ${paleta.bordaControle}`, borderRadius: "8px", overflow: "hidden" }}
         >
           {[
             { sinal: "+", rotulo: "Entrada", cor: semantica.receita.texto, acao: () => setDialogo({ tipo: "movimento", mov: "entrada" }) },
@@ -146,8 +158,34 @@ export function TelaContas() {
           ))}
         </Box>
 
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "flex-start" }}>
-          <Stack spacing={4} sx={{ flex: "2 1 460px", minWidth: 0 }}>
+        <Box sx={{ gridArea: { md: "contas" }, minWidth: 0, display: "flex", "& > *": { flex: 1 } }}>
+            <SecaoCard titulo="Minhas contas" gap={3}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 2 }}>
+                {listaContas.map((c) => {
+                  const hojeConferida = c.conferidaEm === hoje;
+                  return (
+                    <ButtonBase
+                      key={c.id}
+                      onClick={() => setDialogo({ tipo: "ajustar", conta: c })}
+                      sx={{ border: `1px solid ${paleta.divisor}`, borderRadius: "10px", bgcolor: paleta.fundo, p: 3.5, flexDirection: "column", alignItems: "flex-start", gap: 1.5, textAlign: "left", "&:hover": { borderColor: paleta.bordaControle } }}
+                    >
+                      <Typography sx={{ fontSize: 15 }}>{c.nome}</Typography>
+                      <Valor valor={c.saldo} sx={{ fontSize: 18, fontWeight: 500 }} />
+                      <Box component="span" sx={{ fontFamily: tipografia.familiaMono, fontSize: 10, textTransform: "uppercase", color: hojeConferida ? semantica.receita.texto : "text.secondary" }}>
+                        {hojeConferida ? "✓ " : ""}
+                        {diasDesde(c.conferidaEm, hoje)}
+                      </Box>
+                    </ButtonBase>
+                  );
+                })}
+              </Box>
+              <Typography variant="caption" component="p">
+                Toque numa conta para conferir com o saldo do banco.
+              </Typography>
+            </SecaoCard>
+        </Box>
+
+        <Box sx={{ gridArea: { md: "proximos" }, alignSelf: "start", minWidth: 0, display: "flex", flexDirection: "column", gap: { xs: 3, md: 4 } }}>
             <SecaoCard titulo="Próximos movimentos" acao={<Rotulo aria-hidden>Valor · Saldo após</Rotulo>} gap={1}>
               {p.itens.length === 0 ? (
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
@@ -202,34 +240,9 @@ export function TelaContas() {
                 ))
               )}
             </SecaoCard>
-          </Stack>
+          </Box>
 
-          <Stack spacing={4} sx={{ flex: "1 1 300px", minWidth: 0 }}>
-            <SecaoCard titulo="Minhas contas" gap={3}>
-              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 2 }}>
-                {listaContas.map((c) => {
-                  const hojeConferida = c.conferidaEm === hoje;
-                  return (
-                    <ButtonBase
-                      key={c.id}
-                      onClick={() => setDialogo({ tipo: "ajustar", conta: c })}
-                      sx={{ border: `1px solid ${paleta.divisor}`, borderRadius: "10px", bgcolor: paleta.fundo, p: 3.5, flexDirection: "column", alignItems: "flex-start", gap: 1.5, textAlign: "left", "&:hover": { borderColor: paleta.bordaControle } }}
-                    >
-                      <Typography sx={{ fontSize: 15 }}>{c.nome}</Typography>
-                      <Valor valor={c.saldo} sx={{ fontSize: 18, fontWeight: 500 }} />
-                      <Box component="span" sx={{ fontFamily: tipografia.familiaMono, fontSize: 10, textTransform: "uppercase", color: hojeConferida ? semantica.receita.texto : "text.secondary" }}>
-                        {hojeConferida ? "✓ " : ""}
-                        {diasDesde(c.conferidaEm, hoje)}
-                      </Box>
-                    </ButtonBase>
-                  );
-                })}
-              </Box>
-              <Typography variant="caption" component="p">
-                Toque numa conta para conferir com o saldo do banco.
-              </Typography>
-            </SecaoCard>
-
+        <Box sx={{ gridArea: { md: "recorrentes" }, alignSelf: "start", minWidth: 0 }}>
             <SecaoCard
               titulo="Recorrentes"
               acao={
@@ -269,9 +282,8 @@ export function TelaContas() {
                 ))
               )}
             </SecaoCard>
-          </Stack>
         </Box>
-      </Stack>
+      </Box>
     );
   }
 

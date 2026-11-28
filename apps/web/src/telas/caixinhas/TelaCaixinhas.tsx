@@ -157,7 +157,7 @@ export function TelaCaixinhas() {
               </Rotulo>
             </Box>
           </Box>
-          <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr) auto", gap: 2, p: { xs: "12px 16px", md: "14px 24px" }, borderBottom: divisor, maxWidth: { md: 560 } }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr) auto", gap: 2, p: { xs: "12px 16px", md: "14px 24px" }, borderBottom: divisor }}>
             <Button variant="contained" onClick={() => setDialogo({ tipo: "movimentar", mov: "deposito" })}>
               Guardar
             </Button>

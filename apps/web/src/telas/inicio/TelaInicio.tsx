@@ -38,6 +38,8 @@ import {
 } from "./Secoes";
 
 const somenteLeitor = estiloSomenteLeitor;
+/** Célula de grade cujo painel ocupa toda a altura da linha. */
+const preencher = { minWidth: 0, display: "flex", flexDirection: "column", "& > *": { flex: 1 } } as const;
 
 function Cabecalho() {
   const hoje = hojeEmSaoPaulo();
@@ -146,6 +148,7 @@ export function TelaInicio() {
     </>
   );
   const corPorCartao = new Map(cartoes.data.map((c, i) => [c.nome, corDoCartao(i)]));
+  const temParaOndeFoi = Boolean(gastosMes.resumo && gastosMes.resumo.total > 0);
 
   return (
     <>
@@ -156,17 +159,19 @@ export function TelaInicio() {
           <Atalhos />
         </Box>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(2, minmax(0, 1fr))" }, gap: 3, alignItems: "start" }}>
-          <Box sx={{ order: { xs: 2, md: 1 }, minWidth: 0 }}>
+        {/* Painéis da mesma linha ficam com a mesma altura (o mais alto define a linha). */}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(2, minmax(0, 1fr))" }, gap: 3 }}>
+          <Box sx={{ order: { xs: 2, md: 1 }, ...preencher }}>
             <ProximasFaturas meses={r.proximasFaturas} />
           </Box>
-          <Box sx={{ order: { xs: 1, md: 2 }, minWidth: 0 }}>
+          <Box sx={{ order: { xs: 1, md: 2 }, ...preencher }}>
             <ProximasDatas r={r} corPorCartao={corPorCartao} />
           </Box>
         </Box>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(3, minmax(0, 1fr))" }, gap: 3, alignItems: "start" }}>
-          <Box sx={{ minWidth: 0 }}>
+        {/* As colunas seguem os painéis que existem: sem "Para onde foi", Orçamento e Caixinhas dividem a linha. */}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", md: `repeat(${temParaOndeFoi ? 3 : 2}, minmax(0, 1fr))` }, gap: 3 }}>
+          <Box sx={preencher}>
             {doMes.isPending || orcamentos.isPending || categorias.isPending ? (
               <SecaoCard titulo="Orçamento">
                 <CarregandoLista linhas={3} />
@@ -185,7 +190,7 @@ export function TelaInicio() {
               />
             )}
           </Box>
-          <Box sx={{ minWidth: 0, order: { md: 3 } }}>
+          <Box sx={{ ...preencher, order: { md: 3 } }}>
             {caixinhas.isPending || movCaixinhas.isPending ? (
               <Skeleton variant="rounded" height={180} />
             ) : caixinhas.data && caixinhas.data.length > 0 && movCaixinhas.data ? (
@@ -216,16 +221,16 @@ export function TelaInicio() {
               />
             )}
           </Box>
-          <Box sx={{ minWidth: 0, order: { md: 2 } }}>
-            {gastosMes.resumo && gastosMes.resumo.total > 0 && (
+          {temParaOndeFoi && (
+            <Box sx={{ ...preencher, order: { md: 2 } }}>
               <ParaOndeFoi
                 mes={mesDe(hoje)}
-                total={gastosMes.resumo.total}
-                linhas={gastosMes.resumo.linhas}
+                total={gastosMes.resumo!.total}
+                linhas={gastosMes.resumo!.linhas}
                 nomes={new Map((categorias.data ?? []).map((c) => [c.id, c.nome]))}
               />
-            )}
-          </Box>
+            </Box>
+          )}
         </Box>
 
         {recentes.isPending ? (

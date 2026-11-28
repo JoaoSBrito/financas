@@ -1,10 +1,9 @@
 "use client";
 
-import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import { useRouter } from "next/navigation";
+import { CabecalhoTela } from "@financas/ui";
+import { BotaoVoltar } from "@/componentes/BotaoVoltar";
 import { TelaNovoGasto } from "./TelaNovoGasto";
 
 function voltar(router: ReturnType<typeof useRouter>) {
@@ -16,13 +15,9 @@ function voltar(router: ReturnType<typeof useRouter>) {
 export function PaginaNovoGasto() {
   const router = useRouter();
   return (
-    <Box sx={{ maxWidth: 560, mx: "auto" }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 5, ml: -2 }}>
-        <IconButton aria-label="Voltar" onClick={() => voltar(router)}>
-          <ArrowBackRounded />
-        </IconButton>
-        <Typography variant="h1">Novo gasto</Typography>
-      </Box>
+    // Mesma largura do diálogo de Novo gasto (md), para as duas colunas caberem.
+    <Box sx={{ maxWidth: 900, mx: "auto" }}>
+      <CabecalhoTela titulo="Novo gasto" voltar={<BotaoVoltar rotulo="Voltar" onClick={() => voltar(router)} />} />
       <TelaNovoGasto onConcluir={() => voltar(router)} />
     </Box>
   );
