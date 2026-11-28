@@ -10,7 +10,7 @@ import {
   type Data,
   type Mes,
 } from "@financas/core";
-import { confirmadasDe, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
+import { confirmadasDe, faturaVencidaSemUso, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
 
 export interface ResumoInicio {
   /** Soma das faturas abertas de todos os cartões. */
@@ -68,6 +68,8 @@ export function resumirInicio(cartoes: CartaoCompleto[], faturas: FaturaResumo[]
     limiteTotal += c.limite;
 
     for (const f of doCartao) {
+      // Fatura que venceu sem nada lançado (mês do cadastro do cartão): não entra em nada.
+      if (faturaVencidaSemUso(f, hoje)) continue;
       if (!f.pagaEm) comprometido += f.total;
       if (f.mes === aberta.mes) faturaAtual += f.total;
       if (f.mes > aberta.mes && f.total > 0) {

@@ -29,7 +29,7 @@ import { useCartoes, useCorrigirFatura } from "@/hooks/useCartoes";
 import { usePagamentoFatura } from "@/hooks/useContas";
 import { useLancamentos } from "@/hooks/useFaturas";
 import { useCategorias, useFaturasResumo } from "@/hooks/useGastos";
-import { confirmadasDe, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
+import { confirmadasDe, faturaVencidaSemUso, type CartaoCompleto, type FaturaResumo } from "@/services/cartoes-mapeamento";
 import type { Lancamento } from "@/services/faturas";
 import { ParcelamentosAtivos } from "./ColunaLateral";
 import { DialogoEditarLancamento } from "./DialogoEditarLancamento";
@@ -119,7 +119,10 @@ function ConteudoFaturas({ cartoes, faturas }: { cartoes: CartaoCompleto[]; fatu
   const mesAberto = faturaDaCompra(cartao, hoje, confirmadasDe(doCartao)).mes;
 
   // Meses exibidos: até 6 para trás e 3 para frente da fatura aberta.
-  const visiveis = doCartao.filter((f) => f.mes >= somarMeses(mesAberto, -6) && f.mes <= somarMeses(mesAberto, 3));
+  // Faturas que venceram sem nada lançado (mês do cadastro do cartão) não aparecem.
+  const visiveis = doCartao.filter(
+    (f) => f.mes >= somarMeses(mesAberto, -6) && f.mes <= somarMeses(mesAberto, 3) && !(f.mes < mesAberto && faturaVencidaSemUso(f, hoje)),
+  );
   const mesPedido = params.get("mes");
   const mes: Mes = visiveis.some((f) => f.mes === mesPedido) ? mesPedido! : mesAberto;
   const fatura = doCartao.find((f) => f.mes === mes);

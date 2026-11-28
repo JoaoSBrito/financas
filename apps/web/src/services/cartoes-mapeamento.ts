@@ -219,12 +219,26 @@ export function resumirFaturas(faturas: FaturaResumo[]): { totaisPorMes: Map<Mes
 }
 
 /**
- * Faturas em que algo "de agora" pode estar: a que vence neste mês (fechada, ainda não paga)
- * e a aberta. Usado no parcelamento em andamento e no saldo inicial.
+ * Fatura que já venceu sem nada lançado e sem pagamento: não há o que pagar nem conferir.
+ * Acontece com o mês em que o cartão é cadastrado depois do vencimento (a geração começa
+ * no mês de hoje). Fica fora das telas para não aparecer como "vencida".
+ */
+export function faturaVencidaSemUso(f: Pick<FaturaResumo, "vencimento" | "pagaEm" | "total" | "lancamentos">, hoje: Data): boolean {
+  return !f.pagaEm && f.vencimento < hoje && f.total === 0 && f.lancamentos === 0;
+}
+
+/**
+ * Faturas em que algo "de agora" pode estar: a aberta e, enquanto não vence,
+ * a fechada deste mês (ainda a pagar). Usado no parcelamento em andamento e no saldo inicial.
  */
 export function faturasDeReferencia(cartao: Cartao, faturas: Fatura[], hoje: Data): { aberta: Mes; meses: Mes[] } {
   const doCartao = faturas.filter((f) => f.cartaoId === cartao.id);
-  const aberta = faturaDaCompra(cartao, hoje, confirmadasDe(doCartao)).mes;
-  const meses = new Set([mesDe(hoje), aberta]);
+  const confirmadas = confirmadasDe(doCartao);
+  const aberta = faturaDaCompra(cartao, hoje, confirmadas).mes;
+  const mesAtual = mesDe(hoje);
+  const doMes = doCartao.find((f) => f.mes === mesAtual) ?? gerarCiclos(cartao, mesAtual, 1, confirmadas)[0];
+  const meses = new Set([aberta]);
+  // Depois do vencimento, a fatura deste mês já passou: não é mais referência para lançar nada.
+  if (doMes && doMes.vencimento >= hoje) meses.add(mesAtual);
   return { aberta, meses: [...meses].filter((m) => m <= aberta).sort() };
 }

@@ -87,6 +87,12 @@ describe("próximas datas (agenda)", () => {
     expect(linhas(resumirInicio([xp, viagens], soXpPaga, "2026-12-01"))[0]).toBe("2026-11-30 vencimento Viagens vencida");
   });
 
+  it("cartão cadastrado depois do vencimento: a fatura vazia do mês não aparece como vencida", () => {
+    // Cadastrado em 27/11: a fatura de novembro foi gerada, mas venceu em 10/11 sem nada lançado.
+    const novo = [f("xp", "2026-11", "2026-11-03", "2026-11-10", 0), f("xp", "2026-12", "2026-12-03", "2026-12-10", 0)];
+    expect(linhas(resumirInicio([xp], novo, "2026-11-27"))).toEqual(["2026-12-03 fechamento XP", "2026-12-10 vencimento XP"]);
+  });
+
   it("datas que já passaram e faturas pagas saem", () => {
     const r = resumirInicio([xp, viagens], faturas, "2026-11-23");
     // Outubro (paga) não aparece; o fechamento de novembro (já passou) também não.

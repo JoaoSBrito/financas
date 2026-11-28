@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   cartaoParaFormulario,
+  faturasDeReferencia,
+  faturaVencidaSemUso,
   formularioParaLinha,
   linhaParaCartao,
   planejarSincronizacao,
@@ -86,5 +88,26 @@ describe("planejarSincronizacao", () => {
   it("estende o horizonte até depois da última parcela", () => {
     const plano = planejarSincronizacao({ cartao, existentes: [], hoje: "2026-11-01", ultimoMesUsado: "2028-03" });
     expect(plano.gravar.at(-1)?.mes).toBe("2028-04-01");
+  });
+});
+
+describe("cartão cadastrado depois do vencimento do mês (vence dia 10, fecha 7 dias antes)", () => {
+  const cartao = { ...linhaParaCartao(linhaXp), diaVencimento: 10, fechamento: { tipo: "dias_antes" as const, dias: 7, contagem: "corridos" as const } };
+  const novembro = { id: "f-nov", cartaoId: cartao.id, mes: "2026-11", fechamento: "2026-11-03", vencimento: "2026-11-10", status: "estimado" as const, pagaEm: null };
+  const dezembro = { id: "f-dez", cartaoId: cartao.id, mes: "2026-12", fechamento: "2026-12-03", vencimento: "2026-12-10", status: "estimado" as const, pagaEm: null };
+
+  it("a fatura de novembro, vencida e vazia, é marcada como sem uso", () => {
+    expect(faturaVencidaSemUso({ ...novembro, total: 0, lancamentos: 0 }, "2026-11-27")).toBe(true);
+    // Com algo lançado, ou ainda antes do vencimento, ela continua valendo.
+    expect(faturaVencidaSemUso({ ...novembro, total: 5000, lancamentos: 1 }, "2026-11-27")).toBe(false);
+    expect(faturaVencidaSemUso({ ...novembro, total: 0, lancamentos: 0 }, "2026-11-05")).toBe(false);
+  });
+
+  it("em 27/11, a referência para lançar é só dezembro", () => {
+    expect(faturasDeReferencia(cartao, [novembro, dezembro], "2026-11-27")).toEqual({ aberta: "2026-12", meses: ["2026-12"] });
+  });
+
+  it("entre o fechamento e o vencimento, a fatura fechada ainda é oferecida", () => {
+    expect(faturasDeReferencia(cartao, [novembro, dezembro], "2026-11-05")).toEqual({ aberta: "2026-12", meses: ["2026-11", "2026-12"] });
   });
 });
